@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inntuitivo — Un agente de IA que consigue clientes por ti</title>
+<meta name="description" content="Un agente de IA que encuentra prospectos, escribe outreach personalizado y hace seguimiento 24/7. Tú solo entras a las reuniones.">
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rojo:#DE0540;
+  --morado:#452774;
+  --morado-oscuro:#2E1A4F;
+  --gradiente:linear-gradient(135deg,#DE0540 0%,#452774 100%);
+  --fondo:#FCFAFD;
+  --tinta:#2B1B45;
+  --tinta-suave:#5C5273;
+  --carta:#FFFFFF;
+  --linea:#E6DFEF;
+  --rosa-claro:#FF6E92;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Century Gothic','Jost',sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.6;font-size:17px}
+a{color:var(--rojo)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+nav{padding:18px 0;display:flex;justify-content:space-between;align-items:center}
+.marca{display:flex;align-items:center;gap:12px;text-decoration:none}
+.marca img{width:42px;height:42px}
+.marca .nombre{font-family:'Audiowide',sans-serif;font-size:1.25rem;color:var(--morado);letter-spacing:.01em}
+.nav-cta{font-size:.95rem;font-weight:600;text-decoration:none;color:#fff;background:var(--gradiente);padding:10px 20px;border-radius:999px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;padding:40px 0 56px}
+.hero h1{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.7rem,3.8vw,2.7rem);line-height:1.18;color:var(--morado)}
+.hero h1 em{font-style:normal;background:var(--gradiente);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{margin-top:20px;font-size:1.12rem;color:var(--tinta-suave);max-width:46ch}
+.cta-row{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-block;font-weight:600;text-decoration:none;padding:14px 28px;border-radius:999px;font-size:1rem;transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-primario{background:var(--gradiente);color:#fff;box-shadow:0 8px 24px rgba(222,5,64,.25)}
+.btn-primario:hover{box-shadow:0 12px 30px rgba(69,39,116,.35)}
+.btn-secundario{background:transparent;color:var(--morado);border:1.5px solid var(--linea)}
+.micro{margin-top:14px;font-size:.88rem;color:var(--tinta-suave)}
+
+/* Signature: panel de actividad del agente */
+.panel{background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);border-radius:18px;padding:22px;box-shadow:0 24px 60px rgba(69,39,116,.35)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.15)}
+.panel-head .titulo{font-size:.8rem;color:#CBBEE6;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.estado{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--rosa-claro);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.punto{width:8px;height:8px;border-radius:50%;background:var(--rosa-claro);animation:latido 1.6s ease-in-out infinite}
+@keyframes latido{0%,100%{opacity:1}50%{opacity:.3}}
+.feed{list-style:none;padding-top:14px;font-size:.88rem;line-height:1.5}
+.feed li{display:flex;gap:12px;padding:9px 0;color:#F0EBF8;opacity:0;transform:translateY(6px);animation:entrar .5s ease forwards}
+.feed li .hora{color:#9D8CC2;flex-shrink:0;font-weight:600;font-size:.8rem;padding-top:2px}
+.feed li .tag{color:var(--rosa-claro);font-weight:600}
+.feed li:nth-child(1){animation-delay:.3s}
+.feed li:nth-child(2){animation-delay:1.1s}
+.feed li:nth-child(3){animation-delay:1.9s}
+.feed li:nth-child(4){animation-delay:2.7s}
+.feed li:nth-child(5){animation-delay:3.5s}
+@keyframes entrar{to{opacity:1;transform:translateY(0)}}
+
+/* Secciones */
+section{padding:44px 0}
+.eyebrow{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--rojo);margin-bottom:12px;display:inline-block}
+h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.6vw,1.9rem);line-height:1.25;max-width:26ch;color:var(--morado)}
+.intro{margin-top:14px;color:var(--tinta-suave);max-width:58ch}
+
+/* Pasos */
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
+.paso{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:28px 24px;border-top:4px solid transparent;border-image:var(--gradiente) 1;border-image-slice:1 0 0 0;border-top-width:4px}
+.paso .num{font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--rojo);margin-bottom:14px;display:block}
+.paso h3{font-size:1.1rem;font-weight:600;margin-bottom:8px;color:var(--morado)}
+.paso p{font-size:.95rem;color:var(--tinta-suave)}
+
+/* Comparación */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px}
+.col-vs{border-radius:16px;padding:28px 26px}
+.col-vs h3{font-size:1.05rem;font-weight:600;margin-bottom:18px}
+.col-vs ul{list-style:none}
+.col-vs li{padding:8px 0;font-size:.96rem;display:flex;gap:10px}
+.sin-agente{background:var(--carta);border:1px solid var(--linea);color:var(--tinta-suave)}
+.sin-agente h3{color:var(--tinta)}
+.sin-agente li::before{content:"—";color:var(--rojo);flex-shrink:0}
+.con-agente{background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);color:#F0EBF8}
+.con-agente h3{color:#fff}
+.con-agente li::before{content:"✓";color:var(--rosa-claro);flex-shrink:0;font-weight:700}
+
+/* Precio */
+.precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:44px}
+.precio-inner{background:var(--carta);border-radius:17px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
+.oferta{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;background:var(--gradiente);color:#fff;padding:6px 14px;border-radius:999px;display:inline-block;margin-bottom:16px}
+.cifra{font-family:'Audiowide',sans-serif;font-weight:400;font-size:2.3rem;color:var(--morado)}
+.cifra small{font-family:'Century Gothic','Jost',sans-serif;font-size:1rem;color:var(--tinta-suave)}
+.tachado{text-decoration:line-through;color:var(--tinta-suave);font-size:1.1rem;margin-right:10px;font-family:'Century Gothic','Jost',sans-serif}
+.precio-inner ul{list-style:none;margin-top:18px}
+.precio-inner ul li{padding:6px 0;font-size:.96rem;display:flex;gap:10px}
+.precio-inner ul li::before{content:"✓";background:var(--gradiente);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+
+/* FAQ */
+details{background:var(--carta);border:1px solid var(--linea);border-radius:14px;padding:18px 22px;margin-top:12px}
+summary{font-weight:600;cursor:pointer;font-size:1rem;color:var(--morado)}
+details p{margin-top:10px;color:var(--tinta-suave);font-size:.96rem}
+
+/* Footer */
+footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;color:var(--tinta-suave);font-size:.9rem}
+.footer-marca{display:flex;align-items:center;gap:10px}
+.footer-marca img{width:30px;height:30px}
+.footer-marca .nombre{font-family:'Audiowide',sans-serif;color:var(--morado);font-size:1rem;display:block;line-height:1.2}
+.footer-marca .tagline{font-size:.78rem;color:var(--tinta-suave)}
+
+@media (max-width:840px){
+  .hero{grid-template-columns:1fr;padding:28px 0 44px}
+  .pasos,.versus,.precio-inner{grid-template-columns:1fr}
+  .precio-inner{padding:28px}
+  section{padding:32px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  .feed li{animation:none;opacity:1;transform:none}
+  .punto{animation:none}
+  .btn:hover{transform:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <a class="marca" href="#">
+      <img src="data:image/png;base64,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" alt="Logo de Inntuitivo">
+      <span class="nombre">inntuitivo</span>
+    </a>
+    <a class="nav-cta" href="#demo">Pedir demo</a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Un agente de IA que <em>consigue clientes</em> mientras tú trabajas 🚀</h1>
+      <p class="sub">Encuentra prospectos según tu cliente ideal, investiga a cada uno, escribe outreach personalizado y hace seguimiento solo. Tú solo entras a las reuniones.</p>
+      <div class="cta-row">
+        <a class="btn btn-primario" href="#demo">Ver una demo con mis prospectos</a>
+        <a class="btn btn-secundario" href="#como">Cómo funciona</a>
+      </div>
+      <p class="micro">Sin contratos largos. Demo con prospectos reales de tu mercado, gratis ✨</p>
+    </div>
+
+    <div class="panel" aria-label="Ejemplo de actividad del agente">
+      <div class="panel-head">
+        <span class="titulo">🛰️ Tu agente · hoy</span>
+        <span class="estado"><span class="punto" aria-hidden="true"></span>en órbita</span>
+      </div>
+      <ul class="feed">
+        <li><span class="hora">08:14</span><span>27 prospectos encontrados que encajan con tu cliente ideal</span></li>
+        <li><span class="hora">08:52</span><span>Cada uno investigado: web, sector, gancho de personalización</span></li>
+        <li><span class="hora">09:30</span><span>12 emails personalizados enviados desde tu cuenta</span></li>
+        <li><span class="hora">14:07</span><span class="tag">→ María (agencia, 8 personas) respondió: quiere hablar</span></li>
+        <li><span class="hora">14:08</span><span>Te avisé por WhatsApp. La reunión es tuya.</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section id="como">
+    <span class="eyebrow">🚀 Cómo funciona</span>
+    <h2>Tres pasos. Tú solo participas en el primero.</h2>
+    <div class="pasos">
+      <div class="paso">
+        <span class="num">👨‍🚀 Paso 1 — contigo</span>
+        <h3>Definimos tu cliente ideal</h3>
+        <p>Una sesión de 45 minutos: a quién vendes, qué problema resuelves y cómo suenas. Con eso configuro tu agente.</p>
+      </div>
+      <div class="paso">
+        <span class="num">🛰️ Paso 2 — el agente</span>
+        <h3>Prospecta y escribe por ti</h3>
+        <p>Encuentra prospectos que encajan, investiga a cada uno y escribe mensajes que suenan a ti, no a robot. Envía desde tu propia cuenta, a ritmo seguro.</p>
+      </div>
+      <div class="paso">
+        <span class="num">📡 Paso 3 — el agente</span>
+        <h3>Hace seguimiento y te avisa</h3>
+        <p>Si no responden, insiste con criterio. Si responden, frena todo y te avisa al instante. Cada lunes recibes tu reporte: enviados, respuestas, reuniones.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">🪐 La diferencia</span>
+    <h2>Deja de ser el cuello de botella de tu propio negocio</h2>
+    <div class="versus">
+      <div class="col-vs sin-agente">
+        <h3>Prospectar a mano</h3>
+        <ul>
+          <li>Horas buscando contactos en vez de atender clientes</li>
+          <li>Mensajes genéricos que nadie responde</li>
+          <li>Follow-ups que olvidas hacer</li>
+          <li>Semanas buenas y semanas vacías</li>
+        </ul>
+      </div>
+      <div class="col-vs con-agente">
+        <h3>🚀 Con tu agente Inntuitivo</h3>
+        <ul>
+          <li>Prospección corriendo todos los días, también cuando descansas</li>
+          <li>Cada mensaje personalizado con investigación real</li>
+          <li>Seguimiento puntual, sin excepciones</li>
+          <li>Flujo constante de conversaciones nuevas</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <span class="eyebrow">✨ Precio</span>
+    <h2>Una inversión, no un empleado</h2>
+    <div class="precio-card">
+      <div class="precio-inner">
+        <div>
+          <span class="oferta">Oferta cliente fundador · 2 cupos</span>
+          <p class="cifra"><span class="tachado">$700</span>$400 <small>setup único</small></p>
+          <p class="cifra" style="font-size:1.4rem;margin-top:6px">+ $150 <small>/mes, agente activo 24/7</small></p>
+          <ul>
+            <li>Configuración completa de tu agente en menos de una semana</li>
+            <li>Envíos desde tu propia cuenta de correo, con límites seguros</li>
+            <li>Aviso inmediato cuando alguien responde</li>
+            <li>Reporte semanal de resultados</li>
+            <li>Cancela cuando quieras, sin permanencia</li>
+          </ul>
+        </div>
+        <div>
+          <a class="btn btn-primario" style="width:100%;text-align:center" href="https://wa.me/50670144980?text=Hola%2C%20quiero%20una%20demo%20del%20agente%20de%20prospecci%C3%B3n">Pedir mi demo por WhatsApp 🚀</a>
+          <p class="micro" style="text-align:center;margin-top:12px">O escríbeme a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">👨‍🚀 Preguntas frecuentes</span>
+    <h2>Lo que todos preguntan antes de empezar</h2>
+    <details>
+      <summary>¿Los mensajes suenan a robot?</summary>
+      <p>No. El agente investiga a cada prospecto antes de escribir y usa tu tono. Además, antes de activar los envíos revisas los primeros mensajes y ajustamos hasta que suenen a ti.</p>
+    </details>
+    <details>
+      <summary>¿Esto es spam?</summary>
+      <p>No. Volumen bajo y dirigido (máximo 25 contactos al día), solo a perfiles que encajan con tu cliente ideal, siempre con opción de baja y desde tu cuenta real. Calidad sobre cantidad: así se consiguen respuestas.</p>
+    </details>
+    <details>
+      <summary>¿Cuánto tarda en dar resultados?</summary>
+      <p>El agente queda activo en menos de una semana. Las primeras respuestas suelen llegar en la primera o segunda semana de envíos, según tu mercado.</p>
+    </details>
+    <details>
+      <summary>¿Necesito saber de tecnología?</summary>
+      <p>Cero. Tú defines a quién vender y entras a las reuniones. Todo lo técnico corre por mi cuenta.</p>
+    </details>
+  </section>
+
+  <footer>
+    <div class="footer-marca">
+      <img src="data:image/png;base64,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" alt="Logo de Inntuitivo">
+      <span>
+        <span class="nombre">inntuitivo</span>
+        <span class="tagline">making ideas happen</span>
+      </span>
+    </div>
+    <span><a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> · WhatsApp (506) 7014-4980</span>
+  </footer>
+</div>
+
+</body>
+</html>
