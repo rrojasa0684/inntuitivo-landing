@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Inntuitivo — Conectá tu buzón</title>
+<title>Inntuitivo — Configurá tu agente</title>
 <link rel="icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,14 +14,13 @@
   --rojo:#DE0540; --morado:#452774; --morado-oscuro:#2E1A4F;
   --gradiente:linear-gradient(135deg,#DE0540 0%,#452774 100%);
   --fondo:#0D0722; --tinta:#F2EDFA; --tinta-suave:#B5A9D4;
-  --carta:rgba(255,255,255,.05); --linea:rgba(255,255,255,.14); --rosa-claro:#FF6E92;
-  --ok:#3ED598; --alerta:#FFC65C;
+  --linea:rgba(255,255,255,.14); --rosa-claro:#FF6E92; --ok:#3ED598; --alerta:#FFC65C;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Century Gothic','Jost',sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.6;font-size:17px;min-height:100vh}
 a{color:var(--rojo)}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
 .estrellas{position:fixed;inset:0;z-index:-2;background-image:
   radial-gradient(1px 1px at 20px 30px,#fff,transparent),
   radial-gradient(1px 1px at 90px 110px,rgba(255,255,255,.7),transparent),
@@ -31,29 +30,42 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
   background-repeat:repeat;background-size:340px 220px;opacity:.6}
 .nebulosa{position:fixed;width:60vw;height:60vw;max-width:700px;max-height:700px;border-radius:50%;filter:blur(70px);z-index:-1;pointer-events:none;background:radial-gradient(circle at 30% 30%,rgba(222,5,64,.22),rgba(69,39,116,.12) 55%,transparent 75%);top:-15vw;right:-15vw}
 .nebulosa.dos{top:auto;right:auto;bottom:-20vw;left:-20vw;background:radial-gradient(circle at 70% 70%,rgba(69,39,116,.4),rgba(222,5,64,.08) 60%,transparent 78%)}
-.wrap{max-width:640px;margin:0 auto;padding:0 24px}
+.wrap{max-width:660px;margin:0 auto;padding:0 24px}
 nav{padding:18px 0;display:flex;align-items:center;gap:12px}
 .marca{display:flex;align-items:center;gap:12px;text-decoration:none}
 .marca img{width:42px;height:42px}
 .marca .nombre{font-family:'Audiowide',sans-serif;font-size:1.25rem;color:#fff;letter-spacing:.01em}
-main{padding:24px 0 60px}
+main{padding:20px 0 60px}
+.pasos{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.pasos .p{font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--tinta-suave);display:flex;align-items:center;gap:7px}
+.pasos .p .n{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--linea);display:inline-flex;align-items:center;justify-content:center;font-size:.78rem}
+.pasos .p.activa{color:#fff}
+.pasos .p.activa .n{background:var(--gradiente);border-color:transparent;color:#fff}
+.pasos .p.hecha .n{background:rgba(62,213,152,.25);border-color:rgba(62,213,152,.5);color:#C8F4E2}
 .eyebrow{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--rosa-claro);margin-bottom:10px;display:inline-block}
-h1{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.2;color:#fff}
+h1{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.4rem,3.2vw,2rem);line-height:1.2;color:#fff}
 h1 em{font-style:normal;background:var(--gradiente);-webkit-background-clip:text;background-clip:text;color:transparent}
-p.sub{margin-top:14px;color:var(--tinta-suave);max-width:52ch}
-.panel{margin-top:26px;background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);border-radius:18px;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
-label{display:block;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:16px 0 7px}
-input{width:100%;background:rgba(0,0,0,.25);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:13px 15px}
-input:focus{border-color:var(--rosa-claro);outline:none}
-input::placeholder{color:#8E80B3}
+p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
+.panel{margin-top:22px;background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);border-radius:18px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
+.tarjeta{margin-top:16px;background:rgba(0,0,0,.18);border:1px solid var(--linea);border-radius:14px;padding:18px}
+.tarjeta h3{font-family:'Audiowide',sans-serif;font-weight:400;font-size:1rem;color:#fff;margin-bottom:4px}
+label{display:block;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:14px 0 6px}
+label .hint{text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.85rem}
+.badge{display:inline-block;margin-left:8px;font-size:.66rem;font-weight:700;letter-spacing:.03em;color:#3A2400;background:var(--alerta);border-radius:999px;padding:2px 8px;vertical-align:middle}
+input,textarea,select{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px}
+.baja input,.baja textarea{border-color:rgba(255,198,92,.6);background:rgba(255,198,92,.06)}
+textarea{min-height:70px;resize:vertical;line-height:1.5}
+input:focus,textarea:focus,select:focus{border-color:var(--rosa-claro);outline:none}
+input::placeholder,textarea::placeholder{color:#8E80B3}
 .fila2{display:grid;grid-template-columns:1fr 120px;gap:12px}
 .oculto{display:none}
-.btn{display:inline-block;width:100%;font-weight:600;font-family:inherit;text-decoration:none;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;margin-top:22px;position:relative;overflow:hidden}
+.btn{display:inline-block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;margin-top:22px;position:relative;overflow:hidden}
 .btn:hover{transform:translateY(-2px)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-primario{background:var(--gradiente);color:#fff;box-shadow:0 8px 24px rgba(222,5,64,.25);animation:pulso-cta 3s ease-in-out infinite}
 .btn-primario::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);pointer-events:none}
 .btn-primario:hover::after{animation:brillo-cta .8s ease}
+.btn-sec{background:transparent;color:#fff;border:1.5px solid var(--linea);box-shadow:none;animation:none;margin-top:12px}
 @keyframes pulso-cta{0%,100%{box-shadow:0 8px 24px rgba(222,5,64,.28)}50%{box-shadow:0 10px 30px rgba(255,110,146,.42)}}
 @keyframes brillo-cta{from{left:-130%}to{left:150%}}
 .provaviso{margin-top:16px;padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--linea);font-size:.92rem}
@@ -61,6 +73,11 @@ input::placeholder{color:#8E80B3}
 .instrucciones{margin-top:12px;font-size:.9rem;color:#E7DEF7}
 .instrucciones li{margin:6px 0 6px 18px}
 .nota{margin-top:10px;font-size:.82rem;color:var(--tinta-suave)}
+.fuentes{margin-top:18px;padding-top:14px;border-top:1px solid var(--linea)}
+.fuentes h3{font-family:'Audiowide',sans-serif;font-weight:400;font-size:.9rem;color:#fff;margin-bottom:8px}
+.fuente{font-size:.83rem;color:#E7DEF7;margin:7px 0;padding-left:18px;position:relative}
+.fuente::before{content:"🔗";position:absolute;left:0;font-size:.78rem}
+.fuente a{color:var(--rosa-claro);word-break:break-all}
 .resultado{margin-top:18px;padding:15px 17px;border-radius:12px;font-size:.95rem;display:none}
 .resultado.ok{display:block;background:rgba(62,213,152,.12);border:1px solid rgba(62,213,152,.5);color:#C8F4E2}
 .resultado.alerta{display:block;background:rgba(255,198,92,.1);border:1px solid rgba(255,198,92,.45);color:#FBE7BE}
@@ -68,10 +85,13 @@ input::placeholder{color:#8E80B3}
 .resultado .titulo{font-weight:600;display:block;margin-bottom:5px}
 .detalle{margin-top:9px;font-size:.84rem;opacity:.9}
 .detalle span{display:inline-block;margin-right:14px}
-.detalle a{color:var(--rosa-claro)}
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;margin-right:8px;animation:girar .7s linear infinite}
 .cargando{margin-top:40px;text-align:center;color:var(--tinta-suave)}
 @keyframes girar{to{transform:rotate(360deg)}}
+.final{text-align:center;padding:40px 0}
+.final .cohete{font-size:3rem}
+.final h1{margin-top:12px}
+.final p{margin-top:16px;color:var(--tinta-suave);max-width:46ch;margin-left:auto;margin-right:auto}
 .pie{margin-top:26px;text-align:center;font-size:.82rem;color:var(--tinta-suave)}
 .pie a{color:var(--rosa-claro)}
 @media (max-width:520px){.fila2{grid-template-columns:1fr}}
@@ -88,11 +108,44 @@ input::placeholder{color:#8E80B3}
 
 <div id="cargando" class="cargando"><span class="spin"></span> Cargando tu configuración…</div>
 
-<!-- Formulario de conexión (visible con token válido) -->
-<section id="form" class="oculto">
-  <span class="eyebrow">Paso 3 · Conexión del buzón</span>
-  <h1 id="titulo">Vamos a conectar <em>tu correo</em></h1>
-  <p class="sub">Desde este buzón saldrán los correos de tu agente y aquí leerá las respuestas. Detectamos tu proveedor automáticamente y verificamos la conexión en el momento.</p>
+<div id="pasos" class="pasos oculto">
+  <span class="p" data-p="1"><span class="n">1</span> Sitio</span>
+  <span class="p" data-p="2"><span class="n">2</span> Perfil</span>
+  <span class="p" data-p="3"><span class="n">3</span> Buzón</span>
+</div>
+
+<!-- PASO 1 -->
+<section id="step1" class="oculto">
+  <span class="eyebrow">Paso 1 · Tu sitio</span>
+  <h1 id="titulo">Empecemos por <em>tu sitio web</em></h1>
+  <p class="sub">Analizamos tu sitio para entender qué ofrecés y a quién. Lo revisás y ajustás en el paso siguiente.</p>
+  <div class="panel">
+    <label for="sitio">¿Cuál es el sitio de tu negocio?</label>
+    <input id="sitio" type="url" placeholder="https://tuempresa.com" spellcheck="false">
+    <button id="btn-analizar" class="btn btn-primario">Analizar mi negocio</button>
+    <div id="r1" class="resultado"></div>
+  </div>
+</section>
+
+<!-- PASO 2 -->
+<section id="step2" class="oculto">
+  <span class="eyebrow">Paso 2 · Tu perfil</span>
+  <h1>Esto <em>entendí</em> de tu negocio</h1>
+  <p class="sub">Corregí lo que haga falta — tu agente escribirá con esto. Marcamos en <span style="color:var(--alerta)">amarillo</span> lo que inferimos con poca certeza.</p>
+  <div id="cards" class="panel"></div>
+  <div class="panel" style="margin-top:16px">
+    <div class="fuentes" id="fuentes-box"><h3>Fuentes 🔗</h3><div id="fuentes-lista"></div></div>
+    <button id="btn-confirmar" class="btn btn-primario">Confirmar perfil</button>
+    <button id="btn-volver1" class="btn btn-sec">Analizar otro sitio</button>
+    <div id="r2" class="resultado"></div>
+  </div>
+</section>
+
+<!-- PASO 3 -->
+<section id="step3" class="oculto">
+  <span class="eyebrow">Paso 3 · Tu buzón</span>
+  <h1>Conectá <em>tu correo</em></h1>
+  <p class="sub">Desde este buzón saldrán los correos de tu agente y aquí leerá las respuestas. Detectamos tu proveedor y verificamos la conexión en el momento.</p>
   <div class="panel">
     <label for="email">Correo del buzón</label>
     <input id="email" type="email" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
@@ -116,11 +169,21 @@ input::placeholder{color:#8E80B3}
   </div>
 </section>
 
-<!-- Pedir un enlace nuevo (token vencido / inválido / ausente) -->
+<!-- FINAL -->
+<section id="final" class="oculto">
+  <div class="final">
+    <div class="cohete">🚀</div>
+    <h1>Tu agente entra <em>en órbita</em></h1>
+    <p>En menos de 24 horas tu agente empieza a trabajar. Te avisamos cuando despegue.</p>
+    <p id="final-nota" class="nota"></p>
+  </div>
+</section>
+
+<!-- REISSUE -->
 <section id="reissue" class="oculto">
-  <span class="eyebrow">Conexión del buzón</span>
+  <span class="eyebrow">Configuración</span>
   <h1>Necesitás un <em>enlace nuevo</em></h1>
-  <p class="sub" id="reissue-txt">Este enlace de configuración no es válido o ya venció (los enlaces duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.</p>
+  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció (duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.</p>
   <div class="panel">
     <label for="remail">Tu correo de pago</label>
     <input id="remail" type="email" placeholder="el correo con el que te suscribiste" spellcheck="false">
@@ -137,63 +200,143 @@ input::placeholder{color:#8E80B3}
 const API='https://api.inntuitivo.com';
 const $=id=>document.getElementById(id);
 const token=new URLSearchParams(location.search).get('token')||'';
-let prov=null,tmr=null;
+let prov=null,tmr=null,perfil=null;
 
-function ver(id){['cargando','form','reissue'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
+// Definición de los campos editables del paso 2 (por tarjeta). `campo` casa con las
+// inferencias del backend para marcar baja confianza.
+const CARDS=[
+  ['Tu negocio',[
+    ['empresa_nombre','empresa_nombre','Nombre de la empresa','text'],
+    ['empresa_descripcion','empresa_descripcion','Qué hace','textarea'],
+    ['ubicacion','ubicacion','Ubicación','text']]],
+  ['Qué vendes',[
+    ['propuesta_valor','propuesta_valor','Propuesta de valor','textarea'],
+    ['diferenciador','diferenciador','Tu diferenciador','textarea'],
+    ['precio','precio','Precio (si aplica)','text'],
+    ['pruebas','pruebas','Pruebas de credibilidad · una por línea','lines']]],
+  ['Tu cliente ideal',[
+    ['icp_descripcion','icp_descripcion','A quién le vendés','textarea'],
+    ['industrias','industrias','Industrias · una por línea','lines'],
+    ['tamano_empresa','tamano_empresa','Tamaño de empresa','text'],
+    ['geografia_objetivo','icp_descripcion','Geografía objetivo','text'],
+    ['cargos_objetivo','cargos_objetivo','Cargos a contactar · uno por línea','lines'],
+    ['senales_de_compra','senales_de_compra','Señales de compra · una por línea','lines'],
+    ['descalificadores','descalificadores','A quién NO escribirle · uno por línea','lines']]],
+  ['Tu tono',[
+    ['tono_estilo','tono','Estilo de comunicación','text'],
+    ['registro','registro','Trato','select'],
+    ['palabras_caracteristicas','tono','Palabras características · una por línea','lines'],
+    ['palabras_evitar','tono','Palabras a evitar · una por línea','lines']]]
+];
+const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detectando tu tono…','Buscando tus señales de credibilidad…'];
 
-// --- arranque: valida el token y decide qué mostrar ---
+function ver(sec){['cargando','step1','step2','step3','final','reissue'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
+  $('pasos').classList.toggle('oculto',!['step1','step2','step3'].includes(sec));}
+function marcarPaso(n){document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
+function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+function lineas(t){return (t||'').split('\n').map(x=>x.trim()).filter(Boolean);}
+function texto(arr){return (arr||[]).join('\n');}
+function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;box.innerHTML=(titulo?'<span class="titulo">'+titulo+'</span>':'')+(cuerpo||'')+(detalle||'');}
+
+// --- arranque: lee el estado y reanuda donde iba ---
 (async()=>{
   if(!token){ver('reissue');return;}
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
-    if(d.valido){
-      if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', conectá <em>tu correo</em>';
-      ver('form');
-    }else{
-      $('reissue-txt').textContent=d.motivo==='vencido'
-        ?'Este enlace venció (los enlaces duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.'
-        :'Este enlace no es válido o ya no existe. Ingresá el correo con el que te suscribiste y te damos uno nuevo.';
-      ver('reissue');
-    }
+    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresá el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
+    if(d.paso==='final'){mostrarFinal();return;}
+    if(d.paso===3){ver('step3');marcarPaso(3);return;}
+    if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
+    ver('step1');marcarPaso(1);
   }catch(e){ver('reissue');}
 })();
 
-function escapa(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function mostrarFinal(nota){ if(nota)$('final-nota').textContent=nota; ver('final'); }
 
-// --- detección de proveedor ---
+// --- PASO 1: analizar (asíncrono, loaders rotativos) ---
+let loaderTimer=null;
+$('btn-analizar').addEventListener('click',async()=>{
+  const sitio=$('sitio').value.trim();
+  if(!sitio.includes('.')){res($('r1'),'error','','Ingresá una dirección web válida.');return;}
+  $('btn-analizar').disabled=true;
+  let li=0; const pintar=()=>res($('r1'),'alerta','<span class="spin"></span>'+LOADERS[li%LOADERS.length],'Puede tardar un par de minutos. No cierres esta página.');
+  pintar(); loaderTimer=setInterval(()=>{li++;pintar();},4000);
+  try{
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sitio_web:sitio})});
+    const d=await r.json();
+    if(!r.ok){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intentá de nuevo.'));$('btn-analizar').disabled=false;return;}
+    pollAnalisis();
+  }catch(e){clearInterval(loaderTimer);res($('r1'),'error','Error','No pudimos analizar el sitio. Intentá de nuevo.');$('btn-analizar').disabled=false;}
+});
+async function pollAnalisis(){
+  for(let i=0;i<60;i++){
+    await new Promise(r=>setTimeout(r,3000));
+    try{
+      const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar-estado');
+      const d=await r.json();
+      if(d.estado==='listo'){clearInterval(loaderTimer);perfil=d.perfil;renderPerfil(perfil);$('r1').className='resultado';ver('step2');marcarPaso(2);window.scrollTo(0,0);$('btn-analizar').disabled=false;return;}
+      if(d.estado==='error'){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intentá de nuevo.'));$('btn-analizar').disabled=false;return;}
+    }catch(e){}
+  }
+  clearInterval(loaderTimer);res($('r1'),'error','Tardó demasiado','Probá de nuevo en un momento.');$('btn-analizar').disabled=false;
+}
+
+// --- PASO 2: render editable con baja confianza ---
+function confMap(p){const m={};(p.inferencias||[]).forEach(i=>{if(m[i.campo]==null||i.confianza<m[i.campo])m[i.campo]=i.confianza;});return m;}
+function renderPerfil(p){
+  const conf=confMap(p);
+  $('cards').innerHTML=CARDS.map(([titulo,campos])=>{
+    const filas=campos.map(([id,campo,label,tipo])=>{
+      const baja=(conf[campo]!=null&&conf[campo]<3);
+      const badge=baja?'<span class="badge">revisar</span>':'';
+      const v=p[id];
+      let control;
+      if(tipo==='textarea')control='<textarea id="f-'+id+'">'+escapa(v||'')+'</textarea>';
+      else if(tipo==='lines')control='<textarea id="f-'+id+'">'+escapa(texto(v))+'</textarea>';
+      else if(tipo==='select'){const r=['tu','usted','vos'].includes(v)?v:'usted';
+        control='<select id="f-'+id+'"><option value="usted"'+(r==='usted'?' selected':'')+'>Usted (formal)</option><option value="tu"'+(r==='tu'?' selected':'')+'>Tú (cercano)</option><option value="vos"'+(r==='vos'?' selected':'')+'>Vos (voseo)</option></select>';}
+      else control='<input id="f-'+id+'" type="text" value="'+escapa(v||'')+'">';
+      return '<div class="'+(baja?'baja':'')+'"><label>'+escapa(label)+badge+'</label>'+control+'</div>';
+    }).join('');
+    return '<div class="tarjeta"><h3>'+escapa(titulo)+'</h3>'+filas+'</div>';
+  }).join('');
+  const fs=(p.inferencias||[]).filter(i=>i.fuente);
+  $('fuentes-lista').innerHTML=fs.length?fs.map(i=>'<div class="fuente">'+escapa(i.campo)+' ('+i.confianza+'/5) — <a href="'+escapa(i.fuente)+'" target="_blank" rel="noopener">'+escapa(i.fuente)+'</a></div>').join(''):'<div class="fuente" style="padding-left:0">Sin fuentes citadas (poca información pública del sitio).</div>';
+}
+$('btn-volver1').addEventListener('click',()=>{ver('step1');marcarPaso(1);});
+$('btn-confirmar').addEventListener('click',async()=>{
+  const campoTipo={};CARDS.forEach(([t,cs])=>cs.forEach(([id,c,l,tipo])=>campoTipo[id]=tipo));
+  Object.keys(campoTipo).forEach(id=>{const el=$('f-'+id);if(!el)return;
+    perfil[id]=campoTipo[id]==='lines'?lineas(el.value):el.value.trim();});
+  $('btn-confirmar').disabled=true;
+  res($('r2'),'alerta','<span class="spin"></span>Guardando…','');
+  try{
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil})});
+    const d=await r.json();
+    if(r.ok&&d.ok){$('r2').className='resultado';ver('step3');marcarPaso(3);window.scrollTo(0,0);}
+    else res($('r2'),'error','Revisá el perfil',escapa(d.error||'Intentá de nuevo.'));
+  }catch(e){res($('r2'),'error','Error','No pudimos guardar. Intentá de nuevo.');}
+  $('btn-confirmar').disabled=false;
+});
+
+// --- PASO 3: buzón ---
 function pintarProveedor(d){
-  prov=d;
-  $('prov').classList.remove('oculto');
+  prov=d;$('prov').classList.remove('oculto');
   $('prov-nombre').textContent='Proveedor detectado: '+d.nombre;
   $('prov-inst').innerHTML=(d.instrucciones||[]).map(t=>'<li>'+escapa(t)+'</li>').join('');
   $('prov-nota').textContent=d.nota||'';
-  const manual=d.proveedor==='otro';
-  $('manual').classList.toggle('oculto',!manual);
+  const manual=d.proveedor==='otro';$('manual').classList.toggle('oculto',!manual);
   if(manual){$('smtp_host').value=d.smtp_host||'';$('imap_host').value=d.imap_host||'';$('smtp_port').value=d.smtp_port||587;$('imap_port').value=d.imap_port||993;}
-  const micro=d.proveedor==='microsoft';
-  $('pass-wrap').classList.toggle('oculto',micro);
+  const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
-  $('btn').disabled=micro;
-  $('btn').textContent=micro?'Microsoft se conecta aparte':'Probar y conectar';
+  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft se conecta aparte':'Probar y conectar';
 }
-async function detectar(){
-  const email=$('email').value.trim();
-  if(!email.includes('@'))return;
-  try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar?email='+encodeURIComponent(email));
-    if(r.ok)pintarProveedor(await r.json());
-  }catch(e){}
-}
+async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
+  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar?email='+encodeURIComponent(email));if(r.ok)pintarProveedor(await r.json());}catch(e){}}
 $('email').addEventListener('blur',detectar);
 $('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(detectar,700);});
-
-function mostrar(box,clase,titulo,cuerpo,detalle){
-  box.className='resultado '+clase;
-  box.innerHTML='<span class="titulo">'+titulo+'</span>'+(cuerpo||'')+(detalle||'');
-}
-
-// --- probar y conectar ---
 $('btn').addEventListener('click',async()=>{
   if(!prov)return;
   const payload={proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
@@ -202,29 +345,27 @@ $('btn').addEventListener('click',async()=>{
     imap_host:prov.proveedor==='otro'?$('imap_host').value.trim():prov.imap_host,
     imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port};
   $('btn').disabled=true;
-  mostrar($('resultado'),'alerta','<span class="spin"></span>Probando conexión…','Verificando envío (SMTP) y lectura (IMAP)…');
+  res($('resultado'),'alerta','<span class="spin"></span>Probando conexión…','Verificando envío (SMTP) y lectura (IMAP)…');
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/probar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
     const det=(d.smtp||d.imap)?'<div class="detalle"><span>Envío (SMTP): '+(d.smtp&&d.smtp.ok?'✓':'✗')+'</span><span>Lectura (IMAP): '+(d.imap&&d.imap.ok?'✓':'✗')+'</span></div>':'';
-    if(d.mailbox_ok)mostrar($('resultado'),'ok','✓ ¡Listo!',escapa(d.mensaje||''),det);
-    else if(d.imap&&d.imap.ok)mostrar($('resultado'),'alerta','Casi listo',escapa(d.mensaje||''),det);
-    else mostrar($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisá los datos.'),det);
-  }catch(e){mostrar($('resultado'),'error','Error','No pudimos completar la prueba. Intentá de nuevo.');}
+    if(d.mailbox_ok){marcarPaso(4);mostrarFinal();}
+    else if(d.imap&&d.imap.ok){marcarPaso(4);mostrarFinal('Verificamos la lectura de tu buzón. El envío queda pendiente por un mantenimiento temporal de nuestro servidor; lo activamos apenas se resuelva.');}
+    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisá los datos.'),det);
+  }catch(e){res($('resultado'),'error','Error','No pudimos completar la prueba. Intentá de nuevo.');}
   $('btn').disabled=false;
 });
 
-// --- reemisión de enlace ---
+// --- reemisión ---
 $('rbtn').addEventListener('click',async()=>{
-  const email=$('remail').value.trim();
-  if(!email.includes('@'))return;
-  $('rbtn').disabled=true;
+  const email=$('remail').value.trim();if(!email.includes('@'))return;$('rbtn').disabled=true;
   try{
     const r=await fetch(API+'/onboarding/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
     const d=await r.json();
-    if(d.ok)mostrar($('rresultado'),'ok','✓ Enlace generado',escapa(d.mensaje||''),d.link?'<div class="detalle"><a href="'+d.link+'">Abrir mi configuración →</a></div>':'');
-    else mostrar($('rresultado'),'alerta','',escapa(d.mensaje||'No encontramos ese correo.'));
-  }catch(e){mostrar($('rresultado'),'error','Error','Intentá de nuevo.');}
+    if(d.ok)res($('rresultado'),'ok','✓ Enlace generado',escapa(d.mensaje||''),d.link?'<div class="detalle"><a href="'+d.link+'">Abrir mi configuración →</a></div>':'');
+    else res($('rresultado'),'alerta','',escapa(d.mensaje||'No encontramos ese correo.'));
+  }catch(e){res($('rresultado'),'error','Error','Intentá de nuevo.');}
   $('rbtn').disabled=false;
 });
 </script>
