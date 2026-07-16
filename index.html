@@ -677,5 +677,33 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 })();
 </script>
 
+<!-- Analytics (Umami, cookieless) -->
+<script defer src="https://analytics.inntuitivo.com/script.js"
+        data-website-id="0fb992b8-c3ab-4f40-baeb-d715f962d5fd"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function track(n, d) { if (window.umami) umami.track(n, d); }
+
+  // Origen del tráfico via ?r=<código> (links cortos y humanos, sin UTMs largos)
+  var codigos = { a:'agente', l:'linkedin', i:'instagram', f:'facebook', d:'discord', p:'podcast', w:'whatsapp' };
+  var r = new URLSearchParams(location.search).get('r');
+  if (r && codigos[r]) track('origen-' + codigos[r]);
+
+  document.querySelectorAll('a[href*="/suscribir"]').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_activar'); });      // clic suscribir
+  });
+  document.querySelectorAll('a[href="#activar"]').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_ver_precio'); });   // clic ver precio
+  });
+  var precio = document.getElementById('activar');                           // scroll a precio
+  if (precio && 'IntersectionObserver' in window) {
+    var visto = false, io = new IntersectionObserver(function (e) {
+      if (e[0].isIntersecting && !visto) { visto = true; track('scroll_precio'); io.disconnect(); }
+    }, { threshold: 0.4 });
+    io.observe(precio);
+  }
+});
+</script>
+
 </body>
 </html>
