@@ -145,27 +145,48 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="step3" class="oculto">
   <span class="eyebrow">Paso 3 · Tu buzón</span>
   <h1>Conectá <em>tu correo</em></h1>
-  <p class="sub">Desde este buzón saldrán los correos de tu agente y aquí leerá las respuestas. Detectamos tu proveedor y verificamos la conexión en el momento.</p>
+  <p class="sub">Tu agente escribirá COMO VOS, desde tu propia dirección, y leerá ahí las respuestas. Dos pasos: conectás tu dominio (envío) y tu buzón (lectura).</p>
   <div class="panel">
-    <label for="email">Correo del buzón</label>
+    <label for="email">Tu dirección de correo</label>
     <input id="email" type="email" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
-    <div id="prov" class="provaviso oculto">
-      <span class="nombre-prov" id="prov-nombre"></span>
-      <ul class="instrucciones" id="prov-inst"></ul>
-      <div class="nota" id="prov-nota"></div>
+
+    <!-- A · ENVÍO: verificar el dominio del cliente en NUESTRA cuenta de Resend -->
+    <div id="envio" class="oculto" style="margin-top:20px">
+      <h3 style="margin:0 0 8px">1 · Envío — conectá tu dominio</h3>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#B5A9D4;margin-bottom:12px">
+        🔒 Esto <strong>no toca tu correo actual</strong>. Agregás 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
+      </div>
+      <div id="dns-donde" class="nota" style="margin-bottom:10px"></div>
+      <div id="registros"></div>
+      <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
+      <div id="envio-estado" class="resultado"></div>
+      <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
+        <strong>¿No sabés dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe. Pasanos el dato y lo dejamos listo por vos.
+        <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px">💬 Escribirnos por WhatsApp</a>
+      </div>
     </div>
-    <div id="pass-wrap" class="oculto">
-      <label for="password" id="pass-label">Contraseña</label>
-      <input id="password" type="password" autocomplete="off" placeholder="••••••••">
+
+    <!-- B · LECTURA: IMAP (993, no bloqueado) -->
+    <div id="lectura" class="oculto" style="margin-top:24px">
+      <h3 style="margin:0 0 8px">2 · Lectura — conectá tu buzón</h3>
+      <div id="prov" class="provaviso oculto">
+        <span class="nombre-prov" id="prov-nombre"></span>
+        <ul class="instrucciones" id="prov-inst"></ul>
+        <div class="nota" id="prov-nota"></div>
+      </div>
+      <div id="pass-wrap" class="oculto">
+        <label for="password" id="pass-label">Contraseña</label>
+        <input id="password" type="password" autocomplete="off" placeholder="••••••••">
+      </div>
+      <div id="manual" class="oculto">
+        <label>Servidor IMAP (lectura) y puerto</label>
+        <div class="fila2"><input id="imap_host" placeholder="imap.tuproveedor.com"><input id="imap_port" value="993" inputmode="numeric"></div>
+      </div>
+      <button id="btn" class="btn btn-primario" disabled style="margin-top:10px">Conectar lectura</button>
+      <div id="resultado" class="resultado"></div>
     </div>
-    <div id="manual" class="oculto">
-      <label>Servidor SMTP (envío) y puerto</label>
-      <div class="fila2"><input id="smtp_host" placeholder="smtp.tuproveedor.com"><input id="smtp_port" value="587" inputmode="numeric"></div>
-      <label>Servidor IMAP (lectura) y puerto</label>
-      <div class="fila2"><input id="imap_host" placeholder="imap.tuproveedor.com"><input id="imap_port" value="993" inputmode="numeric"></div>
-    </div>
-    <button id="btn" class="btn btn-primario" disabled>Probar y conectar</button>
-    <div id="resultado" class="resultado"></div>
+
+    <div id="buzon-progreso" class="detalle oculto" style="margin-top:16px"></div>
   </div>
 </section>
 
@@ -247,7 +268,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresá el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'){mostrarFinal();return;}
-    if(d.paso===3){ver('step3');marcarPaso(3);return;}
+    if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
     ver('step1');marcarPaso(1);
   }catch(e){ver('reissue');}
@@ -321,41 +342,94 @@ $('btn-confirmar').addEventListener('click',async()=>{
   $('btn-confirmar').disabled=false;
 });
 
-// --- PASO 3: buzón ---
+// --- PASO 3: buzón (envío = dominio verificado en Resend · lectura = IMAP) ---
+let domVerificado=false, imapOk=false;
+
+function progreso(){
+  const box=$('buzon-progreso');box.classList.remove('oculto');
+  box.innerHTML='<span>Envío (dominio): '+(domVerificado?'✓':'⏳')+'</span><span>Lectura (buzón): '+(imapOk?'✓':'⏳')+'</span>';
+  if(domVerificado&&imapOk){marcarPaso(4);mostrarFinal();}
+}
+function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent=t,1200);});}
+function regFila(valor){
+  return '<div style="display:flex;gap:8px;align-items:center;margin:4px 0">'
+    +'<code style="flex:1;overflow-wrap:anywhere;background:rgba(0,0,0,.25);padding:4px 8px;border-radius:6px;font-size:.82rem">'+escapa(valor)+'</code>'
+    +'<button type="button" data-copiar="'+escapa(valor)+'" style="flex:none;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#FF6E92;cursor:pointer">Copiar</button></div>';
+}
+function pintarRegistros(regs){
+  $('registros').innerHTML=(regs||[]).map(r=>{
+    const ok=(r.estado||'').toLowerCase()==='verified';
+    return '<div style="border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
+      +'<div style="font-weight:600;margin-bottom:6px">'+escapa(r.para||r.tipo)+' · '+escapa(r.tipo)+(ok?' ✓':'')+'</div>'
+      +'<div class="nota">Nombre</div>'+regFila(r.nombre)
+      +'<div class="nota" style="margin-top:6px">Valor</div>'+regFila(r.valor)
+      +(r.prioridad!=null?'<div class="nota" style="margin-top:6px">Prioridad: '+escapa(''+r.prioridad)+'</div>':'')
+      +'</div>';
+  }).join('');
+  document.querySelectorAll('#registros [data-copiar]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.copiar)));
+}
+async function cargarDominio(){
+  const email=$('email').value.trim();if(!email.includes('@'))return;
+  $('envio').classList.remove('oculto');
+  try{
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio?email='+encodeURIComponent(email));
+    const d=await r.json();
+    if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));return;}
+    if(d.dns&&d.dns.donde)$('dns-donde').textContent='Tu DNS parece estar en '+d.dns.dns_nombre+'. '+d.dns.donde;
+    pintarRegistros(d.registros);
+    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','');progreso();}
+  }catch(e){}
+}
+$('btn-verificar').addEventListener('click',async()=>{
+  $('btn-verificar').disabled=true;
+  res($('envio-estado'),'alerta','<span class="spin"></span>Verificando…','Los DNS pueden tardar hasta 30 min.');
+  try{
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/verificar-dominio',{method:'POST'});
+    const d=await r.json();
+    if(d.registros)pintarRegistros(d.registros);
+    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','Tu agente ya puede enviar como vos.');progreso();}
+    else res($('envio-estado'),'alerta','Todavía no','Puede tardar. Cerrá tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
+  }catch(e){res($('envio-estado'),'error','Error','Probá de nuevo en un momento.');}
+  $('btn-verificar').disabled=false;
+});
+
 function pintarProveedor(d){
   prov=d;$('prov').classList.remove('oculto');
   $('prov-nombre').textContent='Proveedor detectado: '+d.nombre;
   $('prov-inst').innerHTML=(d.instrucciones||[]).map(t=>'<li>'+escapa(t)+'</li>').join('');
   $('prov-nota').textContent=d.nota||'';
   const manual=d.proveedor==='otro';$('manual').classList.toggle('oculto',!manual);
-  if(manual){$('smtp_host').value=d.smtp_host||'';$('imap_host').value=d.imap_host||'';$('smtp_port').value=d.smtp_port||587;$('imap_port').value=d.imap_port||993;}
+  if(manual){$('imap_host').value=d.imap_host||'';$('imap_port').value=d.imap_port||993;}
   const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
-  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft se conecta aparte':'Probar y conectar';
+  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft se conecta aparte':'Conectar lectura';
 }
 async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
+  $('lectura').classList.remove('oculto');
   try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar?email='+encodeURIComponent(email));if(r.ok)pintarProveedor(await r.json());}catch(e){}}
-$('email').addEventListener('blur',detectar);
-$('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(detectar,700);});
+$('email').addEventListener('blur',()=>{cargarDominio();detectar();});
+$('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{cargarDominio();detectar();},800);});
 $('btn').addEventListener('click',async()=>{
   if(!prov)return;
   const payload={proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
-    smtp_host:prov.proveedor==='otro'?$('smtp_host').value.trim():prov.smtp_host,
-    smtp_port:prov.proveedor==='otro'?$('smtp_port').value.trim():prov.smtp_port,
     imap_host:prov.proveedor==='otro'?$('imap_host').value.trim():prov.imap_host,
     imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port};
   $('btn').disabled=true;
-  res($('resultado'),'alerta','<span class="spin"></span>Probando conexión…','Verificando envío (SMTP) y lectura (IMAP)…');
+  res($('resultado'),'alerta','<span class="spin"></span>Conectando…','Verificando la lectura de tu buzón…');
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/probar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    const det=(d.smtp||d.imap)?'<div class="detalle"><span>Envío (SMTP): '+(d.smtp&&d.smtp.ok?'✓':'✗')+'</span><span>Lectura (IMAP): '+(d.imap&&d.imap.ok?'✓':'✗')+'</span></div>':'';
-    if(d.mailbox_ok){marcarPaso(4);mostrarFinal();}
-    else if(d.imap&&d.imap.ok){marcarPaso(4);mostrarFinal('Verificamos la lectura de tu buzón. El envío queda pendiente por un mantenimiento temporal de nuestro servidor; lo activamos apenas se resuelva.');}
-    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisá los datos.'),det);
+    if(d.imap_ok){imapOk=true;res($('resultado'),'ok','✓ Lectura conectada','');progreso();}
+    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisá el correo y la contraseña.'));
   }catch(e){res($('resultado'),'error','Error','No pudimos completar la prueba. Intentá de nuevo.');}
   $('btn').disabled=false;
 });
+function reanudarBuzon(b){
+  if(!b)return;
+  domVerificado=!!b.dominio_ok;imapOk=!!b.imap_ok;
+  if(b.email_envio){$('email').value=b.email_envio;cargarDominio();detectar();}
+  progreso();
+}
 
 // --- reemisión ---
 $('rbtn').addEventListener('click',async()=>{
