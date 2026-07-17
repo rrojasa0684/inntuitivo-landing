@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Inntuitivo — Configurá tu agente</title>
+<title>Inntuitivo — Configura tu agente</title>
 <link rel="icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,7 +118,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="step1" class="oculto">
   <span class="eyebrow">Paso 1 · Tu sitio</span>
   <h1 id="titulo">Empecemos por <em>tu sitio web</em></h1>
-  <p class="sub">Analizamos tu sitio para entender qué ofrecés y a quién. Lo revisás y ajustás en el paso siguiente.</p>
+  <p class="sub">Analizamos tu sitio para entender qué ofreces y a quién. Lo revisas y ajustas en el paso siguiente.</p>
   <div class="panel">
     <label for="sitio">¿Cuál es el sitio de tu negocio?</label>
     <input id="sitio" type="url" placeholder="https://tuempresa.com" spellcheck="false">
@@ -131,7 +131,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="step2" class="oculto">
   <span class="eyebrow">Paso 2 · Tu perfil</span>
   <h1>Esto <em>entendí</em> de tu negocio</h1>
-  <p class="sub">Corregí lo que haga falta — tu agente escribirá con esto. Marcamos en <span style="color:var(--alerta)">amarillo</span> lo que inferimos con poca certeza.</p>
+  <p class="sub">Corrige lo que haga falta — tu agente escribirá con esto. Marcamos en <span style="color:var(--alerta)">amarillo</span> lo que inferimos con poca certeza.</p>
   <div id="cards" class="panel"></div>
   <div class="panel" style="margin-top:16px">
     <div class="fuentes" id="fuentes-box"><h3>Fuentes 🔗</h3><div id="fuentes-lista"></div></div>
@@ -144,31 +144,31 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <!-- PASO 3 -->
 <section id="step3" class="oculto">
   <span class="eyebrow">Paso 3 · Tu buzón</span>
-  <h1>Conectá <em>tu correo</em></h1>
-  <p class="sub">Tu agente escribirá COMO VOS, desde tu propia dirección, y leerá ahí las respuestas. Dos pasos: conectás tu dominio (envío) y tu buzón (lectura).</p>
+  <h1>Conecta <em>tu correo</em></h1>
+  <p class="sub">Tu agente escribirá COMO TÚ, desde tu propia dirección, y leerá ahí las respuestas. Dos pasos: conectas tu dominio (envío) y tu buzón (lectura).</p>
   <div class="panel">
     <label for="email">Tu dirección de correo</label>
     <input id="email" type="email" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
 
     <!-- A · ENVÍO: verificar el dominio del cliente en NUESTRA cuenta de Resend -->
     <div id="envio" class="oculto" style="margin-top:20px">
-      <h3 style="margin:0 0 8px">1 · Envío — conectá tu dominio</h3>
+      <h3 style="margin:0 0 8px">1 · Envío — conecta tu dominio</h3>
       <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#B5A9D4;margin-bottom:12px">
-        🔒 Esto <strong>no toca tu correo actual</strong>. Agregás 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
+        🔒 Esto <strong>no toca tu correo actual</strong>. Agregas 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
       </div>
       <div id="dns-donde" class="nota" style="margin-bottom:10px"></div>
       <div id="registros"></div>
       <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
       <div id="envio-estado" class="resultado"></div>
       <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
-        <strong>¿No sabés dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe. Pasanos el dato y lo dejamos listo por vos.
+        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe. Pásanos el dato y lo dejamos listo por ti.
         <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px">💬 Escribirnos por WhatsApp</a>
       </div>
     </div>
 
     <!-- B · LECTURA: IMAP (993, no bloqueado) -->
     <div id="lectura" class="oculto" style="margin-top:24px">
-      <h3 style="margin:0 0 8px">2 · Lectura — conectá tu buzón</h3>
+      <h3 style="margin:0 0 8px">2 · Lectura — conecta tu buzón</h3>
       <div id="prov" class="provaviso oculto">
         <span class="nombre-prov" id="prov-nombre"></span>
         <ul class="instrucciones" id="prov-inst"></ul>
@@ -203,8 +203,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <!-- REISSUE -->
 <section id="reissue" class="oculto">
   <span class="eyebrow">Configuración</span>
-  <h1>Necesitás un <em>enlace nuevo</em></h1>
-  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció (duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.</p>
+  <h1>Necesitas un <em>enlace nuevo</em></h1>
+  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.</p>
   <div class="panel">
     <label for="remail">Tu correo de pago</label>
     <input id="remail" type="email" placeholder="el correo con el que te suscribiste" spellcheck="false">
@@ -214,7 +214,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 </section>
 
 </main>
-<p class="pie">¿Dudas? Escribinos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a></p>
+<p class="pie">¿Dudas? Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a></p>
 </div>
 
 <script>
@@ -265,7 +265,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
-    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresá el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresá el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
@@ -280,16 +280,16 @@ function mostrarFinal(nota){ if(nota)$('final-nota').textContent=nota; ver('fina
 let loaderTimer=null;
 $('btn-analizar').addEventListener('click',async()=>{
   const sitio=$('sitio').value.trim();
-  if(!sitio.includes('.')){res($('r1'),'error','','Ingresá una dirección web válida.');return;}
+  if(!sitio.includes('.')){res($('r1'),'error','','Ingresa una dirección web válida.');return;}
   $('btn-analizar').disabled=true;
   let li=0; const pintar=()=>res($('r1'),'alerta','<span class="spin"></span>'+LOADERS[li%LOADERS.length],'Puede tardar un par de minutos. No cierres esta página.');
   pintar(); loaderTimer=setInterval(()=>{li++;pintar();},4000);
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sitio_web:sitio})});
     const d=await r.json();
-    if(!r.ok){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intentá de nuevo.'));$('btn-analizar').disabled=false;return;}
+    if(!r.ok){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intenta de nuevo.'));$('btn-analizar').disabled=false;return;}
     pollAnalisis();
-  }catch(e){clearInterval(loaderTimer);res($('r1'),'error','Error','No pudimos analizar el sitio. Intentá de nuevo.');$('btn-analizar').disabled=false;}
+  }catch(e){clearInterval(loaderTimer);res($('r1'),'error','Error','No pudimos analizar el sitio. Intenta de nuevo.');$('btn-analizar').disabled=false;}
 });
 async function pollAnalisis(){
   for(let i=0;i<60;i++){
@@ -298,10 +298,10 @@ async function pollAnalisis(){
       const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar-estado');
       const d=await r.json();
       if(d.estado==='listo'){clearInterval(loaderTimer);perfil=d.perfil;renderPerfil(perfil);$('r1').className='resultado';ver('step2');marcarPaso(2);window.scrollTo(0,0);$('btn-analizar').disabled=false;return;}
-      if(d.estado==='error'){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intentá de nuevo.'));$('btn-analizar').disabled=false;return;}
+      if(d.estado==='error'){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intenta de nuevo.'));$('btn-analizar').disabled=false;return;}
     }catch(e){}
   }
-  clearInterval(loaderTimer);res($('r1'),'error','Tardó demasiado','Probá de nuevo en un momento.');$('btn-analizar').disabled=false;
+  clearInterval(loaderTimer);res($('r1'),'error','Tardó demasiado','Prueba de nuevo en un momento.');$('btn-analizar').disabled=false;
 }
 
 // --- PASO 2: render editable con baja confianza ---
@@ -337,8 +337,8 @@ $('btn-confirmar').addEventListener('click',async()=>{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil})});
     const d=await r.json();
     if(r.ok&&d.ok){$('r2').className='resultado';ver('step3');marcarPaso(3);window.scrollTo(0,0);}
-    else res($('r2'),'error','Revisá el perfil',escapa(d.error||'Intentá de nuevo.'));
-  }catch(e){res($('r2'),'error','Error','No pudimos guardar. Intentá de nuevo.');}
+    else res($('r2'),'error','Revisa el perfil',escapa(d.error||'Intenta de nuevo.'));
+  }catch(e){res($('r2'),'error','Error','No pudimos guardar. Intenta de nuevo.');}
   $('btn-confirmar').disabled=false;
 });
 
@@ -374,9 +374,11 @@ async function cargarDominio(){
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio?email='+encodeURIComponent(email));
     const d=await r.json();
-    if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));return;}
+    if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));$('btn-verificar').classList.add('oculto');return;}
     if(d.dns&&d.dns.donde)$('dns-donde').textContent='Tu DNS parece estar en '+d.dns.dns_nombre+'. '+d.dns.donde;
     pintarRegistros(d.registros);
+    const hayReg=d.registros&&d.registros.length;
+    $('btn-verificar').classList.toggle('oculto', !!d.verificado || !hayReg);
     if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','');progreso();}
   }catch(e){}
 }
@@ -387,9 +389,9 @@ $('btn-verificar').addEventListener('click',async()=>{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/verificar-dominio',{method:'POST'});
     const d=await r.json();
     if(d.registros)pintarRegistros(d.registros);
-    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','Tu agente ya puede enviar como vos.');progreso();}
-    else res($('envio-estado'),'alerta','Todavía no','Puede tardar. Cerrá tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
-  }catch(e){res($('envio-estado'),'error','Error','Probá de nuevo en un momento.');}
+    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','Tu agente ya puede enviar como tú.');$('btn-verificar').classList.add('oculto');progreso();}
+    else res($('envio-estado'),'alerta','Todavía no','Puede tardar. Cierra tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
+  }catch(e){res($('envio-estado'),'error','Error','Prueba de nuevo en un momento.');}
   $('btn-verificar').disabled=false;
 });
 
@@ -420,8 +422,8 @@ $('btn').addEventListener('click',async()=>{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/probar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
     if(d.imap_ok){imapOk=true;res($('resultado'),'ok','✓ Lectura conectada','');progreso();}
-    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisá el correo y la contraseña.'));
-  }catch(e){res($('resultado'),'error','Error','No pudimos completar la prueba. Intentá de nuevo.');}
+    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisa el correo y la contraseña.'));
+  }catch(e){res($('resultado'),'error','Error','No pudimos completar la prueba. Intenta de nuevo.');}
   $('btn').disabled=false;
 });
 function reanudarBuzon(b){
@@ -439,7 +441,7 @@ $('rbtn').addEventListener('click',async()=>{
     const d=await r.json();
     if(d.ok)res($('rresultado'),'ok','✓ Enlace generado',escapa(d.mensaje||''),d.link?'<div class="detalle"><a href="'+d.link+'">Abrir mi configuración →</a></div>':'');
     else res($('rresultado'),'alerta','',escapa(d.mensaje||'No encontramos ese correo.'));
-  }catch(e){res($('rresultado'),'error','Error','Intentá de nuevo.');}
+  }catch(e){res($('rresultado'),'error','Error','Intenta de nuevo.');}
   $('rbtn').disabled=false;
 });
 </script>
