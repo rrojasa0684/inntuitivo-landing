@@ -54,6 +54,8 @@ label .hint{text-transform:none;letter-spacing:0;font-weight:400;color:var(--tin
 .badge{display:inline-block;margin-left:8px;font-size:.66rem;font-weight:700;letter-spacing:.03em;color:#3A2400;background:var(--alerta);border-radius:999px;padding:2px 8px;vertical-align:middle}
 input,textarea,select{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px}
 .baja input,.baja textarea{border-color:rgba(255,198,92,.6);background:rgba(255,198,92,.06)}
+.tarjeta.resaltar{border-color:var(--rojo);box-shadow:0 0 0 2px rgba(222,5,64,.5)}
+.campo-falta{border-color:var(--rojo) !important;background:rgba(222,5,64,.07) !important}
 textarea{min-height:70px;resize:vertical;line-height:1.5}
 input:focus,textarea:focus,select:focus{border-color:var(--rosa-claro);outline:none}
 input::placeholder,textarea::placeholder{color:#8E80B3}
@@ -327,10 +329,29 @@ function renderPerfil(p){
   $('fuentes-lista').innerHTML=fs.length?fs.map(i=>'<div class="fuente">'+escapa(i.campo)+' ('+i.confianza+'/5) — <a href="'+escapa(i.fuente)+'" target="_blank" rel="noopener">'+escapa(i.fuente)+'</a></div>').join(''):'<div class="fuente" style="padding-left:0">Sin fuentes citadas (poca información pública del sitio).</div>';
 }
 $('btn-volver1').addEventListener('click',()=>{ver('step1');marcarPaso(1);});
+// Resalta la tarjeta y los campos vacíos del cliente ideal, y hace scroll a ellos.
+function marcarFaltantes(ids){
+  document.querySelectorAll('.campo-falta').forEach(el=>el.classList.remove('campo-falta'));
+  document.querySelectorAll('.tarjeta.resaltar').forEach(el=>el.classList.remove('resaltar'));
+  let card=null;
+  ids.forEach(id=>{const el=$('f-'+id);if(!el)return;el.classList.add('campo-falta');if(!card)card=el.closest('.tarjeta');});
+  if(card){card.classList.add('resaltar');card.scrollIntoView({behavior:'smooth',block:'center'});}
+}
 $('btn-confirmar').addEventListener('click',async()=>{
   const campoTipo={};CARDS.forEach(([t,cs])=>cs.forEach(([id,c,l,tipo])=>campoTipo[id]=tipo));
   Object.keys(campoTipo).forEach(id=>{const el=$('f-'+id);if(!el)return;
     perfil[id]=campoTipo[id]==='lines'?lineas(el.value):el.value.trim();});
+  // Gate del target: sin a-quién-le-vende + industrias + cargos, la primera tanda
+  // apuntaría a los competidores del cliente. Bloquea el submit y marca qué falta.
+  const faltan=[];
+  if(!(perfil.icp_descripcion||'').trim())faltan.push('icp_descripcion');
+  if(!(perfil.industrias||[]).length)faltan.push('industrias');
+  if(!(perfil.cargos_objetivo||[]).length)faltan.push('cargos_objetivo');
+  if(faltan.length){
+    marcarFaltantes(faltan);
+    res($('r2'),'error','Faltan datos de tu cliente ideal','Indicá a quién le vendés, sus industrias y los cargos a contactar — sin eso, tu agente escribiría a las empresas equivocadas.');
+    return;
+  }
   $('btn-confirmar').disabled=true;
   res($('r2'),'alerta','<span class="spin"></span>Guardando…','');
   try{
