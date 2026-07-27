@@ -493,6 +493,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form h3{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:6px}
   .ms-form p.ms-nota{font-size:.86rem;color:var(--tinta-suave);margin-bottom:6px}
   .ms-form label{display:block;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:14px 0 6px}
+  .ms-form label .ms-hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.84rem;margin-top:4px}
   .ms-form input,.ms-form textarea{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px;resize:vertical}
   .ms-form input:focus,.ms-form textarea:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
@@ -530,8 +531,8 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <form id="ms-form" novalidate>
           <label for="ms-sitio">Tu sitio web</label>
           <input id="ms-sitio" name="sitio_web" type="url" required placeholder="https://tuempresa.com" spellcheck="false" autocomplete="url">
-          <label for="ms-target">¿A quién le vendes?</label>
-          <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: cooperativas y cámaras empresariales en Costa Rica"></textarea>
+          <label for="ms-target">¿Qué tipo de empresas son tus clientes? <span class="ms-hint">El rubro de las empresas a las que les vendes, no el tuyo.</span></label>
+          <textarea id="ms-target" name="a_quien_vendes" required rows="3" placeholder="Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos»."></textarea>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <div class="ms-hp" aria-hidden="true">

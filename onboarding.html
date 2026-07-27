@@ -50,7 +50,7 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
 .tarjeta{margin-top:16px;background:rgba(0,0,0,.18);border:1px solid var(--linea);border-radius:14px;padding:18px}
 .tarjeta h3{font-family:'Audiowide',sans-serif;font-weight:400;font-size:1rem;color:#fff;margin-bottom:4px}
 label{display:block;font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:14px 0 6px}
-label .hint{text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.85rem}
+label .hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.85rem;margin-top:3px}
 .badge{display:inline-block;margin-left:8px;font-size:.66rem;font-weight:700;letter-spacing:.03em;color:#3A2400;background:var(--alerta);border-radius:999px;padding:2px 8px;vertical-align:middle}
 input,textarea,select{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px}
 .baja input,.baja textarea{border-color:rgba(255,198,92,.6);background:rgba(255,198,92,.06)}
@@ -238,7 +238,7 @@ const CARDS=[
     ['precio','precio','Precio (si aplica)','text'],
     ['pruebas','pruebas','Pruebas de credibilidad · una por línea','lines']]],
   ['Tu cliente ideal',[
-    ['icp_descripcion','icp_descripcion','A quién le vendés','textarea'],
+    ['icp_descripcion','icp_descripcion','Qué tipo de empresas son tus clientes','textarea','El rubro de las empresas a las que les vendes, no el tuyo. Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos».'],
     ['industrias','industrias','Industrias · una por línea','lines'],
     ['tamano_empresa','tamano_empresa','Tamaño de empresa','text'],
     ['geografia_objetivo','icp_descripcion','Geografía objetivo','text'],
@@ -311,7 +311,7 @@ function confMap(p){const m={};(p.inferencias||[]).forEach(i=>{if(m[i.campo]==nu
 function renderPerfil(p){
   const conf=confMap(p);
   $('cards').innerHTML=CARDS.map(([titulo,campos])=>{
-    const filas=campos.map(([id,campo,label,tipo])=>{
+    const filas=campos.map(([id,campo,label,tipo,hint])=>{
       const baja=(conf[campo]!=null&&conf[campo]<3);
       const badge=baja?'<span class="badge">revisar</span>':'';
       const v=p[id];
@@ -321,7 +321,7 @@ function renderPerfil(p){
       else if(tipo==='select'){const r=['tu','usted','vos'].includes(v)?v:'usted';
         control='<select id="f-'+id+'"><option value="usted"'+(r==='usted'?' selected':'')+'>Usted (formal)</option><option value="tu"'+(r==='tu'?' selected':'')+'>Tú (cercano)</option><option value="vos"'+(r==='vos'?' selected':'')+'>Vos (voseo)</option></select>';}
       else control='<input id="f-'+id+'" type="text" value="'+escapa(v||'')+'">';
-      return '<div class="'+(baja?'baja':'')+'"><label>'+escapa(label)+badge+'</label>'+control+'</div>';
+      return '<div class="'+(baja?'baja':'')+'"><label>'+escapa(label)+badge+(hint?'<span class="hint">'+escapa(hint)+'</span>':'')+'</label>'+control+'</div>';
     }).join('');
     return '<div class="tarjeta"><h3>'+escapa(titulo)+'</h3>'+filas+'</div>';
   }).join('');
@@ -349,19 +349,37 @@ $('btn-confirmar').addEventListener('click',async()=>{
   if(!(perfil.cargos_objetivo||[]).length)faltan.push('cargos_objetivo');
   if(faltan.length){
     marcarFaltantes(faltan);
-    res($('r2'),'error','Faltan datos de tu cliente ideal','Indicá a quién le vendés, sus industrias y los cargos a contactar — sin eso, tu agente escribiría a las empresas equivocadas.');
+    res($('r2'),'error','Faltan datos de tu cliente ideal','Indica a quién le vendes, sus industrias y los cargos a contactar — sin eso, tu agente escribiría a las empresas equivocadas.');
     return;
   }
+  await confirmar(false);
+});
+
+// Envía /confirmar. `advertido`=true reenvía tras la advertencia de "posible target propio".
+async function confirmar(advertido){
   $('btn-confirmar').disabled=true;
   res($('r2'),'alerta','<span class="spin"></span>Guardando…','');
   try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil})});
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil,confirmar_advertido:advertido})});
     const d=await r.json();
-    if(r.ok&&d.ok){$('r2').className='resultado';ver('step3');marcarPaso(3);window.scrollTo(0,0);}
-    else res($('r2'),'error','Revisa el perfil',escapa(d.error||'Intenta de nuevo.'));
+    if(r.ok&&d.ok){$('r2').className='resultado';ver('step3');marcarPaso(3);window.scrollTo(0,0);return;}
+    if(r.status===409&&d.advertencia){
+      const a=d.advertencia;
+      res($('r2'),'alerta',escapa(a.titulo||'Revisa tu cliente ideal'),
+        escapa(a.mensaje||'')+'<br>'+escapa(a.detalle||'')+
+        '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">'+
+        '<button id="btn-igual" class="btn btn-primario" style="width:auto;margin:0">Confirmar igual</button>'+
+        '<button id="btn-corregir" class="btn btn-sec" style="width:auto;margin:0">Volver a corregir</button></div>');
+      const t=($('f-icp_descripcion')||{}).closest?$('f-icp_descripcion').closest('.tarjeta'):null; if(t)t.classList.add('resaltar');
+      $('btn-confirmar').disabled=false;
+      $('btn-igual').addEventListener('click',()=>confirmar(true));
+      $('btn-corregir').addEventListener('click',()=>{$('r2').className='resultado';document.querySelectorAll('.tarjeta.resaltar').forEach(el=>el.classList.remove('resaltar'));});
+      return;
+    }
+    res($('r2'),'error','Revisa el perfil',escapa(d.error||'Intenta de nuevo.'));
   }catch(e){res($('r2'),'error','Error','No pudimos guardar. Intenta de nuevo.');}
   $('btn-confirmar').disabled=false;
-});
+}
 
 // --- PASO 3: buzón (envío = dominio verificado en Resend · lectura = IMAP) ---
 let domVerificado=false, imapOk=false;
