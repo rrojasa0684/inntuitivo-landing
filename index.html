@@ -506,6 +506,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-resultado .titulo{font-weight:600;display:block;margin-bottom:4px}
   .ms-resultado.ok{display:block;background:rgba(62,213,152,.12);border:1px solid rgba(62,213,152,.5);color:#C8F4E2}
   .ms-resultado.error{display:block;background:rgba(222,5,64,.12);border:1px solid rgba(222,5,64,.5);color:#FFD3DE}
+  .ms-resultado.alerta{display:block;background:rgba(255,198,92,.1);border:1px solid rgba(255,198,92,.45);color:#FBE7BE}
   @media (max-width:840px){
     .ms-grid{grid-template-columns:1fr}
   }
@@ -915,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function () {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos)
       }).then(function (r) {
-        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; });
       }).then(function (o) {
         if (o.ok) {
           track('muestra_enviada');
@@ -924,6 +925,13 @@ document.addEventListener('DOMContentLoaded', function () {
             (o.j.mensaje || 'Tu agente está armando la muestra. Te llega a tu correo dentro de la próxima hora.');
           msForm.reset();
           btn.textContent = 'Muestra pedida ✓';
+        } else if (o.status === 429) {
+          // Demasiadas solicitudes desde esta IP: mensaje distinto, sin decir "recibido".
+          res.className = 'ms-resultado alerta';
+          res.innerHTML = '<span class="titulo">Espera un momento</span>' +
+            'Recibimos varias solicitudes desde aquí hace poco. Intenta de nuevo más tarde.';
+          btn.disabled = false;
+          btn.textContent = textoBtn;
         } else {
           res.className = 'ms-resultado error';
           res.innerHTML = '<span class="titulo">No pudimos recibirlo</span>' +
