@@ -63,6 +63,10 @@ nav{padding:18px 0;display:flex;justify-content:space-between;align-items:center
 .btn-primario:hover{box-shadow:0 12px 30px rgba(69,39,116,.35)}
 .btn-secundario{background:transparent;color:#fff;border:1.5px solid var(--linea)}
 .micro{margin-top:14px;font-size:.88rem;color:var(--tinta-suave)}
+.iq-fit{margin-top:20px;max-width:62ch;background:var(--carta);border:1px solid var(--linea);border-left:3px solid var(--rojo);border-radius:12px;padding:12px 16px}
+.iq-fit summary{font-size:.95rem}
+.iq-fit p{font-size:.92rem}
+.iq-fit strong{color:#fff}
 
 /* Signature: panel de actividad del agente */
 .panel{background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);border-radius:18px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
@@ -328,6 +332,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <a class="btn btn-secundario" href="#activar">Activar mi agente</a>
       </div>
       <p class="micro">Tu agente en órbita en menos de una semana · Cancela cuando quieras ✨</p>
+      <details class="iq-fit">
+        <summary>Hecho para ti si tus clientes son empresas como</summary>
+        <p>No decide el rubro, sino que tus clientes <strong>publiquen un correo alcanzable en su web</strong> —agencias, pymes, despachos, consultoras, clínicas—. No aplica con personas ni grandes corporaciones, que no publican contacto.</p>
+      </details>
     </div>
 
     <div class="panel" aria-label="Ejemplo de actividad del agente">
@@ -528,7 +536,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <li>Todo llega a tu correo. No conectas tu buzón, no tocas nada técnico y no pagas nada.</li>
           <li>Lo recibes dentro de la próxima hora: llenas el formulario y tu agente se pone a trabajar.</li>
         </ul>
-        <p class="ms-fit"><strong>Un dato honesto:</strong> la muestra sale mejor cuando tus propios clientes son empresas de mercado medio que publican un correo de contacto. Ahí es donde tu agente rinde más.</p>
+        <p class="ms-fit"><strong>Un dato honesto:</strong> funciona cuando tus clientes son empresas con web y un correo de contacto —agencias, despachos contables, clínicas privadas—. Si les vendes a personas y no a empresas (por ejemplo, casas o seguros a particulares), el agente no las va a encontrar: busca empresas, no individuos.</p>
       </div>
       <div class="ms-form">
         <h3>Pide tu muestra</h3>
@@ -536,7 +544,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <form id="ms-form" novalidate>
           <label for="ms-sitio">Tu sitio web</label>
           <input id="ms-sitio" name="sitio_web" type="url" required placeholder="https://tuempresa.com" spellcheck="false" autocomplete="url">
-          <label for="ms-target">¿Qué tipo de empresas son tus clientes? <span class="ms-hint">El rubro de las empresas a las que les vendes, no el tuyo.</span></label>
+          <label for="ms-target">¿Qué tipo de empresas son tus clientes? <span class="ms-hint">El rubro de las empresas a las que les vendes, no el tuyo. Y tienen que ser empresas: si tu respuesta son personas («compradores de casa», «gente que quiere aprender inglés»), el agente no aplica.</span></label>
           <textarea id="ms-target" name="a_quien_vendes" required rows="3" placeholder="Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos»."></textarea>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
@@ -608,6 +616,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     <details>
       <summary>¿Qué pasa si cancelo?</summary>
       <p>Sin permanencia ni penalidad. Si nunca activas la mensualidad, tu agente simplemente se pausa al terminar el primer mes incluido; si ya estabas en el plan de $99, se desactiva al final del período pagado. En cualquier caso te entregamos la lista de prospectos y conversaciones generadas — son tuyas.</p>
+    </details>
+    <details>
+      <summary>¿Para quién NO sirve Inntuitivo?</summary>
+      <p>Tres casos en los que no es para ti: <strong>1)</strong> si tus clientes son personas y no empresas —vendes casas, seguros o cursos al consumidor final—: el agente busca empresas con correo publicado, no encuentra individuos. <strong>2)</strong> si tus clientes son corporaciones grandes —bancos, multinacionales, cadenas—: no publican un correo de contacto alcanzable y el agente encuentra puertas cerradas. <strong>3)</strong> si todavía no tienes claro qué tipo de empresa es tu cliente ideal, no hay una búsqueda que armar. Preferimos decírtelo antes y no cobrarte para que lo descubras después.</p>
     </details>
   </section>
 
