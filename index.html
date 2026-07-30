@@ -6,7 +6,7 @@
 <title>Inntuitivo — Un agente de IA que consigue clientes por ti</title>
 <meta name="description" content="Un agente de IA que encuentra prospectos, escribe outreach personalizado y hace seguimiento 24/7. Tú solo recibes el aviso cuando alguien responde con interés real.">
 <meta property="og:title" content="Inntuitivo — Un agente de IA que consigue clientes por ti 🚀">
-<meta property="og:description" content="Encuentra prospectos, escribe outreach personalizado y hace seguimiento 24/7. Tú solo recibes el aviso cuando alguien responde. Tu agente en órbita en menos de una semana.">
+<meta property="og:description" content="Encuentra prospectos, escribe outreach personalizado y hace seguimiento 24/7. Tú solo recibes el aviso cuando alguien responde. En cuanto verificas tu dominio, tu agente empieza a trabajar dentro de 24 horas.">
 <meta property="og:url" content="https://www.inntuitivo.com/">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://www.inntuitivo.com/og-image.png">
@@ -124,7 +124,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .precio-inner ul li::before{content:"✓";background:var(--gradiente);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
 
 /* FAQ */
-details{background:var(--carta);border:1px solid var(--linea);border-radius:14px;padding:18px 22px;margin-top:12px}
+details{background:var(--carta);border:1px solid var(--linea);border-radius:14px;padding:0 22px;margin-top:12px}
 summary{font-weight:600;cursor:pointer;font-size:1rem;color:#fff}
 details p{margin-top:10px;color:var(--tinta-suave);font-size:.96rem}
 
@@ -255,6 +255,12 @@ details summary{list-style:none;position:relative;padding-right:28px}
 details summary::-webkit-details-marker{display:none}
 details summary::after{content:"+";position:absolute;right:0;top:0;font-size:1.3rem;color:var(--rojo);transition:transform .25s ease;line-height:1}
 details[open] summary::after{transform:rotate(45deg)}
+/* FAQ: barra completa tocable (>=44px). El padding vertical vive en el summary,
+   no en el details, para que toda la fila togglee. Scopeado con :not(.iq-fit)
+   para no tocar el desplegable del hero, que comparte el marcador ::after. */
+details:not(.iq-fit) summary{padding-top:18px;padding-bottom:18px}
+details:not(.iq-fit) summary::after{top:18px}
+details:not(.iq-fit) p{margin-top:0;padding-bottom:18px}
 
 /* Nav con sombra al hacer scroll */
 nav{position:sticky;top:0;background:rgba(13,7,34,.8);backdrop-filter:blur(10px);z-index:50;transition:box-shadow .2s ease}
@@ -331,7 +337,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <a class="btn btn-primario" href="#muestra">Ver una muestra gratis 💸</a>
         <a class="btn btn-secundario" href="#activar">Activar mi agente</a>
       </div>
-      <p class="micro">Tu agente en órbita en menos de una semana · Cancela cuando quieras ✨</p>
+      <p class="micro">Tu agente arranca apenas verificas tu dominio · Cancela cuando quieras ✨</p>
       <details class="iq-fit">
         <summary>Hecho para ti si tus clientes son empresas como</summary>
         <p>No decide el rubro, sino que tus clientes <strong>publiquen un correo alcanzable en su web</strong> —agencias, pymes, despachos, consultoras, clínicas—. No aplica con personas ni grandes corporaciones, que no publican contacto.</p>
@@ -392,10 +398,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <div class="col-vs con-agente">
         <h3>🚀 Con tu agente Inntuitivo</h3>
         <ul>
-          <li>Prospección corriendo todos los días, también cuando descansas</li>
+          <li>Prospección que corre sola todos los días, sin que tengas que empujarla</li>
           <li>Cada mensaje personalizado con investigación real</li>
           <li>Seguimiento puntual, sin excepciones</li>
-          <li>Flujo constante de conversaciones nuevas</li>
+          <li>Prioriza calidad sobre volumen: pocos prospectos bien investigados, no una lista masiva sin verificar</li>
         </ul>
       </div>
     </div>
@@ -438,19 +444,19 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <p>Pagas y llenas un formulario corto: a quién vendes, qué ofreces y cómo suenas.</p>
       </div>
       <div class="dia">
-        <span class="cuando">Día 1-2</span>
+        <span class="cuando">Tu parte</span>
         <h3>Configuración</h3>
-        <p>Tu agente se calibra con tu cliente ideal y conectamos tu correo de forma segura.</p>
+        <p>Revisas tu perfil y conectas tu dominio y tu correo: dos pasos guiados, con botón de copiar. Esta parte marca el ritmo, porque depende de ti.</p>
       </div>
       <div class="dia">
-        <span class="cuando">Día 3</span>
+        <span class="cuando">Al verificar tu dominio</span>
         <h3>Despegue 🚀</h3>
-        <p>El agente entra en órbita: encuentra prospectos y empieza el outreach personalizado.</p>
+        <p>En cuanto tu dominio verifica, tu agente empieza a trabajar dentro de las 24 horas siguientes: encuentra prospectos y escribe el outreach personalizado.</p>
       </div>
       <div class="dia">
-        <span class="cuando">Día 7</span>
-        <h3>Primer reporte</h3>
-        <p>Recibes tu resumen: enviados, respuestas y conversaciones abiertas. Cada semana, sin pedirlo.</p>
+        <span class="cuando">Cada semana</span>
+        <h3>Tu reporte</h3>
+        <p>Con los envíos en marcha recibes tu resumen: enviados, respuestas y conversaciones abiertas. Cada semana, sin pedirlo.</p>
       </div>
     </div>
   </section>
@@ -531,7 +537,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <div class="ms-que">
         <h3>Qué recibes</h3>
         <ul>
-          <li>Unos 10 borradores de correo, cada uno sobre una empresa real de tu mercado — no ejemplos genéricos.</li>
+          <li>Tu agente evalúa decenas de empresas de tu mercado y te escribe un borrador por cada una que pasa su filtro — nada de ejemplos genéricos. Cuántos recibes depende de cuántas publiquen un contacto alcanzable: prefiere mandarte 3 bien investigados que 10 rellenos con datos inventados.</li>
           <li>Cada dato con su fuente: un enlace donde lo verificas en un clic. Si no se puede comprobar, tu agente no lo dice.</li>
           <li>Todo llega a tu correo. No conectas tu buzón, no tocas nada técnico y no pagas nada.</li>
           <li>Lo recibes dentro de la próxima hora: llenas el formulario y tu agente se pone a trabajar.</li>
@@ -569,7 +575,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <p class="cifra"><span class="tachado">$400</span>$200 <small>activación — con el primer mes incluido</small></p>
           <p class="cifra" style="font-size:1.4rem;margin-top:6px">Después, $99 <small>/mes — solo si quieres que siga.</small></p>
           <ul>
-            <li>Configuración completa de tu agente en menos de una semana</li>
+            <li>Puesta en marcha guiada: tu agente arranca en cuanto verificas tu dominio</li>
             <li>Envíos desde tu propia cuenta de correo, con límites seguros</li>
             <li>Aviso inmediato cuando alguien responde</li>
             <li>Reporte semanal de resultados</li>
@@ -599,11 +605,11 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </details>
     <details>
       <summary>¿Cuánto tarda en dar resultados?</summary>
-      <p>El agente queda activo en menos de una semana. Las primeras respuestas suelen llegar en la primera o segunda semana de envíos, según tu mercado.</p>
+      <p>Tu agente arranca en cuanto verificas tu dominio: dentro de las 24 horas siguientes. Ese paso depende de qué tan rápido completes tu parte (pegar tus registros DNS y conectar tu correo). Ya en marcha, las primeras respuestas suelen llegar en la primera o segunda semana de envíos, según tu mercado.</p>
     </details>
     <details>
       <summary>¿Necesito saber de tecnología?</summary>
-      <p>Cero. Tú defines a quién vender y entras a las reuniones. Todo lo técnico corre por mi cuenta.</p>
+      <p>En el <strong>setup</strong> hay dos pasos técnicos, guiados y con botón de copiar: pegas 3 registros DNS en tu proveedor de dominio y conectas tu correo con una contraseña de aplicación. Si te trabas, te ayudamos por WhatsApp (o lo dejamos listo por ti). Después, la <strong>operación es cero</strong>: no apruebas leads, no escribes correos, no tocas nada — tú defines a quién vender y entras a las reuniones.</p>
     </details>
     <details>
       <summary>¿Qué incluye exactamente la mensualidad de $99?</summary>
