@@ -560,7 +560,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <div class="ms-hp" aria-hidden="true">
             <label for="ms-hp-field">No llenar este campo</label>
-            <input id="ms-hp-field" name="confirmar_email" type="text" tabindex="-1" autocomplete="off">
+            <input id="ms-hp-field" name="ms_ref_2" type="text" tabindex="-1" autocomplete="new-password">
           </div>
           <button id="ms-btn" class="ms-btn" type="submit">Ver mi muestra gratis 💸</button>
           <div id="ms-res" class="ms-resultado" role="status" aria-live="polite"></div>
@@ -931,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function () {
         sitio_web: (msForm.sitio_web.value || '').trim(),
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
         correo: (msForm.correo.value || '').trim(),
-        confirmar_email: msForm.confirmar_email.value || ''   // honeypot
+        ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
       };
       if (!datos.sitio_web || !datos.a_quien_vendes || !datos.correo) {
         res.className = 'ms-resultado error';
