@@ -175,6 +175,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <span class="nombre-prov" id="prov-nombre"></span>
         <ul class="instrucciones" id="prov-inst"></ul>
         <div class="nota" id="prov-nota"></div>
+        <a id="prov-wsp" class="oculto" href="https://wa.me/50670144980?text=Quiero%20conectar%20mi%20correo%20Microsoft%20365%20a%20mi%20agente" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px">💬 Escríbeme por WhatsApp</a>
       </div>
       <div id="pass-wrap" class="oculto">
         <label for="password" id="pass-label">Contraseña</label>
@@ -442,6 +443,7 @@ function pintarProveedor(d){
   const manual=d.proveedor==='otro';$('manual').classList.toggle('oculto',!manual);
   if(manual){$('imap_host').value=d.imap_host||'';$('imap_port').value=d.imap_port||993;}
   const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
+  $('prov-wsp').classList.toggle('oculto',!micro);
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
   $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft se conecta aparte':'Conectar lectura';
 }
