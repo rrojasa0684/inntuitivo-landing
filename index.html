@@ -116,8 +116,10 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:44px}
 .precio-inner{background:#180E31;border-radius:17px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
 .oferta{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;background:var(--gradiente);color:#fff;padding:6px 14px;border-radius:999px;display:inline-block;margin-bottom:16px}
-.cifra{font-family:'Audiowide',sans-serif;font-weight:400;font-size:2.3rem;color:#fff}
-.cifra small{font-family:'Century Gothic','Jost',sans-serif;font-size:1rem;color:var(--tinta-suave)}
+.cifra{font-family:'Audiowide',sans-serif;font-weight:400;font-size:2.3rem;color:#fff;line-height:1.2}
+.cifra .fuego{font-size:.5em;vertical-align:middle;line-height:1}
+/* inline-block: el <small> envuelve con SU line-height, no con el strut de .cifra */
+.cifra small{font-family:'Century Gothic','Jost',sans-serif;font-size:1rem;color:var(--tinta-suave);display:inline-block;vertical-align:middle;line-height:1.45;max-width:30ch}
 .tachado{text-decoration:line-through;color:var(--tinta-suave);font-size:1.1rem;margin-right:10px;font-family:'Century Gothic','Jost',sans-serif}
 .precio-inner ul{list-style:none;margin-top:18px}
 .precio-inner ul li{padding:6px 0;font-size:.96rem;display:flex;gap:10px}
@@ -576,7 +578,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <div class="precio-inner">
         <div>
           <span class="oferta">Precio de lanzamiento 🚀</span>
-          <p class="cifra">🔥 $99 <small>de activación · pago único, incluye el primer mes completo</small></p>
+          <p class="cifra"><span class="fuego">🔥</span> $99 <small>de activación · pago único, incluye el primer mes completo</small></p>
           <p class="intro">Después, $49/mes — sin contrato, solo si quieres que siga.</p>
           <ul>
             <li>Puesta en marcha guiada</li>
