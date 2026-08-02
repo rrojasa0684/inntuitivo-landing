@@ -176,7 +176,10 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 .redes svg{width:18px;height:18px;fill:#fff}
 .demo-muestra{text-align:center;margin-top:14px;font-size:1rem;color:var(--tinta)}
 /* inline-block: si no entra en la línea, baja entero en vez de partir la frase */
-.demo-muestra a{display:inline-block;font-weight:600;color:var(--rosa-claro);text-decoration:underline;text-underline-offset:3px}
+/* Rojo de marca (#DE0540) aclarado en luminosidad —mismo tono y saturación—
+   para pasar 4.5:1 sobre el #180E31 del bloque: el de marca puro da 3.67:1.
+   4.55:1 y no el mínimo de 4.50, para que aguante un retoque del fondo. */
+.demo-muestra a{display:inline-block;font-weight:600;color:#FA0B4C;text-decoration:underline;text-underline-offset:3px}
 
 @media (max-width:840px){
   .semana{grid-template-columns:1fr 1fr}
