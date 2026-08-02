@@ -174,7 +174,9 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 .redes a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--linea);transition:background .15s ease,transform .15s ease}
 .redes a:hover{background:var(--rojo);transform:translateY(-2px)}
 .redes svg{width:18px;height:18px;fill:#fff}
-.btn-demo-sec{font-size:.9rem;color:var(--tinta-suave)}
+.demo-muestra{text-align:center;margin-top:14px;font-size:1rem;color:var(--tinta)}
+/* inline-block: si no entra en la línea, baja entero en vez de partir la frase */
+.demo-muestra a{display:inline-block;font-weight:600;color:var(--rosa-claro);text-decoration:underline;text-underline-offset:3px}
 
 @media (max-width:840px){
   .semana{grid-template-columns:1fr 1fr}
@@ -591,8 +593,8 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <div>
           <a class="btn btn-primario" style="width:100%;text-align:center" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
           <p class="micro" style="text-align:center;margin-top:12px">Pagas $99 hoy con tarjeta — sin necesidad de cuenta PayPal. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $49/mes. Cancela cuando quieras.</p>
-          <p class="micro" style="text-align:center;margin-top:8px">¿Dudas antes de activar? <a href="https://wa.me/50670144980?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
-          <p class="micro btn-demo-sec" style="text-align:center;margin-top:18px">¿Prefieres ver una demo con tus prospectos primero? <a href="mailto:info@inntuitivo.com">Escríbeme</a></p>
+          <p class="demo-muestra">¿Prefieres ver primero cómo escribe? <a href="#muestra">Pide una muestra gratis</a></p>
+          <p class="micro" style="text-align:center;margin-top:12px">¿Dudas antes de activar? <a href="https://wa.me/50670144980?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
         </div>
       </div>
     </div>
