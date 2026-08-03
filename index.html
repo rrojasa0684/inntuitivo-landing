@@ -179,7 +179,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 /* Rojo de marca (#DE0540) aclarado en luminosidad —mismo tono y saturación—
    para pasar 4.5:1 sobre el #180E31 del bloque: el de marca puro da 3.67:1.
    4.55:1 y no el mínimo de 4.50, para que aguante un retoque del fondo. */
-.demo-muestra a{display:inline-block;font-weight:400;color:#FA0B4C;text-decoration:underline;text-underline-offset:3px}
+.demo-muestra a{display:inline-block;padding:10px 4px;font-weight:400;color:#FA0B4C;text-decoration:underline;text-underline-offset:3px}
 
 @media (max-width:840px){
   .semana{grid-template-columns:1fr 1fr}
@@ -276,6 +276,9 @@ details:not(.iq-fit) p{margin-top:0;padding-bottom:18px}
 /* Nav con sombra al hacer scroll */
 nav{position:sticky;top:0;background:rgba(13,7,34,.8);backdrop-filter:blur(10px);z-index:50;transition:box-shadow .2s ease}
 nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
+/* El nav sticky mide ~78px, y a <=520px envuelve a dos filas (~130px).
+   Sin este margen tapa el eyebrow y parte del h2 al saltar desde los CTAs. */
+#muestra,#activar{scroll-margin-top:140px}
 
 /* --- Paquete de animacion (punto 7) --- */
 /* 7a. Cascada escalonada en los grids */
