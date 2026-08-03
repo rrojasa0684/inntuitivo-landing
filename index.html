@@ -884,8 +884,11 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Aparicion progresiva al hacer scroll
-  var targets = document.querySelectorAll('section, .paso, .dia, .col-vs, details, .banner-marca, .precio-card');
+  // Aparicion progresiva al hacer scroll.
+  // #muestra y #activar quedan fuera: son destino de ancla y, al llegar por
+  // salto, puede quedar visible menos del 12% que exige el observer — nunca
+  // dispararia y la seccion se quedaria en opacity:0.
+  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, .col-vs, details, .banner-marca, .precio-card');
   targets.forEach(function(el){ el.classList.add('reveal'); });
   if (reduce || !('IntersectionObserver' in window)) {
     targets.forEach(function(el){ el.classList.add('visible'); });
