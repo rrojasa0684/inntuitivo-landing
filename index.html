@@ -131,7 +131,12 @@
   --rosa-claro:#FF85A6;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* Sin scroll-behavior:smooth a proposito. El navegador calcula el offset del
+   destino una sola vez y anima ~400ms hacia ese numero; si el documento
+   reflowea en ese lapso (swap de fuentes, ticker del panel, contador de
+   stats) el destino se mueve y el numero no se recalcula, y el salto
+   aterriza mal. Con salto instantaneo se calcula y aplica en el mismo
+   frame: no hay ventana. No reactivar sin resolver antes esos reflows. */
 body{font-family:'Century Gothic','Jost',sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.6;font-size:17px}
 a{color:var(--rojo)}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
