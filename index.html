@@ -661,7 +661,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <p class="ms-nota">Tres datos y tu agente se pone a trabajar.</p>
         <form id="ms-form">
           <label for="ms-sitio">Tu sitio web</label>
-          <input id="ms-sitio" name="sitio_web" type="url" required placeholder="https://tuempresa.com" spellcheck="false" autocomplete="url">
+          <input id="ms-sitio" name="sitio_web" type="url" required placeholder="tuempresa.com" spellcheck="false" autocomplete="url">
           <label for="ms-target">¿Qué tipo de empresas son tus clientes? <span class="ms-hint">El rubro de las empresas a las que les vendes, no el tuyo. Y tienen que ser empresas: si tu respuesta son personas («compradores de casa», «gente que quiere aprender inglés»), el agente no aplica.</span></label>
           <textarea id="ms-target" name="a_quien_vendes" required rows="3" placeholder="Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos»."></textarea>
           <label for="ms-correo">Tu correo</label>
@@ -1087,6 +1087,44 @@ document.addEventListener('DOMContentLoaded', function () {
           'Revisa tu conexión e intenta de nuevo. Si sigue, escríbenos a info@inntuitivo.com.';
         btn.disabled = false;
         btn.textContent = textoBtn;
+      });
+    });
+
+    // Bug del 2 ago (commit 1a6cb34, quitar novalidate): el navegador exigía el
+    // esquema y rebotaba 'tuempresa.com' con un globo genérico, sin dejar rastro.
+    // Se normaliza cómo escribe la gente ANTES de validar y se reemplaza el mensaje.
+    var msSitio = document.getElementById('ms-sitio');
+    function normalizarSitio() {
+      var v = msSitio.value.trim();
+      if (v && !/^https?:\/\//i.test(v)) { msSitio.value = 'https://' + v; }  // reflejado: ve qué se envía
+    }
+    msSitio.addEventListener('blur', normalizarSitio);
+    msSitio.addEventListener('keydown', function (e) { if (e.key === 'Enter') normalizarSitio(); });
+
+    function msMotivo(el) {
+      if (el.validity.valueMissing) return 'vacio';
+      if (el.validity.typeMismatch) return 'formato';
+      return 'invalido';
+    }
+    function msMensaje(el) {
+      if (el.validity.valueMissing) {
+        if (el.id === 'ms-sitio') return 'Falta tu sitio web — puede ser tuempresa.com';
+        if (el.id === 'ms-correo') return 'Falta tu correo.';
+        return 'Cuéntanos a qué tipo de empresas les vendes.';
+      }
+      if (el.validity.typeMismatch) {
+        if (el.id === 'ms-correo') return 'Ese correo no se ve bien: revisa que tenga @ y el dominio.';
+        return 'Escribe una dirección como tuempresa.com';
+      }
+      return 'Revisa este dato.';
+    }
+    ['ms-sitio', 'ms-target', 'ms-correo'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function () { el.setCustomValidity(''); });   // limpia en cada tecla
+      el.addEventListener('invalid', function () {
+        el.setCustomValidity(msMensaje(el));                                     // mensaje propio, no el genérico
+        track('muestra_form_error', { campo: el.name || el.id, motivo: msMotivo(el) });
       });
     });
   }

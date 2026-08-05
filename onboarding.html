@@ -123,7 +123,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <p class="sub">Analizamos tu sitio para entender qué ofreces y a quién. Lo revisas y ajustas en el paso siguiente.</p>
   <div class="panel">
     <label for="sitio">¿Cuál es el sitio de tu negocio?</label>
-    <input id="sitio" type="url" placeholder="https://tuempresa.com" spellcheck="false">
+    <input id="sitio" type="url" placeholder="tuempresa.com" spellcheck="false">
     <button id="btn-analizar" class="btn btn-primario">Analizar mi negocio</button>
     <div id="r1" class="resultado"></div>
   </div>
@@ -450,6 +450,7 @@ function pintarProveedor(d){
 async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
   $('lectura').classList.remove('oculto');
   try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar?email='+encodeURIComponent(email));if(r.ok)pintarProveedor(await r.json());}catch(e){}}
+$('sitio').addEventListener('blur',()=>{const v=$('sitio').value.trim();if(v&&!/^https?:\/\//i.test(v))$('sitio').value='https://'+v;});
 $('email').addEventListener('blur',()=>{cargarDominio();detectar();});
 $('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{cargarDominio();detectar();},800);});
 $('btn').addEventListener('click',async()=>{
