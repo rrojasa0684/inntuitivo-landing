@@ -625,6 +625,8 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form p.ms-nota{font-size:.86rem;color:var(--tinta-suave);margin-bottom:6px}
   .ms-form label{display:block;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:14px 0 6px}
   .ms-form label .ms-hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.84rem;margin-top:4px}
+  .ms-form .ms-nudge{font-size:.82rem;color:var(--tinta-suave);margin-top:6px}
+  .ms-form .ms-nudge:empty{display:none}
   .ms-form input,.ms-form textarea{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px;resize:vertical}
   .ms-form input:focus,.ms-form textarea:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
@@ -663,8 +665,9 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <form id="ms-form">
           <label for="ms-sitio">Tu sitio web</label>
           <input id="ms-sitio" name="sitio_web" type="url" required placeholder="tuempresa.com" spellcheck="false" autocomplete="url">
-          <label for="ms-target">¿Qué tipo de empresas son tus clientes? <span class="ms-hint">El rubro de las empresas a las que les vendes, no el tuyo. Y tienen que ser empresas: si tu respuesta son personas («compradores de casa», «gente que quiere aprender inglés»), el agente no aplica.</span></label>
-          <textarea id="ms-target" name="a_quien_vendes" required rows="3" placeholder="Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos»."></textarea>
+          <label for="ms-target">¿A qué tipo de empresas les vendes? <span class="ms-hint">El rubro de tus clientes, no el tuyo; y que sean empresas, no personas. Cuanto más específico seas —tamaño, dónde están—, mejor busca tu agente.</span></label>
+          <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos en Costa Rica y Panamá» — no «turismo» a secas."></textarea>
+          <div id="ms-target-nudge" class="ms-nudge" aria-live="polite"></div>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <div class="ms-hp" aria-hidden="true">
@@ -1062,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; });
       }).then(function (o) {
         if (o.ok) {
-          track('muestra_enviada');
+          track('muestra_enviada', { target_len: datos.a_quien_vendes.length });
           res.className = 'ms-resultado ok';
           res.innerHTML = '<span class="titulo">¡Listo! 🚀</span>' +
             (o.j.mensaje || 'Tu agente está armando la muestra. Te llega a tu correo dentro de la próxima hora.');
@@ -1128,6 +1131,22 @@ document.addEventListener('DOMContentLoaded', function () {
         track('muestra_form_error', { campo: el.name || el.id, motivo: msMotivo(el) });
       });
     });
+
+    // Validación BLANDA del target: un renglón gris cuando quedó corto (<30, el mismo
+    // umbral que el backend trata como flojo). NUNCA bloquea. Aparece al SALIR del campo
+    // (no interrumpe mientras se escribe) y se va apenas se agrega detalle. Pide
+    // especificidad; no promete un resultado.
+    var msTarget = document.getElementById('ms-target');
+    var msNudge = document.getElementById('ms-target-nudge');
+    if (msTarget && msNudge) {
+      msTarget.addEventListener('blur', function () {
+        var v = (msTarget.value || '').trim();
+        msNudge.textContent = (v.length > 0 && v.length < 30)
+          ? 'Un poco más de detalle —tamaño, dónde— y tu agente busca mejor.'
+          : '';
+      });
+      msTarget.addEventListener('input', function () { msNudge.textContent = ''; });
+    }
   }
 
   var precio = document.getElementById('activar');                           // scroll a precio
