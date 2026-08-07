@@ -539,6 +539,97 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
+  <!-- Banner Academy — prueba de autoridad, entre Partners y "Cómo funciona".
+       Sección transparente (empalma con el cosmos de las vecinas). Tokens --ac-*
+       del prototipo mapeados a las variables reales del sitio. -->
+<style>
+  .academy{padding:96px 24px}
+  .academy *{box-sizing:border-box}
+  .academy__card{
+    position:relative;max-width:880px;margin:0 auto;padding:64px 56px;
+    text-align:center;border-radius:24px;
+    background:var(--carta);border:1px solid var(--linea);
+    overflow:hidden;
+  }
+  /* filo de gradiente de marca en el borde superior (mismo gradiente del sitio) */
+  .academy__card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:3px;
+    background:var(--gradiente);
+  }
+  /* halo de marca, muy bajo en opacidad; contenido por overflow:hidden de la tarjeta */
+  .academy__card::after{
+    content:"";position:absolute;inset:-40% -10% auto -10%;height:340px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(222,5,64,.28) 0%,rgba(69,39,116,.22) 45%,transparent 72%);
+    pointer-events:none;
+  }
+  .academy__inner{position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:20px}
+  .academy__eyebrow{
+    margin:0;font-family:'Century Gothic','Jost',sans-serif;font-size:.8125rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--rosa-claro);
+  }
+  .academy__title{
+    margin:0;font-family:'Audiowide','Jost',sans-serif;font-weight:400;
+    font-size:clamp(2rem,5.2vw,3.25rem);line-height:1.14;color:var(--tinta);
+    letter-spacing:-.01em;text-wrap:balance;
+  }
+  /* Astronauta flotando — solo transform (keyframes verbatim del handoff) */
+  .academy__astronaut{
+    display:inline-block;will-change:transform;
+    animation:ac-float 5.5s ease-in-out infinite;
+  }
+  @keyframes ac-float{
+    0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+    50%    {transform:translate3d(0,-10px,0) rotate(-4deg)}
+  }
+  /* pausada mientras la sección está fuera del viewport (observer compartido) */
+  .academy:not(.is-visible) .academy__astronaut{animation-play-state:paused}
+  .academy__subtitle{
+    margin:0;max-width:52ch;font-size:1.0625rem;line-height:1.65;
+    color:var(--tinta-suave);text-wrap:pretty;
+  }
+  .academy__cta{
+    margin-top:12px;display:inline-flex;align-items:center;justify-content:center;
+    min-height:56px;padding:0 34px;border-radius:999px;
+    font-family:'Century Gothic','Jost',sans-serif;font-size:1.0625rem;font-weight:700;
+    color:#fff;text-decoration:none;background:var(--gradiente);
+    transition:transform .18s ease,box-shadow .18s ease;
+    box-shadow:0 8px 28px rgba(222,5,64,.22);
+  }
+  .academy__cta:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(222,5,64,.34)}
+  .academy__cta:active{transform:translateY(0)}
+  .academy__cta:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:3px}
+  @media (max-width:767px){
+    .academy{padding:56px 16px}
+    .academy__card{padding:40px 20px;border-radius:20px}
+    .academy__inner{gap:16px}
+    .academy__eyebrow{font-size:.75rem;letter-spacing:.14em}
+    .academy__title{font-size:1.75rem;line-height:1.2}
+    .academy__subtitle{font-size:1rem;line-height:1.6}
+    .academy__cta{width:100%;padding:0 20px;font-size:1rem;min-height:52px}
+    @keyframes ac-float{
+      0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+      50%    {transform:translate3d(0,-7px,0) rotate(-3deg)}
+    }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .academy__astronaut{animation:none}
+    .academy__cta{transition:none}
+    .academy__cta:hover{transform:none}
+  }
+</style>
+
+  <section class="academy" id="academy" aria-labelledby="academy-title">
+    <div class="academy__card">
+      <div class="academy__inner">
+        <p class="academy__eyebrow">🔭 Academia</p>
+        <h2 class="academy__title" id="academy-title">Inntuitivo Academy <span class="academy__astronaut" aria-hidden="true">👨‍🚀</span></h2>
+        <p class="academy__subtitle">Contenido gratis en IA, tecnología y emprendimiento para potenciar tu negocio y llevarlo a órbita 🪐</p>
+        <a class="academy__cta" href="https://www.youtube.com/@inntuitivo" target="_blank" rel="noopener">Ver el contenido en YouTube 🚀</a>
+      </div>
+    </div>
+  </section>
+
   <section id="como">
     <span class="eyebrow">🚀 Cómo funciona</span>
     <h2>Tres pasos. Tú solo participas en el primero.</h2>
@@ -991,13 +1082,24 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     targets.forEach(function(el){ obs.observe(el); });
   }
 
-  // Partners: pausar el marquee cuando la seccion no esta en viewport, para no
-  // componer un loop infinito que compite con el resto de la pagina.
-  var partners = document.querySelector('.partners');
-  if (partners && !reduce && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function(entries){
-      partners.classList.toggle('pausada', !entries[0].isIntersecting);
-    }, { threshold: 0 }).observe(partners);
+  // Observer COMPARTIDO: pausa animaciones de seccion fuera de viewport, para no
+  // componer loops infinitos que compiten con el resto de la pagina.
+  //  - Partners (.partners): marquee, clase 'pausada' cuando NO intersecta.
+  //  - Academy (#academy): astronauta, clase 'is-visible' cuando SI intersecta.
+  var _academy = document.getElementById('academy');
+  if (!reduce && 'IntersectionObserver' in window) {
+    var pausaObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.target.id === 'academy') e.target.classList.toggle('is-visible', e.isIntersecting);
+        else e.target.classList.toggle('pausada', !e.isIntersecting);
+      });
+    }, { threshold: 0 });
+    var _partners = document.querySelector('.partners');
+    if (_partners) pausaObs.observe(_partners);
+    if (_academy) pausaObs.observe(_academy);
+  } else if (_academy) {
+    // sin IntersectionObserver (o reduced-motion): que el astronauta no quede trabado en pausa
+    _academy.classList.add('is-visible');
   }
 
   // Nav con sombra al hacer scroll
