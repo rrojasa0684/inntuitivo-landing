@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inntuitivo Academy — banner de referencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Questrial&display=swap" rel="stylesheet">
+<style>
+  /* ───────── Tokens (mapear a las variables reales del sitio) ───────── */
+  :root{
+    --ac-brand-red:#DE0540;
+    --ac-brand-purple:#452774;
+    --ac-gradient:linear-gradient(90deg,#DE0540 0%,#452774 100%);
+    --ac-bg:#0A0614;            /* fondo espacial del sitio */
+    --ac-surface:#120B21;       /* superficie de la tarjeta */
+    --ac-hairline:rgba(255,255,255,.10);
+    --ac-text:#FFFFFF;
+    --ac-text-muted:rgba(255,255,255,.72);
+    --ac-eyebrow:#F04E77;       /* rojo aclarado: 5.6:1 sobre --ac-surface */
+    --ac-font-display:"Audiowide",system-ui,sans-serif;
+    --ac-font-body:"Century Gothic","Questrial","URW Gothic",system-ui,sans-serif;
+    --ac-radius:24px;
+    --ac-focus:#FFFFFF;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ac-bg);font-family:var(--ac-font-body);
+       -webkit-font-smoothing:antialiased}
+
+  /* ───────── Sección ───────── */
+  .academy{padding:96px 24px;background:var(--ac-bg)}
+
+  .academy__card{
+    position:relative;max-width:880px;margin:0 auto;padding:64px 56px;
+    text-align:center;border-radius:var(--ac-radius);
+    background:var(--ac-surface);
+    border:1px solid var(--ac-hairline);
+    overflow:hidden;
+  }
+  /* Filo de gradiente de marca en el borde superior */
+  .academy__card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:3px;
+    background:var(--ac-gradient);
+  }
+  /* Halo de marca, muy bajo en opacidad para no gritar sobre el tema oscuro */
+  .academy__card::after{
+    content:"";position:absolute;inset:-40% -10% auto -10%;height:340px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(222,5,64,.28) 0%,rgba(69,39,116,.22) 45%,transparent 72%);
+    pointer-events:none;
+  }
+  .academy__inner{position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:20px}
+
+  .academy__eyebrow{
+    margin:0;font-family:var(--ac-font-body);font-size:.8125rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ac-eyebrow);
+  }
+
+  .academy__title{
+    margin:0;font-family:var(--ac-font-display);font-weight:400;
+    font-size:clamp(2rem,5.2vw,3.25rem);line-height:1.14;color:var(--ac-text);
+    letter-spacing:-.01em;text-wrap:balance;
+  }
+
+  /* ───────── Astronauta flotando (solo transform) ───────── */
+  .academy__astronaut{
+    display:inline-block;will-change:transform;
+    animation:ac-float 5.5s ease-in-out infinite;
+  }
+  @keyframes ac-float{
+    0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+    50%    {transform:translate3d(0,-10px,0) rotate(-4deg)}
+  }
+  /* Pausada mientras la sección está fuera del viewport (JS abajo) */
+  .academy:not(.is-visible) .academy__astronaut{animation-play-state:paused}
+
+  @media (prefers-reduced-motion:reduce){
+    .academy__astronaut{animation:none}
+  }
+
+  .academy__subtitle{
+    margin:0;max-width:52ch;font-size:1.0625rem;line-height:1.65;
+    color:var(--ac-text-muted);text-wrap:pretty;
+  }
+
+  .academy__cta{
+    margin-top:12px;display:inline-flex;align-items:center;justify-content:center;
+    min-height:56px;padding:0 34px;border-radius:999px;
+    font-family:var(--ac-font-body);font-size:1.0625rem;font-weight:700;
+    color:#fff;text-decoration:none;background:var(--ac-gradient);
+    transition:transform .18s ease,box-shadow .18s ease;
+    box-shadow:0 8px 28px rgba(222,5,64,.22);
+  }
+  .academy__cta:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(222,5,64,.34)}
+  .academy__cta:active{transform:translateY(0)}
+  .academy__cta:focus-visible{outline:3px solid var(--ac-focus);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){
+    .academy__cta{transition:none}
+    .academy__cta:hover{transform:none}
+  }
+
+  /* ───────── Móvil (<768px) ───────── */
+  @media (max-width:767px){
+    .academy{padding:56px 16px}
+    .academy__card{padding:40px 20px;border-radius:20px}
+    .academy__inner{gap:16px}
+    .academy__eyebrow{font-size:.75rem;letter-spacing:.14em}
+    .academy__title{font-size:1.75rem;line-height:1.2}
+    .academy__subtitle{font-size:1rem;line-height:1.6}
+    .academy__cta{width:100%;padding:0 20px;font-size:1rem;min-height:52px}
+    @keyframes ac-float{
+      0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+      50%    {transform:translate3d(0,-7px,0) rotate(-3deg)}
+    }
+  }
+</style>
+</head>
+<body>
+
+<section class="academy" id="academy" aria-labelledby="academy-title">
+  <div class="academy__card">
+    <div class="academy__inner">
+      <p class="academy__eyebrow">🔭 Academy</p>
+      <h2 class="academy__title" id="academy-title">
+        Inntuitivo Academy <span class="academy__astronaut" aria-hidden="true">👨‍🚀</span>
+      </h2>
+      <p class="academy__subtitle">
+        Contenido gratis en IA, tecnología y emprendimiento para potenciar tu negocio y llevarlo a órbita 🪐
+      </p>
+      <a class="academy__cta"
+         href="https://www.youtube.com/@inntuitivo"
+         target="_blank" rel="noopener">Ver el contenido en YouTube 🚀</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Pausa la animación fuera del viewport.
+  (function () {
+    var el = document.getElementById('academy');
+    if (!el || !('IntersectionObserver' in window)) { el && el.classList.add('is-visible'); return; }
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { el.classList.toggle('is-visible', e.isIntersecting); });
+    }, { threshold: 0.15 }).observe(el);
+  })();
+</script>
+
+</body>
+</html>
