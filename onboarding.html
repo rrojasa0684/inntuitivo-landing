@@ -163,8 +163,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
       <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
       <div id="envio-estado" class="resultado"></div>
       <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
-        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe. Pásanos el dato y lo dejamos listo por ti.
-        <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px">💬 Escribirnos por WhatsApp</a>
+        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe.
+        Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> y te ayudamos. Si estás bloqueado y necesitas resolverlo ya, <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener">escríbenos por WhatsApp</a>.
       </div>
     </div>
 
@@ -415,7 +415,12 @@ async function cargarDominio(){
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio?email='+encodeURIComponent(email));
     const d=await r.json();
     if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));$('btn-verificar').classList.add('oculto');return;}
-    if(d.dns&&d.dns.donde)$('dns-donde').textContent='Tu DNS parece estar en '+d.dns.dns_nombre+'. '+d.dns.donde;
+    if(d.dns&&d.dns.donde){
+      let h='Tu DNS parece estar en '+escapa(d.dns.dns_nombre)+'. '+escapa(d.dns.donde);
+      if(d.dns.doc)h+=' <a href="'+d.dns.doc+'" target="_blank" rel="noopener" style="color:var(--rosa-claro)">📖 Doc oficial: cómo agregar un registro →</a>';
+      if(d.dns.host_note)h+='<br><span style="color:var(--alerta)">💡 '+escapa(d.dns.host_note)+'</span>';
+      $('dns-donde').innerHTML=h;
+    }
     pintarRegistros(d.registros);
     const hayReg=d.registros&&d.registros.length;
     $('btn-verificar').classList.toggle('oculto', !!d.verificado || !hayReg);
@@ -444,6 +449,10 @@ $('btn-verificar').addEventListener('click',async()=>{
         res($('envio-estado'),'alerta','Todavía no aparecen','Aún no vemos los registros. Puede estar propagando (hasta ~30 min). Si ya pasó ese rato, revisa que el Nombre y el Valor de cada registro estén exactos, sin espacios. Cierra tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
       }
     }
+    // Traer el resultado a la vista: el aviso cae DEBAJO del botón y en pantallas chicas
+    // se corta -> sin esto, el usuario apretaba de nuevo creyendo que no pasó nada. Si ya
+    // pasó a "final", #envio-estado queda en un display:none y scrollIntoView es no-op.
+    $('envio-estado').scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch(e){res($('envio-estado'),'error','Error','Prueba de nuevo en un momento.');}
   $('btn-verificar').disabled=false;
 });
