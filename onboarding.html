@@ -430,7 +430,20 @@ $('btn-verificar').addEventListener('click',async()=>{
     const d=await r.json();
     if(d.registros)pintarRegistros(d.registros);
     if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','Tu agente ya puede enviar como tú.');$('btn-verificar').classList.add('oculto');progreso();}
-    else res($('envio-estado'),'alerta','Todavía no','Puede tardar. Cierra tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
+    else{
+      // Resend NO distingue un typo de una propagación (ambos quedan 'pending'), pero SÍ
+      // da el estado POR registro: nombramos cuál falta y ofrecemos revisar ese, sin
+      // afirmar una causa que no podemos saber.
+      const regs=d.registros||[];
+      const pend=regs.filter(x=>(x.estado||'').toLowerCase()!=='verified');
+      const ver=regs.length-pend.length;
+      if(regs.length&&ver>0&&pend.length){
+        const nombres=pend.map(x=>escapa(x.para||x.tipo)).join(', ');
+        res($('envio-estado'),'alerta','Verificamos '+ver+' de '+regs.length,'Falta: <strong>'+nombres+'</strong>. Puede seguir propagando (hasta ~30 min). Si ya pasó ese rato, revisa que el <strong>Nombre</strong> y el <strong>Valor</strong> de ese registro estén exactos, sin espacios de más. Cierra tranquilo — te avisamos por correo cuando quede verde.');
+      }else{
+        res($('envio-estado'),'alerta','Todavía no aparecen','Aún no vemos los registros. Puede estar propagando (hasta ~30 min). Si ya pasó ese rato, revisa que el Nombre y el Valor de cada registro estén exactos, sin espacios. Cierra tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
+      }
+    }
   }catch(e){res($('envio-estado'),'error','Error','Prueba de nuevo en un momento.');}
   $('btn-verificar').disabled=false;
 });
