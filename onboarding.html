@@ -175,7 +175,9 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <span class="nombre-prov" id="prov-nombre"></span>
         <ul class="instrucciones" id="prov-inst"></ul>
         <div class="nota" id="prov-nota"></div>
-        <a id="prov-wsp" class="oculto" href="https://wa.me/50670144980?text=Quiero%20conectar%20mi%20correo%20Microsoft%20365%20a%20mi%20agente" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px">💬 Escríbeme por WhatsApp</a>
+        <div id="prov-contacto" class="oculto" style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.9rem">
+          Escríbenos a <a href="mailto:info@inntuitivo.com?subject=Microsoft%20365%20%E2%80%94%20conectar%20la%20lectura">info@inntuitivo.com</a> y lo dejamos andando contigo. ¿Estás bloqueado y quieres resolverlo ya? <a href="https://wa.me/50670144980?text=Quiero%20conectar%20mi%20correo%20Microsoft%20365%20a%20mi%20agente" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.
+        </div>
       </div>
       <div id="pass-wrap" class="oculto">
         <label for="password" id="pass-label">Contraseña</label>
@@ -465,9 +467,9 @@ function pintarProveedor(d){
   const manual=d.proveedor==='otro';$('manual').classList.toggle('oculto',!manual);
   if(manual){$('imap_host').value=d.imap_host||'';$('imap_port').value=d.imap_port||993;}
   const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
-  $('prov-wsp').classList.toggle('oculto',!micro);
+  $('prov-contacto').classList.toggle('oculto',!micro);
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
-  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft se conecta aparte':'Conectar lectura';
+  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft 365 — te escribimos':'Conectar lectura';
 }
 async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
   $('lectura').classList.remove('oculto');
