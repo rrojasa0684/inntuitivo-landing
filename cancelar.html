@@ -161,8 +161,15 @@ $('btnbaja').addEventListener('click',async()=>{
     if(demo==='revisar'){$('correo2').textContent='a***a@acme.com';ver('revisar');return;}
     mostrarConfirmar({dominio:'acme.com',correo:'a***a@acme.com'});return;
   }
-  // El enlace de finalización (Token B, desde el correo) redirige acá con ?estado=listo.
+  // El enlace de finalización (Token B, desde el correo) redirige acá con ?estado=listo,
+  // o con ?estado=error si /finalizar no pudo confirmar la baja con PayPal. El error NO
+  // culpa al token ni afirma el estado: la incertidumbre es nuestra, no del cliente.
   if(params.get('estado')==='listo'){ver('listo');return;}
+  if(params.get('estado')==='error'){
+    $('error_t').textContent='No pudimos confirmar tu baja';
+    $('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';
+    ver('error');return;
+  }
   if(!token){ver('error');return;}
   try{
     const r=await fetch(API+'/cancelar/info?token='+encodeURIComponent(token));
