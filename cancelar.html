@@ -153,6 +153,7 @@ const token=params.get('token')||'';
 const demo=params.get('demo');           // modo preview: confirmar|revisar|listo
 function ver(id){['cargando','error','confirmar','finalizar','revisar','listo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
 function errFin(){$('error_t').textContent='No pudimos confirmar tu baja';$('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';ver('error');}
+function errCaducado(){$('error_t').textContent='Este enlace caducó';$('error_p').textContent='El enlace de confirmación vence a la hora. Vuelve a pedir la baja desde el enlace que hay en los correos de tu agente y te enviamos uno nuevo.';ver('error');}
 function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $('correo').textContent=info.correo||'—'; $('correo2').textContent=info.correo||'tu buzón'; $('correo_btn').textContent=info.correo||'tu correo'; ver('confirmar'); }
 
 $('entiendo').addEventListener('change',e=>{$('btnbaja').disabled=!e.target.checked;});
@@ -174,7 +175,8 @@ $('btnfin').addEventListener('click',async()=>{
   try{
     const r=await fetch(API+'/cancelar/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
     const d=await r.json().catch(()=>({}));
-    if(!r.ok||!d.ok) throw 0;
+    if(r.status===400){ errCaducado(); return; }   // token vencido/inválido: NO es un fallo de PayPal
+    if(!r.ok||!d.ok) throw 0;                       // 502: fallo real del proveedor (mensaje aparte)
     ver('listo');
   }catch(_){ errFin(); }
 });
@@ -186,6 +188,8 @@ $('btnfin').addEventListener('click',async()=>{
     if(demo==='listo'){ver('listo');return;}
     if(demo==='revisar'){$('correo2').textContent='a***a@acme.com';ver('revisar');return;}
     if(demo==='finalizar'){ver('finalizar');return;}
+    if(demo==='caducado'){errCaducado();return;}   // 400: enlace vencido/inválido
+    if(demo==='fallo'){errFin();return;}            // 502: fallo del proveedor
     mostrarConfirmar({dominio:'acme.com',correo:'a***a@acme.com'});return;
   }
   if(!token){ver('error');return;}
