@@ -113,6 +113,18 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
   </div>
 </section>
 
+<!-- FINALIZAR (2º paso: confirmación de identidad, desde el correo del Token B) -->
+<section id="finalizar" class="oculto">
+  <span class="eyebrow">Confirmar la baja</span>
+  <h1>Confirma <em>tu baja</em></h1>
+  <p class="sub">Estás a un paso. Al confirmar, tu agente se apaga y deja de enviar en tu nombre — es el último paso, y no se puede deshacer.</p>
+  <div class="panel">
+    <div class="irrev">⚠️ Es irreversible. Para volver, sería un alta nueva desde cero (el onboarding de siempre).</div>
+    <button class="btn btn-baja" id="btnfin">Confirmar la baja</button>
+    <a class="btn btn-sec" href="https://www.inntuitivo.com">No, quiero conservarlo</a>
+  </div>
+</section>
+
 <!-- REVISÁ TU CORREO (doble confirmación) -->
 <section id="revisar" class="oculto centro">
   <div class="ico">📩</div>
@@ -139,7 +151,8 @@ const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const token=params.get('token')||'';
 const demo=params.get('demo');           // modo preview: confirmar|revisar|listo
-function ver(id){['cargando','error','confirmar','revisar','listo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
+function ver(id){['cargando','error','confirmar','finalizar','revisar','listo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
+function errFin(){$('error_t').textContent='No pudimos confirmar tu baja';$('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';ver('error');}
 function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $('correo').textContent=info.correo||'—'; $('correo2').textContent=info.correo||'tu buzón'; $('correo_btn').textContent=info.correo||'tu correo'; ver('confirmar'); }
 
 $('entiendo').addEventListener('change',e=>{$('btnbaja').disabled=!e.target.checked;});
@@ -154,23 +167,32 @@ $('btnbaja').addEventListener('click',async()=>{
   }catch(_){ $('error_t').textContent='No pudimos procesarlo'; $('error_p').textContent='Intenta de nuevo en un momento, o escríbenos a info@inntuitivo.com.'; ver('error'); }
 });
 
+// 2º paso: el botón que SÍ cancela (POST con el token en el body — no en la URL, no en logs).
+$('btnfin').addEventListener('click',async()=>{
+  $('btnfin').disabled=true; $('btnfin').innerHTML='<span class="spin"></span> Confirmando…';
+  if(demo){ver('listo');return;}
+  try{
+    const r=await fetch(API+'/cancelar/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw 0;
+    ver('listo');
+  }catch(_){ errFin(); }
+});
+
 (async function(){
-  // Preview local: ?demo=confirmar|revisar|listo con datos de mentira.
+  const finalizar=params.get('finalizar');
+  // Preview local: ?demo=confirmar|finalizar|revisar|listo con datos de mentira.
   if(demo){
     if(demo==='listo'){ver('listo');return;}
     if(demo==='revisar'){$('correo2').textContent='a***a@acme.com';ver('revisar');return;}
+    if(demo==='finalizar'){ver('finalizar');return;}
     mostrarConfirmar({dominio:'acme.com',correo:'a***a@acme.com'});return;
   }
-  // El enlace de finalización (Token B, desde el correo) redirige acá con ?estado=listo,
-  // o con ?estado=error si /finalizar no pudo confirmar la baja con PayPal. El error NO
-  // culpa al token ni afirma el estado: la incertidumbre es nuestra, no del cliente.
-  if(params.get('estado')==='listo'){ver('listo');return;}
-  if(params.get('estado')==='error'){
-    $('error_t').textContent='No pudimos confirmar tu baja';
-    $('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';
-    ver('error');return;
-  }
   if(!token){ver('error');return;}
+  // 2º paso (Token B, desde el correo de confirmación): mostrar el botón que hace el POST.
+  // La baja NO ocurre al abrir este enlace — solo con el clic. Un escáner ve la página y ya.
+  if(finalizar){ver('finalizar');return;}
+  // 1er paso (Token A, desde el pie de un correo): cargar datos y mostrar la confirmación.
   try{
     const r=await fetch(API+'/cancelar/info?token='+encodeURIComponent(token));
     const d=await r.json();
