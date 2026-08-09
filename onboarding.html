@@ -200,7 +200,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <div class="final">
     <div class="cohete">🚀</div>
     <h1>Tu agente entra <em>en órbita</em></h1>
-    <p>Tu dominio quedó verificado: tu agente empieza a trabajar dentro de las próximas 24 horas. Te avisamos cuando despegue.</p>
+    <p>Tu dominio quedó verificado. En cuanto confirmemos que las respuestas de tus prospectos llegan a tu buzón y todo quede conectado, tu agente empieza a trabajar (dentro de 24 horas). Te avisamos cuando despegue.</p>
     <p id="final-nota" class="nota"></p>
   </div>
 </section>
@@ -414,7 +414,7 @@ async function cargarDominio(){
   const email=$('email').value.trim();if(!email.includes('@'))return;
   $('envio').classList.remove('oculto');
   try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio?email='+encodeURIComponent(email));
+    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
     const d=await r.json();
     if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));$('btn-verificar').classList.add('oculto');return;}
     if(d.dns&&d.dns.donde){
@@ -473,7 +473,7 @@ function pintarProveedor(d){
 }
 async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
   $('lectura').classList.remove('oculto');
-  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar?email='+encodeURIComponent(email));if(r.ok)pintarProveedor(await r.json());}catch(e){}}
+  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(r.ok)pintarProveedor(await r.json());}catch(e){}}
 $('sitio').addEventListener('blur',()=>{const v=$('sitio').value.trim();if(v&&!/^https?:\/\//i.test(v))$('sitio').value='https://'+v;});
 $('email').addEventListener('blur',()=>{cargarDominio();detectar();});
 $('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{cargarDominio();detectar();},800);});
