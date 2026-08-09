@@ -150,10 +150,14 @@ const API='https://api.inntuitivo.com';
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const token=params.get('token')||'';
-const demo=params.get('demo');           // modo preview: confirmar|revisar|listo
+const demo=params.get('demo');           // modo preview: confirmar|finalizar|revisar|listo|caducado|fallo|generico
 function ver(id){['cargando','error','confirmar','finalizar','revisar','listo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
 function errFin(){$('error_t').textContent='No pudimos confirmar tu baja';$('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';ver('error');}
 function errCaducado(){$('error_t').textContent='Este enlace caducó';$('error_p').textContent='El enlace de confirmación vence a la hora. Vuelve a pedir la baja desde el enlace que hay en los correos de tu agente y te enviamos uno nuevo.';ver('error');}
+// Fallo que NO es un 502 confirmado por el backend (red/CORS/api caído/500): no afirma dónde
+// falló ni promete que estamos al tanto (nadie fue notificado si la petición no llegó), y empuja
+// a escribir — el correo a info@ es la única red en ese camino.
+function errGenerico(){$('error_t').textContent='No pudimos completar la baja';$('error_p').textContent='Intenta de nuevo en un momento; si sigue, escríbenos a info@inntuitivo.com y lo resolvemos.';ver('error');}
 function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $('correo').textContent=info.correo||'—'; $('correo2').textContent=info.correo||'tu buzón'; $('correo_btn').textContent=info.correo||'tu correo'; ver('confirmar'); }
 
 $('entiendo').addEventListener('change',e=>{$('btnbaja').disabled=!e.target.checked;});
@@ -175,21 +179,23 @@ $('btnfin').addEventListener('click',async()=>{
   try{
     const r=await fetch(API+'/cancelar/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
     const d=await r.json().catch(()=>({}));
-    if(r.status===400){ errCaducado(); return; }   // token vencido/inválido: NO es un fallo de PayPal
-    if(!r.ok||!d.ok) throw 0;                       // 502: fallo real del proveedor (mensaje aparte)
+    if(r.status===400){ errCaducado(); return; }   // token vencido/inválido
+    if(r.status===502){ errFin(); return; }         // 502: fallo real del proveedor — el backend YA avisó a info@, "ya estamos al tanto" es cierto acá
+    if(!r.ok||!d.ok){ errGenerico(); return; }       // 500/503/otro: fallo nuestro, sin culpar a nadie ni afirmar awareness
     ver('listo');
-  }catch(_){ errFin(); }
+  }catch(_){ errGenerico(); }                        // red/CORS/api caído: la petición NUNCA llegó al server → nadie fue notificado
 });
 
 (async function(){
   const finalizar=params.get('finalizar');
-  // Preview local: ?demo=confirmar|finalizar|revisar|listo con datos de mentira.
+  // Preview local: ?demo=confirmar|finalizar|revisar|listo|caducado|fallo|generico con datos de mentira.
   if(demo){
     if(demo==='listo'){ver('listo');return;}
     if(demo==='revisar'){$('correo2').textContent='a***a@acme.com';ver('revisar');return;}
     if(demo==='finalizar'){ver('finalizar');return;}
     if(demo==='caducado'){errCaducado();return;}   // 400: enlace vencido/inválido
     if(demo==='fallo'){errFin();return;}            // 502: fallo del proveedor
+    if(demo==='generico'){errGenerico();return;}    // red/500/otro: sin culpar ni afirmar awareness
     mostrarConfirmar({dominio:'acme.com',correo:'a***a@acme.com'});return;
   }
   if(!token){ver('error');return;}
@@ -199,7 +205,7 @@ $('btnfin').addEventListener('click',async()=>{
   // 1er paso (Token A, desde el pie de un correo): cargar datos y mostrar la confirmación.
   try{
     const r=await fetch(API+'/cancelar/info?token='+encodeURIComponent(token));
-    const d=await r.json();
+    const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.valido){ if(d && d.motivo==='ya_baja'){$('error_t').textContent='Ya está de baja';$('error_p').textContent='Tu agente ya se dio de baja. Si necesitas algo, escríbenos a info@inntuitivo.com.';} ver('error'); return; }
     mostrarConfirmar(d);
   }catch(_){ ver('error'); }
