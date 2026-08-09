@@ -157,7 +157,7 @@ function errCaducado(){$('error_t').textContent='Este enlace caducó';$('error_p
 // Fallo que NO es un 502 confirmado por el backend (red/CORS/api caído/500): no afirma dónde
 // falló ni promete que estamos al tanto (nadie fue notificado si la petición no llegó), y empuja
 // a escribir — el correo a info@ es la única red en ese camino.
-function errGenerico(){$('error_t').textContent='No pudimos completar la baja';$('error_p').textContent='Intenta de nuevo en un momento; si sigue, escríbenos a info@inntuitivo.com y lo resolvemos.';ver('error');}
+function errGenerico(){$('error_t').textContent='No pudimos completar la baja';$('error_p').textContent='Vuelve a abrir el enlace de tu correo para intentarlo de nuevo; si sigue, escríbenos a info@inntuitivo.com y lo resolvemos.';ver('error');}
 function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $('correo').textContent=info.correo||'—'; $('correo2').textContent=info.correo||'tu buzón'; $('correo_btn').textContent=info.correo||'tu correo'; ver('confirmar'); }
 
 $('entiendo').addEventListener('change',e=>{$('btnbaja').disabled=!e.target.checked;});
