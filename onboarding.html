@@ -260,6 +260,17 @@ function ver(sec){['cargando','step1','step2','step3','final','reissue'].forEach
   $('pasos').classList.toggle('oculto',!['step1','step2','step3'].includes(sec));}
 function marcarPaso(n){document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
 function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+// Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
+// el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
+// («¿cómo saben lo que puse?») en atención al detalle. Se inserta una sola vez, arriba del campo.
+function notaMuestra(fecha){
+  const el=$('f-icp_descripcion'); if(!el)return;
+  const cont=el.closest('.campo')||el.parentElement; if(!cont||cont.querySelector('.nota-muestra'))return;
+  const n=document.createElement('p'); n.className='nota-muestra';
+  n.style.cssText='font-size:.85em;opacity:.75;margin:.15rem 0 .5rem';
+  n.textContent=(fecha?('El '+fecha+' pediste una muestra y pusiste esto'):'Pediste una muestra y pusiste esto')+' — corrígelo si cambió.';
+  cont.insertBefore(n,el);
+}
 function lineas(t){return (t||'').split('\n').map(x=>x.trim()).filter(Boolean);}
 function texto(arr){return (arr||[]).join('\n');}
 function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;box.innerHTML=(titulo?'<span class="titulo">'+titulo+'</span>':'')+(cuerpo||'')+(detalle||'');}
@@ -302,7 +313,15 @@ async function pollAnalisis(){
     try{
       const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar-estado');
       const d=await r.json();
-      if(d.estado==='listo'){clearInterval(loaderTimer);perfil=d.perfil;renderPerfil(perfil);$('r1').className='resultado';ver('step2');marcarPaso(2);window.scrollTo(0,0);$('btn-analizar').disabled=false;return;}
+      if(d.estado==='listo'){clearInterval(loaderTimer);perfil=d.perfil;
+        // Reusa lo que la persona YA escribió en su muestra (el target + las industrias que
+        // funcionaron), en vez de re-pedirlo. Pre-llena, NO impone: prevalece sobre la inferencia
+        // del sitio (que suele venir floja), y si lo edita, esa edición es la divergencia.
+        const mp=d.muestra_previa;
+        if(mp&&(mp.target||'').trim()){perfil.icp_descripcion=mp.target;if((mp.industrias||[]).length)perfil.industrias=mp.industrias;}
+        renderPerfil(perfil);
+        if(mp&&(mp.target||'').trim())notaMuestra(mp.fecha);
+        $('r1').className='resultado';ver('step2');marcarPaso(2);window.scrollTo(0,0);$('btn-analizar').disabled=false;return;}
       if(d.estado==='error'){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intenta de nuevo.'));$('btn-analizar').disabled=false;return;}
     }catch(e){}
   }
