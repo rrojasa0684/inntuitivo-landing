@@ -799,8 +799,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form label .ms-hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.84rem;margin-top:4px}
   .ms-form .ms-nudge{font-size:.82rem;color:var(--tinta-suave);margin-top:6px}
   .ms-form .ms-nudge:empty{display:none}
-  .ms-form input,.ms-form textarea{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px;resize:vertical}
-  .ms-form input:focus,.ms-form textarea:focus{border-color:var(--rosa-claro);outline:none}
+  .ms-form input,.ms-form textarea,.ms-form select{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px;resize:vertical}
+  .ms-form select{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238E80B3' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+  .ms-form select option{background:#1a1030;color:var(--tinta)}
+  .ms-form input:focus,.ms-form textarea:focus,.ms-form select:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
   .ms-btn{display:block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;margin-top:20px;color:#fff;background:var(--gradiente);box-shadow:0 8px 24px rgba(222,5,64,.25);transition:transform .15s ease,box-shadow .15s ease}
   .ms-btn:hover{transform:translateY(-2px)}
@@ -833,13 +835,37 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       </div>
       <div class="ms-form">
         <h3>Pide tu muestra gratis 💸</h3>
-        <p class="ms-nota">Tres datos y tu agente se pone a trabajar.</p>
+        <p class="ms-nota">Cuatro datos y tu agente se pone a trabajar.</p>
         <form id="ms-form">
           <label for="ms-sitio">Tu sitio web</label>
           <input id="ms-sitio" name="sitio_web" type="url" required placeholder="tuempresa.com" spellcheck="false" autocomplete="url">
-          <label for="ms-target">¿A qué tipo de empresas les vendes? <span class="ms-hint">El rubro de tus clientes, no el tuyo; y que sean empresas, no personas. Cuanto más específico seas —tamaño, dónde están—, mejor busca tu agente.</span></label>
-          <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos en Costa Rica y Panamá» — no «turismo» a secas."></textarea>
+          <label for="ms-target">¿A qué tipo de empresas les vendes? <span class="ms-hint">El rubro de tus clientes, no el tuyo; y que sean empresas, no personas. Cuanto más específico seas —tamaño, rubro—, mejor busca tu agente.</span></label>
+          <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos» — no «turismo» a secas."></textarea>
           <div id="ms-target-nudge" class="ms-nudge" aria-live="polite"></div>
+          <label for="ms-geo">¿Dónde están tus clientes? <span class="ms-hint">El país donde quieres que tu agente busque. Si vendes en varios, elige la región.</span></label>
+          <select id="ms-geo" name="geografia" required>
+            <option value="" disabled selected>Elige un país o región…</option>
+            <option value="Latinoamérica">Toda Latinoamérica (o no estoy seguro)</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Bolivia">Bolivia</option>
+            <option value="Chile">Chile</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Costa Rica">Costa Rica</option>
+            <option value="Ecuador">Ecuador</option>
+            <option value="El Salvador">El Salvador</option>
+            <option value="España">España</option>
+            <option value="Guatemala">Guatemala</option>
+            <option value="Honduras">Honduras</option>
+            <option value="México">México</option>
+            <option value="Nicaragua">Nicaragua</option>
+            <option value="Panamá">Panamá</option>
+            <option value="Paraguay">Paraguay</option>
+            <option value="Perú">Perú</option>
+            <option value="Puerto Rico">Puerto Rico</option>
+            <option value="República Dominicana">República Dominicana</option>
+            <option value="Uruguay">Uruguay</option>
+            <option value="Venezuela">Venezuela</option>
+          </select>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <div class="ms-hp" aria-hidden="true">
@@ -1247,12 +1273,13 @@ document.addEventListener('DOMContentLoaded', function () {
       var datos = {
         sitio_web: (msForm.sitio_web.value || '').trim(),
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
+        geografia: (msForm.geografia.value || '').trim(),
         correo: (msForm.correo.value || '').trim(),
         ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
       };
-      if (!datos.sitio_web || !datos.a_quien_vendes || !datos.correo) {
+      if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografia || !datos.correo) {
         res.className = 'ms-resultado error';
-        res.innerHTML = '<span class="titulo">Faltan datos</span>Completa tu sitio web, a quién le vendes y tu correo.';
+        res.innerHTML = '<span class="titulo">Faltan datos</span>Completa tu sitio web, a quién le vendes, dónde están tus clientes y tu correo.';
         return;
       }
       var textoBtn = btn.textContent;
