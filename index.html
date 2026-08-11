@@ -1369,5 +1369,47 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<!-- Volver arriba: componente utilitario NUEVO. Autocontenido (tokens del sitio, sin librerías,
+     no depende de nada más). Discreto a propósito: tarjeta hairline (--carta/--linea) + glass, NO
+     el gradiente de los CTA, para no competir con la conversión. Umbral = 1 viewport (proporcional
+     al dispositivo). Scroll suave SOLO acá vía JS con destino 0 (invariante ante reflow, por eso
+     es seguro donde el scroll-behavior:smooth global no lo era — ver la nota del <style> base). -->
+<style>
+  .top-btn{
+    position:fixed;right:24px;bottom:24px;z-index:40;
+    width:48px;height:48px;padding:0;border-radius:999px;
+    display:grid;place-items:center;
+    background:var(--carta);border:1px solid var(--linea);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    color:var(--tinta-suave);cursor:pointer;
+    opacity:0;visibility:hidden;transform:translateY(8px);
+    transition:opacity .3s ease,transform .3s ease,visibility .3s ease,border-color .2s ease,color .2s ease;
+  }
+  .top-btn.visible{opacity:1;visibility:visible;transform:translateY(0)}
+  .top-btn.visible:hover{transform:translateY(-2px);border-color:var(--rojo);color:var(--tinta)}
+  .top-btn:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:3px}
+  .top-btn svg{width:20px;height:20px;display:block}
+  @media (max-width:768px){ .top-btn{right:16px;bottom:16px;width:44px;height:44px} }
+  @media (prefers-reduced-motion:reduce){
+    /* sin fade ni deslizamiento: aparición instantánea */
+    .top-btn{transition:border-color .2s ease,color .2s ease;transform:none}
+    .top-btn.visible,.top-btn.visible:hover{transform:none}
+  }
+</style>
+<button type="button" class="top-btn" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+</button>
+<script>
+  (function () {
+    var btn = document.querySelector('.top-btn'); if (!btn) return;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ticking = false;
+    function update(){ btn.classList.toggle('visible', window.scrollY > window.innerHeight); ticking = false; }
+    addEventListener('scroll', function(){ if(!ticking){ requestAnimationFrame(update); ticking = true; } }, { passive:true });
+    update();
+    btn.addEventListener('click', function(){ window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' }); });
+  })();
+</script>
+
 </body>
 </html>
