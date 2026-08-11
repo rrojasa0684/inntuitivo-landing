@@ -1,1 +1,24 @@
 .claude/
+
+# ── Materiales de diseño / handoff internos — NUNCA al repo público ──
+# Regla 19 aplicada al gitignore: se ignora la CLASE (handoff/diseño), no el
+# nombre que ya vimos. Entró como design_handoff_*, luego inntuitivo_academy,
+# luego "Agregar logos al carrusel…"; el próximo llegará con OTRO nombre.
+#
+# LÍMITE CONOCIDO (la causa raíz que esto NO cubre): un upload web de GitHub
+# (drag-and-drop) se salta el gitignore, el CI y toda la disciplina local.
+# Así entró esta vez. Esto protege el flujo por TERMINAL; la puerta web no.
+#
+# Artefactos característicos del handoff, en cualquier carpeta:
+**/libro-de-marca.pdf
+**/*.dc.html
+**/logos-blanco/
+**/partners-gris/
+**/PROMPT.md
+# Handoff/diseño por nombre (cualquier variante):
+*handoff*/
+*handoff*
+# Las concretas que ya entraron (belt-and-suspenders):
+design_handoff_carrusel_partners/
+inntuitivo_academy/
+Agregar logos al carrusel Inntuitivo/
