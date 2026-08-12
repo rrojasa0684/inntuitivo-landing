@@ -96,7 +96,15 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 .final p{margin-top:16px;color:var(--tinta-suave);max-width:46ch;margin-left:auto;margin-right:auto}
 .pie{margin-top:26px;text-align:center;font-size:.82rem;color:var(--tinta-suave)}
 .pie a{color:var(--rosa-claro)}
-@media (max-width:520px){.fila2{grid-template-columns:1fr}}
+.geo-hint{font-size:.85rem;color:var(--tinta-suave);margin:4px 0 10px}
+.geo-hint b{color:#E7DEF7}
+.geo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:4px}
+.geo-op{display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);font-size:.95rem;margin:0;padding:9px 11px;border:1.5px solid var(--linea);border-radius:10px;background:rgba(0,0,0,.22);cursor:pointer}
+.geo-op:hover{border-color:var(--rosa-claro)}
+.geo-op input{width:auto;margin:0;accent-color:var(--rojo)}
+.geo-op.sug{border-color:rgba(255,198,92,.6);background:rgba(255,198,92,.06)}
+.geo-sug{margin-left:auto;font-size:.66rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#3A2400;background:var(--alerta);border-radius:999px;padding:2px 8px;white-space:nowrap}
+@media (max-width:520px){.fila2{grid-template-columns:1fr}.geo-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.btn-primario{animation:none}.btn-primario::after{display:none}.spin{animation-duration:0s}}
 </style>
 </head>
@@ -244,7 +252,7 @@ const CARDS=[
     ['icp_descripcion','icp_descripcion','Qué tipo de empresas son tus clientes','textarea','El rubro de las empresas a las que les vendes, no el tuyo. Ej: si organizas eventos, aquí va «bancos, farmacéuticas y universidades» — no «organización de eventos». Y tienen que ser empresas: si tu respuesta son personas («compradores de casa», «gente que quiere aprender inglés»), el agente no aplica.'],
     ['industrias','industrias','Industrias · una por línea','lines'],
     ['tamano_empresa','tamano_empresa','Tamaño de empresa','text'],
-    ['geografia_objetivo','icp_descripcion','Geografía objetivo','text'],
+    ['geografia_objetivo','icp_descripcion','Geografía objetivo','geo'],
     ['cargos_objetivo','cargos_objetivo','Cargos a contactar · uno por línea','lines'],
     ['senales_de_compra','senales_de_compra','Señales de compra · una por línea','lines'],
     ['descalificadores','descalificadores','A quién NO escribirle · uno por línea','lines']]],
@@ -329,6 +337,20 @@ async function pollAnalisis(){
 }
 
 // --- PASO 2: render editable con baja confianza ---
+// Geografía: mismas opciones que la muestra. value canónico ('Latinoamérica' es amplia en discovery).
+const GEO_OPCIONES=['Latinoamérica','Argentina','Bolivia','Chile','Colombia','Costa Rica','Ecuador','El Salvador','España','Guatemala','Honduras','México','Nicaragua','Panamá','Paraguay','Perú','Puerto Rico','República Dominicana','Uruguay','Venezuela'];
+const geoNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+// El hidden 'f-geografia_objetivo' lleva el string coma-separado que profiler.py ya splitea.
+function geoSync(){const sel=[...document.querySelectorAll('.geo-chk:checked')].map(c=>c.value);const h=$('f-geografia_objetivo');if(h)h.value=sel.join(', ');}
+// Muestra la inferencia como SUGERENCIA (tag 'sugerido'), nunca pre-marcada: el cliente elige.
+function geoControl(id,v){
+  const nv=geoNorm(v);
+  const opts=GEO_OPCIONES.map(o=>{const sug=nv&&nv.includes(geoNorm(o));
+    return '<label class="geo-op'+(sug?' sug':'')+'"><input type="checkbox" class="geo-chk" value="'+escapa(o)+'" onchange="geoSync()">'+escapa(o)+(sug?'<span class="geo-sug">sugerido</span>':'')+'</label>';}).join('');
+  return '<input id="f-'+id+'" type="hidden" value="">'
+    +(v?'<div class="geo-hint">Detectamos <b>'+escapa(v)+'</b>. Marca los países o regiones donde quieres vender — no lo elegimos por ti.</div>':'')
+    +'<div class="geo-grid">'+opts+'</div>';
+}
 function confMap(p){const m={};(p.inferencias||[]).forEach(i=>{if(m[i.campo]==null||i.confianza<m[i.campo])m[i.campo]=i.confianza;});return m;}
 function renderPerfil(p){
   const conf=confMap(p);
@@ -342,6 +364,7 @@ function renderPerfil(p){
       else if(tipo==='lines')control='<textarea id="f-'+id+'">'+escapa(texto(v))+'</textarea>';
       else if(tipo==='select'){const r=['tu','usted','vos'].includes(v)?v:'usted';
         control='<select id="f-'+id+'"><option value="usted"'+(r==='usted'?' selected':'')+'>Usted (formal)</option><option value="tu"'+(r==='tu'?' selected':'')+'>Tú (cercano)</option><option value="vos"'+(r==='vos'?' selected':'')+'>Vos (voseo)</option></select>';}
+      else if(tipo==='geo')control=geoControl(id,v);
       else control='<input id="f-'+id+'" type="text" value="'+escapa(v||'')+'">';
       return '<div class="'+(baja?'baja':'')+'"><label>'+escapa(label)+badge+(hint?'<span class="hint">'+escapa(hint)+'</span>':'')+'</label>'+control+'</div>';
     }).join('');
