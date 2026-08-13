@@ -164,7 +164,7 @@ function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $
   if(info.buzon_conectado===false){
     var rd=$('row-dominio'); if(rd) rd.style.display='none';
     var lc=$('li-credencial'); if(lc) lc.style.display='none';
-    var cc=$('chk-credencial'); if(cc) cc.textContent='';
+    var cc=$('chk-credencial'); if(cc) cc.remove();  // remover, no vaciar: un span vacío deja un gap inline al renderizar
   }
   ver('confirmar'); }
 
