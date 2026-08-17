@@ -155,30 +155,14 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="step3" class="oculto">
   <span class="eyebrow">Paso 3 · Tu buzón</span>
   <h1>Conecta <em>tu correo</em></h1>
-  <p class="sub">Tu agente escribirá COMO TÚ, desde tu propia dirección, y leerá ahí las respuestas. Aquí conectas dos cosas: tu dominio (envío) y tu buzón (lectura).</p>
+  <p class="sub">Conecta tu buzón para que tu agente lea las respuestas y te avise cuando alguien te conteste. Con eso ya arranca. Enviar desde tu propio dominio, con tu marca, es un upgrade opcional que puedes hacer cuando quieras.</p>
   <div class="panel">
     <label for="email">Tu dirección de correo</label>
     <input id="email" type="email" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
 
-    <!-- A · ENVÍO: verificar el dominio del cliente en NUESTRA cuenta de Resend -->
-    <div id="envio" class="oculto" style="margin-top:20px">
-      <h3 style="margin:0 0 8px">1 · Envío — conecta tu dominio</h3>
-      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#B5A9D4;margin-bottom:12px">
-        🔒 Esto <strong>no toca tu correo actual</strong>. Agregas 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
-      </div>
-      <div id="dns-donde" class="nota" style="margin-bottom:10px"></div>
-      <div id="registros"></div>
-      <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
-      <div id="envio-estado" class="resultado"></div>
-      <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
-        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe.
-        Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> y te ayudamos. Si estás bloqueado y necesitas resolverlo ya, <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener">escríbenos por WhatsApp</a>.
-      </div>
-    </div>
-
-    <!-- B · LECTURA: IMAP (993, no bloqueado) -->
-    <div id="lectura" class="oculto" style="margin-top:24px">
-      <h3 style="margin:0 0 8px">2 · Lectura — conecta tu buzón</h3>
+    <!-- B · LECTURA (OBLIGATORIO): IMAP (993, no bloqueado) — leer las respuestas. Va PRIMERO. -->
+    <div id="lectura" class="oculto" style="margin-top:20px">
+      <h3 style="margin:0 0 8px">1 · Tu buzón — conéctalo para arrancar</h3>
       <div id="prov" class="provaviso oculto">
         <span class="nombre-prov" id="prov-nombre"></span>
         <ul class="instrucciones" id="prov-inst"></ul>
@@ -199,6 +183,22 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
       <div id="resultado" class="resultado"></div>
     </div>
 
+    <!-- A · ENVÍO (OPCIONAL): verificar el dominio del cliente en Resend. Va SEGUNDO, no bloquea. -->
+    <div id="envio" class="oculto" style="margin-top:24px">
+      <h3 style="margin:0 0 8px">2 · Tu dominio — envía con tu marca <span style="opacity:.65;font-weight:400">(opcional, cuando quieras)</span></h3>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#B5A9D4;margin-bottom:12px">
+        Tu agente ya arranca sin esto. Si conectas tu dominio, tus correos saldrán desde tu propia dirección. 🔒 <strong>No toca tu correo actual</strong>: agregas 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
+      </div>
+      <div id="dns-donde" class="nota" style="margin-bottom:10px"></div>
+      <div id="registros"></div>
+      <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
+      <div id="envio-estado" class="resultado"></div>
+      <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
+        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe.
+        Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> y te ayudamos. Si estás bloqueado y necesitas resolverlo ya, <a href="https://wa.me/50670144980?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener">escríbenos por WhatsApp</a>.
+      </div>
+    </div>
+
     <div id="buzon-progreso" class="detalle oculto" style="margin-top:16px"></div>
   </div>
 </section>
@@ -208,7 +208,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <div class="final">
     <div class="cohete">🚀</div>
     <h1>Tu agente entra <em>en órbita</em></h1>
-    <p>Tu dominio quedó verificado. Ahora tus correos saldrán desde tu propia dirección, con tu marca. En cuanto confirmemos que las respuestas de tus prospectos llegan a tu buzón, el upgrade queda completo. Te avisamos.</p>
+    <p id="final-msg"></p>
     <p id="final-nota" class="nota"></p>
   </div>
 </section>
@@ -291,14 +291,21 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
-    if(d.paso==='final'){mostrarFinal();return;}
+    if(d.paso==='final'){ if(d.buzon){domVerificado=!!d.buzon.dominio_ok;imapOk=!!d.buzon.imap_ok;} mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
     ver('step1');marcarPaso(1);
   }catch(e){ver('reissue');}
 })();
 
-function mostrarFinal(nota){ if(nota)$('final-nota').textContent=nota; ver('final'); }
+function mostrarFinal(nota){
+  // Caso principal: plataforma (sin dominio). Si conectó dominio, lo nombra. En ambos dice QUÉ pasa AHORA.
+  $('final-msg').innerHTML = domVerificado
+    ? 'Tu dominio quedó verificado: tus correos saldrán desde tu propia dirección, con tu marca. Tu agente ya empezó a buscar empresas de tu mercado y a escribir en tu nombre. Te avisamos apenas alguien te responda.'
+    : 'Tu agente ya empezó a buscar empresas de tu mercado, y va a escribir y enviar en tu nombre desde inntuitivo.com. Te avisamos apenas alguien te responda. Conectar tu dominio para enviar desde tu propia dirección es opcional: puedes hacerlo cuando quieras.';
+  if(nota)$('final-nota').textContent=nota;
+  ver('final');
+}
 
 // --- PASO 1: analizar (asíncrono, loaders rotativos) ---
 let loaderTimer=null;
@@ -431,8 +438,10 @@ let domVerificado=false, imapOk=false;
 
 function progreso(){
   const box=$('buzon-progreso');box.classList.remove('oculto');
-  box.innerHTML='<span>Envío (dominio): '+(domVerificado?'✓':'⏳')+'</span><span>Lectura (buzón): '+(imapOk?'✓':'⏳')+'</span>';
-  if(domVerificado&&imapOk){marcarPaso(4);mostrarFinal();}
+  // El BUZÓN (imapOk) es lo obligatorio: con eso el agente ya opera (backend -> ONB_PLATAFORMA).
+  // El dominio es opcional -> NO bloquea el final, y se muestra como "opcional", no como pendiente (⏳).
+  box.innerHTML='<span>Buzón (lectura): '+(imapOk?'✓':'⏳')+'</span><span>Dominio propio (envío): '+(domVerificado?'✓':'opcional — cuando quieras')+'</span>';
+  if(imapOk){marcarPaso(4);mostrarFinal();}
 }
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent=t,1200);});}
 function regFila(valor){
