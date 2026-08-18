@@ -153,14 +153,16 @@ footer a{color:#FF6E92}
 
 <ul>
   <li><strong>Anthropic</strong> — el modelo de lenguaje que investiga empresas y redacta los correos.</li>
-  <li><strong>Resend</strong> — la infraestructura de envío de correo.</li>
-  <li><strong>Google</strong> — búsqueda de negocios a través de Places API.</li>
+  <li><strong>Un proveedor de correo saliente</strong> — la infraestructura que entrega los correos que el agente envía en tu nombre.</li>
+  <li><strong>Un proveedor de datos de negocios públicos</strong> — para descubrir empresas que encajan con tu perfil de cliente.</li>
   <li><strong>PayPal</strong> — procesamiento de pagos.</li>
-  <li><strong>DigitalOcean</strong> — el servidor donde corre el sistema.</li>
+  <li><strong>Un proveedor de infraestructura en Estados Unidos</strong> — el servidor donde corre el sistema.</li>
   <li><strong>Umami</strong> — analítica web sin cookies ni identificación personal.</li>
+  <li><strong>El proveedor de tu buzón de correo</strong> — donde está la cuenta que conectas; el sistema se conecta para leer las respuestas de tus prospectos.</li>
+  <li><strong>Un proveedor de monitoreo</strong> — vigila que el servicio siga en pie; recibe señales de estado, no datos personales.</li>
 </ul>
 
-<p>Cada uno trata los datos solo para prestarnos su servicio. Algunos están fuera de tu país, incluido Estados Unidos.</p>
+<p>Cada uno trata los datos solo para prestarnos su servicio. El alojamiento principal del servicio —el servidor donde corre el sistema, la base de datos y las copias de seguridad— está en Estados Unidos; varios de estos proveedores también operan allí. En la práctica, tus datos y los de tus prospectos se procesan y almacenan en Estados Unidos.</p>
 
 <h2>5. Cuánto tiempo los conservamos</h2>
 
@@ -195,6 +197,7 @@ footer a{color:#FF6E92}
   <li>Las credenciales se guardan cifradas y con acceso restringido en el servidor.</li>
   <li>Cada cliente está aislado: nadie puede ver los datos de otro.</li>
   <li>El acceso al servidor está limitado por clave SSH.</li>
+  <li>Las copias de seguridad y los registros técnicos de operación se guardan en el mismo servidor, en Estados Unidos; las copias se conservan hasta aproximadamente un mes y rotan automáticamente.</li>
 </ul>
 
 <p>Ningún sistema es infalible. Si ocurriera una brecha que afecte tus datos, te lo comunicaremos.</p>
