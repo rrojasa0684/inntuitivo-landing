@@ -1281,6 +1281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
         geografia: (msForm.geografia.value || '').trim(),
         correo: (msForm.correo.value || '').trim(),
+        r: r || '',                             // código de origen del ?r= (linkedin, etc.), no visible al usuario
         ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
       };
       if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografia || !datos.correo) {
