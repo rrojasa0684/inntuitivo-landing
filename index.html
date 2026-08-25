@@ -562,7 +562,13 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
        fantasma que .btn-secundario (borde fino, sin gradiente, sin el pulso/shine de los
        CTA primarios, ver comentario "7b." más abajo), no un botón de Mercately. -->
   <style>
-  .mercately{padding:96px 24px}
+  /* bottom 0 -- .academy que sigue ya trae 96px de padding-top fijo (no se toca,
+     ya desplegada). Con los dos en 96 el gap medía 192px: el ritmo real del sitio
+     es 88px (section{padding:44px 0} en ambos lados, la mayoría de la página), no
+     el otro par tarjeta-tarjeta (185px, un caso único, no "el resto"). Sin tocar
+     Academy el piso es 96px (0 + su 96 fijo) -- lo más cerca de 88 que se puede
+     llegar ajustando solo este lado. */
+  .mercately{padding:96px 24px 0}
   .mercately *{box-sizing:border-box}
   .mercately__card{
     position:relative;max-width:720px;margin:0 auto;padding:64px 56px;
@@ -598,7 +604,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .mercately__cta:active{transform:translateY(0)}
   .mercately__cta:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:3px}
   @media (max-width:767px){
-    .mercately{padding:56px 16px}
+    .mercately{padding:56px 16px 0}
     .mercately__card{padding:40px 20px;border-radius:20px}
     .mercately__logo{height:24px;margin-bottom:14px}
     .mercately__title{font-size:1.5rem}
@@ -616,7 +622,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <img class="mercately__logo" src="partners/mercately-partners.png" alt="Mercately" height="30" loading="lazy">
       <p class="mercately__eyebrow">🤝 Alianza</p>
       <h2 class="mercately__title" id="mercately-title">Mercately + Inntuitivo</h2>
-      <p class="mercately__sub">Mercately atiende con IA a quien ya te escribió por WhatsApp. Nosotros te traemos a quien todavía no sabe que existes. Las dos mitades del mismo embudo.</p>
+      <p class="mercately__sub">Mercately atiende con IA a quien ya te escribió por WhatsApp. Nuestro agente de IA te trae a quien todavía no sabe que existes. Las dos mitades del mismo embudo. 🚀</p>
       <a class="mercately__cta" href="https://app.mercately.com/register?partner_id=8db3b072" target="_blank" rel="noopener noreferrer">Conocer Mercately →</a>
     </div>
   </section>
