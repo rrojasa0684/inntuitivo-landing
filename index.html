@@ -1398,6 +1398,12 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('#mercately .mercately__cta').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_mercately'); });   // clic banner Mercately
   });
+  document.querySelectorAll('#activar a[href*="wa.me"]').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_whatsapp_precio'); }); // "¿Dudas antes de activar?" -- punto ciego junto al CTA
+  });
+  document.querySelectorAll('footer a.wsp-cta').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_whatsapp_footer'); }); // contacto general del footer, nombre distinto del de #activar
+  });
 
   // Formulario de la muestra gratis: postea a nuestro endpoint y muestra estados.
   var msForm = document.getElementById('ms-form');
