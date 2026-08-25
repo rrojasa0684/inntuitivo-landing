@@ -554,6 +554,73 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
+  <!-- Banner alianza Mercately — entre Partners y Academy. Mismo tratamiento de tarjeta
+       que .academy__card (filo degradado, fondo/borde/radio) para que se lea como una
+       sección más del sitio, no un anuncio pegado. El logo es el MISMO archivo gris del
+       carrusel #partners (partners/mercately-partners.png) -- ningún azul/verde de marca
+       Mercately entra acá. El CTA es subordinado a "Activar mi agente": mismo estilo
+       fantasma que .btn-secundario (borde fino, sin gradiente, sin el pulso/shine de los
+       CTA primarios, ver comentario "7b." más abajo), no un botón de Mercately. -->
+  <style>
+  .mercately{padding:96px 24px}
+  .mercately *{box-sizing:border-box}
+  .mercately__card{
+    position:relative;max-width:720px;margin:0 auto;padding:64px 56px;
+    text-align:center;border-radius:24px;
+    background:var(--carta);border:1px solid var(--linea);
+    overflow:hidden;
+  }
+  .mercately__card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:3px;
+    background:var(--gradiente);
+  }
+  .mercately__logo{height:30px;width:auto;opacity:.85;margin-bottom:18px}
+  .mercately__eyebrow{
+    margin:0 0 10px;font-family:'Century Gothic','Jost',sans-serif;font-size:.8125rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--rosa-claro);
+  }
+  .mercately__title{
+    margin:0 0 14px;font-family:'Audiowide','Jost',sans-serif;font-weight:400;
+    font-size:clamp(1.5rem,3.4vw,2rem);line-height:1.25;color:var(--tinta);
+  }
+  .mercately__sub{
+    margin:0 auto 26px;max-width:52ch;font-size:1.0625rem;line-height:1.6;color:var(--tinta-suave);
+  }
+  .mercately__cta{
+    display:inline-flex;align-items:center;gap:6px;
+    min-height:50px;padding:0 26px;border-radius:999px;
+    font-family:'Century Gothic','Jost',sans-serif;font-size:.9375rem;font-weight:700;
+    color:var(--tinta);text-decoration:none;
+    background:transparent;border:1.5px solid var(--linea);
+    transition:border-color .18s ease,transform .18s ease;
+  }
+  .mercately__cta:hover{border-color:var(--rosa-claro);transform:translateY(-2px)}
+  .mercately__cta:active{transform:translateY(0)}
+  .mercately__cta:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:3px}
+  @media (max-width:767px){
+    .mercately{padding:56px 16px}
+    .mercately__card{padding:40px 20px;border-radius:20px}
+    .mercately__logo{height:24px;margin-bottom:14px}
+    .mercately__title{font-size:1.5rem}
+    .mercately__sub{font-size:1rem}
+    .mercately__cta{width:100%;padding:0 20px;min-height:52px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .mercately__cta{transition:none}
+    .mercately__cta:hover{transform:none}
+  }
+  </style>
+
+  <section class="mercately" id="mercately" aria-labelledby="mercately-title">
+    <div class="mercately__card">
+      <img class="mercately__logo" src="partners/mercately-partners.png" alt="Mercately" height="30" loading="lazy">
+      <p class="mercately__eyebrow">🤝 Alianza</p>
+      <h2 class="mercately__title" id="mercately-title">Mercately + Inntuitivo</h2>
+      <p class="mercately__sub">Mercately atiende con IA a quien ya te escribió por WhatsApp. Nosotros te traemos a quien todavía no sabe que existes. Las dos mitades del mismo embudo.</p>
+      <a class="mercately__cta" href="https://app.mercately.com/register?partner_id=8db3b072" target="_blank" rel="noopener noreferrer">Conocer Mercately →</a>
+    </div>
+  </section>
+
   <!-- Banner Academy — prueba de autoridad, entre Partners y "Cómo funciona".
        Sección transparente (empalma con el cosmos de las vecinas). Tokens --ac-*
        del prototipo mapeados a las variables reales del sitio. -->
@@ -1269,6 +1336,9 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.querySelectorAll('#mision .nl-cta').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_mision'); });      // clic banner misión
+  });
+  document.querySelectorAll('#mercately .mercately__cta').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_mercately'); });   // clic banner Mercately
   });
 
   // Formulario de la muestra gratis: postea a nuestro endpoint y muestra estados.
