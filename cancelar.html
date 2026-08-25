@@ -68,6 +68,13 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
 .centro h1{margin-top:12px}
 .centro p{margin-top:16px;color:var(--tinta-suave);max-width:48ch;margin-left:auto;margin-right:auto}
 .pie{margin-top:26px;text-align:center;font-size:.82rem;color:var(--tinta-suave)}
+.motivo{margin-top:18px}
+.motivo label{display:block;font-size:.95rem;color:#F2EDFA;margin-bottom:6px}
+.motivo .opt{color:var(--tinta-suave);font-weight:400;font-size:.85rem}
+.motivo textarea{display:block;width:100%;min-height:64px;resize:vertical;font-family:inherit;font-size:.95rem;color:var(--tinta);background:rgba(0,0,0,.22);border:1px solid var(--linea);border-radius:12px;padding:12px 14px;line-height:1.5}
+.motivo textarea::placeholder{color:var(--tinta-suave)}
+.motivo textarea:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
+.motivo p.nota{margin-top:6px;font-size:.82rem;color:var(--tinta-suave)}
 .oculto{display:none}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:0s}}
 </style>
@@ -120,6 +127,11 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
   <p class="sub">Estás a un paso. Al confirmar, tu agente se apaga y deja de enviar en tu nombre — es el último paso, y no se puede deshacer.</p>
   <div class="panel">
     <div class="irrev">⚠️ Es irreversible. Para volver, sería un alta nueva desde cero (el onboarding de siempre).</div>
+    <div class="motivo">
+      <label for="motivo">¿Qué te hizo decidir cancelar? <span class="opt">(opcional)</span></label>
+      <textarea id="motivo" rows="2" maxlength="2000" placeholder="Una línea alcanza."></textarea>
+      <p class="nota">No vamos a insistir ni a contactarte por esto.</p>
+    </div>
     <button class="btn btn-baja" id="btnfin">Confirmar la baja</button>
     <a class="btn btn-sec" href="https://www.inntuitivo.com">No, quiero conservarlo</a>
   </div>
@@ -185,7 +197,8 @@ $('btnfin').addEventListener('click',async()=>{
   $('btnfin').disabled=true; $('btnfin').innerHTML='<span class="spin"></span> Confirmando…';
   if(demo){ver('listo');return;}
   try{
-    const r=await fetch(API+'/cancelar/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    const motivo=($('motivo')&&$('motivo').value||'').trim();
+    const r=await fetch(API+'/cancelar/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,motivo})});
     const d=await r.json().catch(()=>({}));
     if(r.status===400){ errCaducado(); return; }   // token vencido/inválido
     if(r.status===502){ errFin(); return; }         // 502: fallo real del proveedor — el backend YA avisó a info@, "ya estamos al tanto" es cierto acá
