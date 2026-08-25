@@ -444,6 +444,51 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     <a class="nav-cta" href="#muestra">Ver una muestra gratis 💸</a>
   </nav>
 
+  <!-- Houston, la mascota -- decorativa, position:absolute DENTRO de .panel
+       (ya es position:relative, ver "7f." más abajo), anclada con bottom:100%:
+       flota siempre pegada al borde superior del panel, en el espacio libre que
+       deja la columna de texto (mucho más alta) -- nunca se recorta contra el
+       viewport ni tapa "TU AGENTE · HOY"/"EN ÓRBITA"/las líneas del feed, sea
+       cual sea el alto real del hero. No toca texto/CTA/fondo de estrellas.
+       El JPEG tiene fondo negro (no alpha real); mix-blend-mode:screen + máscara
+       radial lo funden con el fondo oscuro del hero, tal como en la animación de
+       referencia. Solo el keyframe houstonFloat de esa referencia -- starDrift/
+       twinkle/nebulaPulse/orbit no se copian, el hero ya tiene su propio fondo.
+       Oculta bajo 840px (mismo breakpoint de .hero): en una columna el panel se
+       reordena debajo del texto y no hay una posición segura garantizada contra
+       cualquier ancho de mobile sin arriesgar tapar el CTA. -->
+  <style>
+  .hero-houston{
+    position:absolute;left:50%;bottom:100%;margin-bottom:18px;
+    transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    z-index:2;pointer-events:none;
+  }
+  .hero-houston__img{
+    display:block;width:clamp(100px,11vw,150px);aspect-ratio:1264/1568;object-fit:contain;
+    mix-blend-mode:screen;
+    -webkit-mask-image:radial-gradient(ellipse 68% 72% at 50% 46%,#000 58%,rgba(0,0,0,0) 100%);
+    mask-image:radial-gradient(ellipse 68% 72% at 50% 46%,#000 58%,rgba(0,0,0,0) 100%);
+    animation:houstonFloat 7s ease-in-out infinite;
+  }
+  .hero-houston__tag{display:flex;align-items:center;gap:6px}
+  .hero-houston__bar{width:16px;height:2px;background:var(--rosa-claro);flex-shrink:0}
+  .hero-houston__tag span{
+    font-family:'Century Gothic','Jost',sans-serif;font-size:.6875rem;font-weight:700;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--rosa-claro);white-space:nowrap;
+  }
+  @keyframes houstonFloat{
+    0%,100%{transform:translateY(0) rotate(-1.2deg)}
+    50%{transform:translateY(-14px) rotate(1.2deg)}
+  }
+  @media (max-width:840px){
+    .hero-houston{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero-houston__img{animation:none}
+  }
+  </style>
+
   <header class="hero">
     <div>
       <span class="eyebrow">🎯 Para pymes, startups y agencias que venden a empresas</span>
@@ -463,6 +508,13 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
 
     <div class="panel" aria-label="Ejemplo de actividad del agente">
+      <div class="hero-houston" aria-hidden="true">
+        <img class="hero-houston__img" src="mascota/houston.jpg" alt="" decoding="async">
+        <div class="hero-houston__tag">
+          <span class="hero-houston__bar"></span>
+          <span>HOUSTON · SIEMPRE EN ÓRBITA</span>
+        </div>
+      </div>
       <span class="satelite" aria-hidden="true"></span>
       <div class="panel-head">
         <span class="titulo">🛰️ Tu agente · hoy</span>
