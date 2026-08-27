@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Inntuitivo — Activar tu agente</title>
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rojo:#DE0540; --morado:#452774; --morado-oscuro:#2E1A4F;
+  --gradiente:linear-gradient(135deg,#DE0540 0%,#452774 100%);
+  --fondo:#0D0722; --tinta:#F2EDFA; --tinta-suave:#B5A9D4;
+  --linea:rgba(255,255,255,.14); --rosa-claro:#FF6E92; --ok:#3ED598; --alerta:#FFC65C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Century Gothic','Jost',sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.6;font-size:17px;min-height:100vh}
+a{color:var(--rosa-claro)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
+.estrellas{position:fixed;inset:0;z-index:-2;background-image:
+  radial-gradient(1px 1px at 20px 30px,#fff,transparent),
+  radial-gradient(1px 1px at 90px 110px,rgba(255,255,255,.7),transparent),
+  radial-gradient(1.5px 1.5px at 160px 60px,rgba(255,110,146,.8),transparent),
+  radial-gradient(1px 1px at 220px 150px,rgba(255,255,255,.5),transparent),
+  radial-gradient(2px 2px at 300px 90px,rgba(255,255,255,.9),transparent);
+  background-repeat:repeat;background-size:340px 220px;opacity:.6}
+.nebulosa{position:fixed;width:60vw;height:60vw;max-width:700px;max-height:700px;border-radius:50%;filter:blur(70px);z-index:-1;pointer-events:none;background:radial-gradient(circle at 30% 30%,rgba(222,5,64,.22),rgba(69,39,116,.12) 55%,transparent 75%);top:-15vw;right:-15vw}
+.nebulosa.dos{top:auto;right:auto;bottom:-20vw;left:-20vw;background:radial-gradient(circle at 70% 70%,rgba(69,39,116,.4),rgba(222,5,64,.08) 60%,transparent 78%)}
+.wrap{max-width:520px;margin:0 auto;padding:0 24px}
+nav{padding:18px 0;display:flex;align-items:center;gap:12px}
+.marca{display:flex;align-items:center;gap:12px;text-decoration:none}
+.marca img{width:42px;height:42px}
+.marca .nombre{font-family:'Audiowide',sans-serif;font-size:1.25rem;color:#fff;letter-spacing:.01em}
+main{padding:20px 0 60px}
+h1{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.4rem,3.2vw,2rem);line-height:1.2;color:#fff}
+p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
+.panel{margin-top:22px;background:linear-gradient(160deg,var(--morado) 0%,var(--morado-oscuro) 100%);border-radius:18px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
+.precio{font-family:'Audiowide',sans-serif;font-size:2rem;color:#fff}
+.precio small{font-family:'Jost',sans-serif;font-size:.95rem;color:var(--tinta-suave);display:block;margin-top:6px;font-weight:400}
+.btn{display:inline-block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;margin-top:22px;background:var(--gradiente);color:#fff;box-shadow:0 8px 24px rgba(222,5,64,.25)}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;margin-right:8px;animation:girar .7s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.msg{margin-top:16px;font-size:.9rem;padding:12px 14px;border-radius:12px;display:none}
+.msg.error{color:#FBE7BE;background:rgba(255,198,92,.1);border:1px solid rgba(255,198,92,.4)}
+.msg.ok{color:#CDEFE0;background:rgba(62,213,152,.1);border:1px solid rgba(62,213,152,.4)}
+.pie{margin-top:26px;text-align:center;font-size:.82rem;color:var(--tinta-suave)}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:0s}}
+</style>
+</head>
+<body>
+<div class="estrellas"></div>
+<div class="nebulosa"></div>
+<div class="nebulosa dos"></div>
+<div class="wrap">
+<nav><a class="marca" href="https://www.inntuitivo.com"><img src="inntuitivo-logo.png" alt="Inntuitivo"><span class="nombre">Inntuitivo</span></a></nav>
+<main>
+<h1>Activar tu agente</h1>
+<p class="sub">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que siga, se activa el plan de $45/mes. Cancelas cuando quieras.</p>
+<div class="panel">
+  <div class="precio">$65 hoy<small>+ $45/mes desde el mes 2</small></div>
+  <button id="btn-activar" class="btn" disabled>Cargando…</button>
+  <div id="msg-error" class="msg error"></div>
+  <div id="msg-ok" class="msg ok"></div>
+</div>
+<p class="pie">Pago procesado por Paddle. ¿Dudas? Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a>.</p>
+</main>
+</div>
+
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+(function () {
+  "use strict";
+  var API = "https://api.inntuitivo.com";
+  var btn = document.getElementById("btn-activar");
+  var msgError = document.getElementById("msg-error");
+  var msgOk = document.getElementById("msg-ok");
+  var cfg = null;
+
+  function mostrarError(texto) {
+    msgError.textContent = texto;
+    msgError.style.display = "block";
+  }
+
+  // t = muestra_token (viaja en el link del correo de muestra cuando el flag
+  // está en 'paddle', ver GET /suscribir en outreach-engine). Reservado para
+  // C2 (resolver a un client_id real vía /suscribir/cliente y mandarlo en
+  // custom_data) -- en C1 no se usa: el checkout abre igual, sin él, y
+  // alta_activacion crea un cliente nuevo -- mismo comportamiento que hoy.
+  var params = new URLSearchParams(window.location.search);
+  var t = params.get("t");
+
+  fetch(API + "/suscribir/config")
+    .then(function (r) {
+      if (!r.ok) throw new Error("config no disponible (" + r.status + ")");
+      return r.json();
+    })
+    .then(function (data) {
+      cfg = data;
+      var env = cfg.client_token.indexOf("test_") === 0 ? "sandbox" : "live";
+      Paddle.Environment.set(env);
+      Paddle.Initialize({
+        token: cfg.client_token,
+        eventCallback: function (event) {
+          if (event.name === "checkout.completed") {
+            btn.style.display = "none";
+            msgOk.textContent = "¡Listo! En unos minutos te llega un correo con el link para conectar tu agente.";
+            msgOk.style.display = "block";
+          }
+        },
+      });
+      btn.disabled = false;
+      btn.textContent = "Activar mi agente 🚀";
+    })
+    .catch(function () {
+      mostrarError("No se pudo cargar la configuración de pago. Escríbenos a info@inntuitivo.com y te ayudamos a mano.");
+    });
+
+  btn.addEventListener("click", function () {
+    if (!cfg) return;
+    Paddle.Checkout.open({
+      items: [
+        { priceId: cfg.price_id_activacion, quantity: 1 },
+        { priceId: cfg.price_id_recurrente, quantity: 1 },
+      ],
+      settings: {
+        displayMode: "overlay",
+        variant: "one-page",
+        theme: "dark",
+        locale: "es",
+      },
+    });
+  });
+})();
+</script>
+</body>
+</html>
