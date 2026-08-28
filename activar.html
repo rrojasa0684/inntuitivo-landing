@@ -87,14 +87,6 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
     msgError.style.display = "block";
   }
 
-  // t = muestra_token (viaja en el link del correo de muestra cuando el flag
-  // está en 'paddle', ver GET /suscribir en outreach-engine). Reservado para
-  // C2 (resolver a un client_id real vía /suscribir/cliente y mandarlo en
-  // custom_data) -- en C1 no se usa: el checkout abre igual, sin él, y
-  // alta_activacion crea un cliente nuevo -- mismo comportamiento que hoy.
-  var params = new URLSearchParams(window.location.search);
-  var t = params.get("t");
-
   fetch(API + "/suscribir/config")
     .then(function (r) {
       if (!r.ok) throw new Error("config no disponible (" + r.status + ")");
@@ -102,15 +94,38 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
     })
     .then(function (data) {
       cfg = data;
-      var env = cfg.client_token.indexOf("test_") === 0 ? "sandbox" : "live";
-      Paddle.Environment.set(env);
+      // `env` viaja EXPLÍCITO desde /suscribir/config -- nunca inferido del
+      // prefijo de client_token. Inferir sería un solo punto de fallo
+      // silencioso justo sobre el ambiente donde se mueve plata.
+      Paddle.Environment.set(cfg.env);
       Paddle.Initialize({
         token: cfg.client_token,
         eventCallback: function (event) {
           if (event.name === "checkout.completed") {
             btn.style.display = "none";
-            msgOk.textContent = "¡Listo! En unos minutos te llega un correo con el link para conectar tu agente.";
+            // 28-ago: event.data.customer.email viaja en el propio evento del
+            // overlay (confirmado contra developer.paddle.com/paddlejs/general/
+            // checkout-completed) -- sin llamada extra. Si por lo que sea no
+            // viene, el mensaje se queda genérico en vez de decir "undefined".
+            var correo = event.data && event.data.customer && event.data.customer.email;
+            msgOk.textContent = correo
+              ? "¡Listo! En unos minutos te llega un correo a " + correo + " con el link para conectar tu agente."
+              : "¡Listo! En unos minutos te llega un correo con el link para conectar tu agente.";
             msgOk.style.display = "block";
+          } else if (event.name === "checkout.error") {
+            // 28-ago: sin esto, si el overlay no abre (price ID archivado,
+            // dominio no aprobado, lo que sea) la persona ve un botón que no
+            // hace nada y se va -- la pared de PayPal con otra cara. Barato,
+            // sin backend: solo re-habilita el botón (puede ser transitorio,
+            // reintentar tiene sentido) y muestra la vía humana. El aviso a
+            // OPS queda gateado -- ver docs/memoria/paddle-checkout-error-sin-aviso-a-ops.md
+            // en outreach-engine: necesita un endpoint, no se construye antes
+            // de que el flag pase a paddle.
+            btn.disabled = false;
+            mostrarError(
+              "No pudimos abrir el pago. Probá de nuevo en un momento, o escribinos a " +
+              "info@inntuitivo.com y te ayudamos a mano."
+            );
           }
         },
       });
