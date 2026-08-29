@@ -118,15 +118,22 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
             // dominio no aprobado, lo que sea) la persona ve un botón que no
             // hace nada y se va -- la pared de PayPal con otra cara. Barato,
             // sin backend: solo re-habilita el botón (puede ser transitorio,
-            // reintentar tiene sentido) y muestra la vía humana. El aviso a
-            // OPS queda gateado -- ver docs/memoria/paddle-checkout-error-sin-aviso-a-ops.md
-            // en outreach-engine: necesita un endpoint, no se construye antes
-            // de que el flag pase a paddle.
+            // reintentar tiene sentido) y muestra la vía humana.
             btn.disabled = false;
             mostrarError(
               "No pudimos abrir el pago. Probá de nuevo en un momento, o escribinos a " +
               "info@inntuitivo.com y te ayudamos a mano."
             );
+            // 29-ago: aviso a OPS -- ver docs/memoria/paddle-checkout-error-sin-aviso-a-ops.md
+            // en outreach-engine (gate YAGNI revocado, endpoint ya construido).
+            // Best-effort: si esto falla, la persona ya vio la vía humana en
+            // pantalla -- no bloquea ni le agrega otro error a su experiencia.
+            var d = event.data || {};
+            fetch(API + "/suscribir/checkout-error", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: d.type, code: d.code, detail: d.detail }),
+            }).catch(function () {});
           }
         },
       });
