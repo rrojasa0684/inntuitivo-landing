@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Bloquea un push que toca index.html (la página que convierte) sin una marca
+# de "baseline" en el diff -- el problema real del 17-ago no fue el copy en
+# sí, fue que 14 commits se pushearon el mismo día sin que nadie anotara el
+# número de ANTES. Dos semanas después, comparar era imposible.
+#
+# Convención: cualquier línea AGREGADA en el diff de index.html que contenga
+# la palabra "baseline" (sin importar mayúsculas) cuenta como marca. Uso
+# esperado: un comentario HTML cerca del cambio, con el número real del día,
+# no un placeholder -- ej. "<!-- 1-sep: baseline scroll_precio=9/día,
+# cta_activar=0/semana. Comparar en 2 semanas. -->".
+#
+# ⚠️ LÍMITE, desde el día uno: esto es un hook LOCAL (vive en .githooks/,
+# git config core.hooksPath). Protege un push hecho desde ESTA máquina con
+# este hook instalado -- NO protege un push desde otra máquina sin el mismo
+# config, ni una edición hecha directo en github.com (el editor web de
+# GitHub commitea sin pasar por ningún hook local). No es un gate de CI
+# porque este repo no tiene CI. Sirve para el caso normal (Ricardo o Claude
+# Code empujando desde este Mac), no como garantía absoluta.
+#
+# Para saltarlo a propósito (un cambio que de verdad no toca nada de
+# conversión: un typo, un link roto): git push --no-verify.
+set -euo pipefail
+
+zero="0000000000000000000000000000000000000000"
+bloqueado=0
+detalle=""
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue  # borrando una ref, nada que revisar
+
+  if [ "$remote_sha" = "$zero" ]; then
+    # rama/ref nueva en el remoto: no hay punto de comparación previo real,
+    # se compara contra el árbol vacío (git diff --root) para no reventar.
+    rango_diff=(--root "$local_sha")
+    rango_names=(--root "$local_sha")
+  else
+    rango_diff=("$remote_sha..$local_sha")
+    rango_names=("$remote_sha..$local_sha")
+  fi
+
+  tocado=$(git diff --name-only "${rango_names[@]}" -- index.html 2>/dev/null || true)
+  [ -z "$tocado" ] && continue  # index.html no cambia en este push
+
+  marca=$(git diff "${rango_diff[@]}" -- index.html 2>/dev/null | grep -E '^\+' | grep -iq 'baseline' && echo si || echo no)
+  if [ "$marca" = "no" ]; then
+    bloqueado=1
+    detalle="$detalle  - $local_ref ($remote_sha..$local_sha)\n"
+  fi
+done
+
+if [ "$bloqueado" = "1" ]; then
+  cat >&2 <<MSG
+
+🔴 PUSH BLOQUEADO: toca index.html (la página que convierte) sin una marca
+   de "baseline" en el diff.
+$(printf '%b' "$detalle")
+   El 17-ago, 14 commits de copy se pushearon juntos sin que nadie anotara
+   el número del día antes -- dos semanas después, nadie podía comparar si
+   algo cambió. Esto existe para que no se repita.
+
+   QUÉ ANOTAR Y DÓNDE: un comentario HTML cerca del cambio, con la palabra
+   "baseline" y el número REAL de hoy (no un placeholder) -- sacalo de
+   Umami o del reporte semanal antes de commitear de nuevo:
+
+     <!-- 1-sep: baseline scroll_precio=9/día, cta_activar=0/semana.
+          Comparar de acá a 2 semanas. -->
+
+   Si de verdad no aplica (un typo, un link roto, nada que toque
+   conversión): git push --no-verify -- pero esa decisión es tuya, el hook
+   no la puede tomar por vos.
+
+MSG
+  exit 1
+fi
+
+exit 0
