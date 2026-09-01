@@ -1,0 +1,61 @@
+name: index-baseline-check
+
+# Gemelo SERVIDOR de .githooks/pre-push -- protege lo que el hook local NO puede: un
+# push desde una máquina donde nadie configuró `core.hooksPath`, o directo desde el
+# editor web de GitHub. Confirmado en vivo (1-sep): un clon limpio tiene el archivo
+# del hook pero `core.hooksPath` no viene seteado por defecto -- el hook NUNCA
+# corre, sin ningún error, indistinguible de un push normal. Un hook que no se
+# disparó no puede avisar que no se disparó por su cuenta; esto corre en el
+# servidor de GitHub, no en la máquina de quien pushea, así que no depende de
+# ningún config local.
+#
+# Motivo (ver docs/memoria/copy-de-conversion-sin-medir-17-ago.md en outreach-engine):
+# el 17-ago, 14 commits de copy a index.html se pushearon juntos, sin baseline, y al
+# día siguiente cta_activar cayó a cero. Este chequeo mira TODO el rango del push
+# (github.event.before -> HEAD), no solo el último commit -- un push de varios
+# commits (como el del 17-ago) tiene que verse completo, no commit por commit.
+#
+# ⚠️ Límite honesto: esto corre DESPUÉS de que el push ya aterrizó (no hay PRs en
+# este repo, push directo a main -- branch protection real necesita GitHub Pro,
+# descartado a propósito con 0 clientes de pago). No bloquea el push; deja el
+# commit con un check ROJO visible en la pestaña Actions y en el commit mismo, y
+# GitHub notifica por default a quien pusheó cuando su propia corrida falla. Es
+# "avisa fuerte e inevitable", no "impide" -- la decisión de no pagar branch
+# protection ya está tomada, esto no la revierte.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: index.html requiere una marca de "baseline" si cambia
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          zero="0000000000000000000000000000000000000000"
+          before="$BEFORE"
+          if [ "$before" = "$zero" ] || ! git cat-file -e "$before" 2>/dev/null; then
+            echo "BEFORE no disponible (rama nueva o force-push) -- comparando contra el primer commit del historial."
+            before=$(git rev-list --max-parents=0 HEAD | tail -1)
+          fi
+
+          if ! git diff --name-only "$before" HEAD | grep -qx "index.html"; then
+            echo "index.html no cambió en este push. OK."
+            exit 0
+          fi
+
+          if git diff "$before" HEAD -- index.html | grep -E '^\+' | grep -iq 'baseline'; then
+            echo "Marca de baseline encontrada en el diff. OK."
+            exit 0
+          fi
+
+          echo "::error::index.html cambió (rango $before..${{ github.sha }}, puede ser varios commits) sin ninguna línea agregada con la palabra 'baseline'. El 17-ago, 14 commits de copy se pushearon juntos sin medir, y al día siguiente cta_activar cayó a cero -- esto existe para que no se repita. Agregá un comentario HTML con 'baseline' y el número REAL de hoy (scroll_precio/cta_activar de Umami) cerca del cambio, y pusheá un commit nuevo con esa marca."
+          exit 1
