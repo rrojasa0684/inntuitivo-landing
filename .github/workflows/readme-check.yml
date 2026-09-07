@@ -1,0 +1,30 @@
+name: readme-check
+
+# Gemelo del chequeo homónimo en outreach-engine (ops/readme-nombres-check.sh):
+# el README.md de este repo nombra archivos entre backticks que un lector sigue
+# al pie de la letra -- si uno de esos archivos se borra o se renombra en un
+# commit posterior, el README queda mintiendo en silencio. Ver el header de
+# readme-nombres-check.sh (raíz de este repo) para qué cuenta como referencia
+# verificable y qué se ignora a propósito.
+#
+# Mismo límite honesto que index-baseline-check.yml: no hay branch protection
+# pagado, así que esto corre DESPUÉS de que el push ya aterrizó -- avisa fuerte
+# (check rojo en Actions), no impide.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "readme-nombres-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if ! bash readme-nombres-check.sh; then
+            echo "::error::README.md menciona un archivo entre backticks que ya no existe en el árbol -- ver la lista de arriba. Actualizá el nombre o quitá la referencia."
+            exit 1
+          fi
