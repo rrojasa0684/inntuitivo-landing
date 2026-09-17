@@ -946,6 +946,9 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form select option{background:#1a1030;color:var(--tinta)}
   .ms-form input:focus,.ms-form textarea:focus,.ms-form select:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
+  .ms-decisor-opciones{display:flex;gap:18px;margin-top:2px}
+  .ms-decisor-opcion{display:flex!important;align-items:center;gap:6px;font-size:.92rem;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);margin:0!important;cursor:pointer}
+  .ms-decisor-opcion input{width:auto!important;padding:0!important}
   .ms-btn{display:block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;margin-top:20px;color:#fff;background:var(--gradiente);box-shadow:0 8px 24px rgba(222,5,64,.25);transition:transform .15s ease,box-shadow .15s ease}
   .ms-btn:hover{transform:translateY(-2px)}
   .ms-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
@@ -1012,6 +1015,18 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           </select>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
+          <!-- 17-sep (2ª tanda, hallazgo de Ronald): baseline scroll_precio=73/7días=10.4/día,
+               cta_activar=0/7días (Umami). Cambio: pregunta "¿sos quien decide?" + correo del
+               decisor, opcional, en el form de muestra. Comparar de acá a 2 semanas. -->
+          <label>¿Eres quien decide comprar herramientas para el negocio? <span class="ms-hint">Opcional — si no eres tú, le avisamos a esa persona directamente.</span></label>
+          <div class="ms-decisor-opciones">
+            <label class="ms-decisor-opcion"><input type="radio" name="es_decisor" value="si"> Sí</label>
+            <label class="ms-decisor-opcion"><input type="radio" name="es_decisor" value="no"> No</label>
+          </div>
+          <div id="ms-decisor-correo-wrap" hidden>
+            <label for="ms-decisor-correo">Correo de quien decide <span class="ms-hint">Opcional — si lo dejas en blanco, tu muestra incluye una línea para que se la reenvíes tú mismo.</span></label>
+            <input id="ms-decisor-correo" name="correo_decisor" type="email" placeholder="correo@tudominio.com" spellcheck="false" autocomplete="email">
+          </div>
           <div class="ms-hp" aria-hidden="true">
             <label for="ms-hp-field">No llenar este campo</label>
             <input id="ms-hp-field" name="ms_ref_2" type="text" tabindex="-1" autocomplete="new-password">
@@ -1424,10 +1439,20 @@ document.addEventListener('DOMContentLoaded', function () {
   // Formulario de la muestra gratis: postea a nuestro endpoint y muestra estados.
   var msForm = document.getElementById('ms-form');
   if (msForm) {
+    // ¿Sos quien decide? (opcional) -- el campo "correo de quien decide" solo tiene
+    // sentido si contestó "no"; se oculta con el resto hasta entonces.
+    var msDecisorWrap = document.getElementById('ms-decisor-correo-wrap');
+    msForm.querySelectorAll('input[name="es_decisor"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        msDecisorWrap.hidden = (r.value !== 'no' || !r.checked);
+        if (msDecisorWrap.hidden) document.getElementById('ms-decisor-correo').value = '';
+      });
+    });
     msForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var res = document.getElementById('ms-res');
       var btn = document.getElementById('ms-btn');
+      var decisorElegido = msForm.querySelector('input[name="es_decisor"]:checked');
       var datos = {
         sitio_web: (msForm.sitio_web.value || '').trim(),
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
@@ -1436,6 +1461,12 @@ document.addEventListener('DOMContentLoaded', function () {
         r: r || '',                             // código de origen del ?r= (linkedin, etc.), no visible al usuario
         ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
       };
+      if (decisorElegido) {
+        datos.es_decisor = (decisorElegido.value === 'si');
+        if (!datos.es_decisor) {
+          datos.correo_decisor = (msForm.correo_decisor.value || '').trim();
+        }
+      }
       if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografia || !datos.correo) {
         res.className = 'ms-resultado error';
         res.innerHTML = '<span class="titulo">Faltan datos</span>Completa tu sitio web, a quién le vendes, dónde están tus clientes y tu correo.';
@@ -1466,6 +1497,7 @@ document.addEventListener('DOMContentLoaded', function () {
           res.innerHTML = '<span class="titulo">¡Listo! 🚀</span>' +
             (o.j.mensaje || 'Tu agente está armando la muestra. Te llega a tu correo dentro de la próxima hora.');
           msForm.reset();
+          msDecisorWrap.hidden = true;
           btn.textContent = 'Muestra pedida ✓';
         } else if (o.status === 429) {
           // Demasiadas solicitudes desde esta IP: mensaje distinto, sin decir "recibido".
