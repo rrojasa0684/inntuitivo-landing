@@ -1433,10 +1433,13 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       </div>
 
       <a class="btn btn-primario tabla-real-cta" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
-      <!-- 18-sep-2026: fix de voseo ("escribinos" -> "escríbenos"), cazado por
-           test_index_html_voseo.py en outreach-engine.
-           baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
-           días). -->
+      <!-- 18-sep-2026: fix de voseo en esta nota al pie -- el verbo estaba
+           conjugado en vos en vez de tú, cazado por test_index_html_voseo.py en
+           outreach-engine (el fix anterior lo describía citando el verbo viejo
+           dentro del propio comentario, lo que el mismo test de voseo lee como
+           substring y vuelve a marcar -- corregido sin citar la palabra literal).
+           baseline (18-sep, 2da corrección) scroll_precio=10.3/día,
+           cta_activar=0/semana (Umami, últimos 7 días). -->
       <p class="micro tabla-real-fuentes">Precios verificados el 18-sep-2026 contra las páginas de precios públicas de Apollo, Lusha y Hunter (plan de entrada, facturación mensual, sin compromiso anual). Si ves un precio viejo, escríbenos — <a href="https://github.com/rrojasa0684/inntuitivo-landing/blob/main/precio-competencia-check.sh" target="_blank" rel="noopener">este chequeo</a> avisa solo cuando toca reverificar.</p>
     </div>
 
