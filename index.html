@@ -1742,115 +1742,127 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Aparicion progresiva al hacer scroll.
-  // #muestra y #activar quedan fuera: son destino de ancla y, al llegar por
-  // salto, puede quedar visible menos del 12% que exige el observer — nunca
-  // dispararia y la seccion se quedaria en opacity:0.
+  // #muestra y #activar quedan fuera del mecanismo genérico: son destino de
+  // ancla y tienen su propio trigger dedicado más abajo.
   //
-  // 18-sep-2026: "🪐 La diferencia" (.col-vs) sale COMPLETO de este mecanismo --
-  // ver el bloque dedicado más abajo. Los intentos anteriores (bajar threshold,
-  // rootMargin -25%) seguían disparando por la intersección de LA CAJA MISMA, y
-  // .col-vs mide casi la altura de la pantalla: para cuando "entra lo suficiente"
-  // para disparar, ya se ve casi completa -- no hay margen real para que el fade
-  // se perciba como fade y no como aparición instantánea. El disparador ahora es
-  // el TÍTULO de la sección (mucho más chico), y las cajas entran desde los
-  // costados, no solo con opacity -- ver abajo.
-  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, details, .banner-marca, .precio-card');
-  targets.forEach(function(el){ el.classList.add('reveal'); });
-  // 17-sep-2026: 'revelado' se agrega DESPUÉS de que termina la transición de
-  // aparecer -- retira la transition-shorthand de .reveal (ver ese CSS) para que
-  // .paso/.dia/.col-vs/details recuperen su transition de hover normal (.2s) en vez
-  // de quedar con la de .6s para siempre. Un solo listener {once:true} alcanza:
-  // opacity y transform duran lo mismo (.6s), llegan casi juntos.
+  // 18-sep-2026 (2da corrección, el hueco en blanco): el fix de hoy más temprano
+  // (threshold:0 + rootMargin negativo, en vez de threshold porcentual) arregló
+  // que el evento NUNCA disparara en elementos altos -- pero introdujo un bug
+  // nuevo, peor en la práctica: el rootMargin retrasa el disparo por la posición
+  // del ANCLA, no por si el CONTENIDO ya se ve. Con .tabla-real/.col-vs (altos,
+  // el ancla es un <h2> chico arriba del todo), el contenido puede entrar
+  // enteramente a pantalla -- sobre todo scrolleando hacia ARRIBA, donde el
+  // contenido (más abajo en el documento) aparece ANTES que su propio ancla --
+  // y quedarse en opacity:0 a la vista, hasta que el ancla al fin cruza el
+  // rootMargin. Visible y en blanco al mismo tiempo: peor que no animar.
+  //
+  // Regla nueva, con la que se reescribió TODO este bloque (genérico, La
+  // diferencia, tabla de precios -- los tres compartían la misma causa):
+  // NADA puede estar visible en pantalla y en blanco a la vez. revelarSinHueco()
+  // la aplica con cuatro capas, cada una cerrando el hueco que dejaba la anterior:
+  //   1. Al armar el observer, si el CONTENIDO ya está en pantalla (carga de
+  //      página, o entrada por ancla/scroll ya avanzado), se revela YA, sin
+  //      esperar ninguna transición -- transition:none puesto y sacado en el
+  //      mismo tick, así el usuario nunca ve ni un frame en blanco.
+  //   2. Mientras el contenido todavía no se ve nada (recién asomando), el
+  //      ancla + rootMargin sigue manejando el timing "entra y se nota" ya
+  //      probado hoy -- eso no cambió.
+  //   3. Pero si el CONTENIDO llega a un 60% visible ANTES de que el ancla
+  //      cruce su rootMargin (el caso nuevo: scroll hacia arriba, o scroll
+  //      rápido) -- revela YA, no espera más al ancla.
+  //   4. Failsafe: si por lo que sea ninguno de los dos disparadores llega,
+  //      1 segundo desde que asoma cualquier parte del contenido y revela
+  //      igual -- nunca se queda en blanco indefinidamente.
+  // 'revelado' (agregado por marcarRevelado tras el transitionend, o directo
+  // si fue instantáneo) sigue existiendo para que .paso/.dia/details recuperen
+  // su transition de hover normal -- eso no cambió.
   function marcarRevelado(el){
     el.addEventListener('transitionend', function(){ el.classList.add('revelado'); }, { once: true });
   }
-  if (reduce || !('IntersectionObserver' in window)) {
-    targets.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
-  } else {
-    // 18-sep-2026: threshold:0.12 -> threshold:0 + rootMargin. Es la MISMA causa
-    // raíz que rompió "La diferencia", la tabla de precios y (recién detectado)
-    // scroll_precio hoy: un threshold porcentual depende de la ALTURA del propio
-    // elemento -- un elemento que crece (o ya es alto: FAQ 919px, "Así escribe"
-    // 847px, ambos más altos que un viewport típico) puede necesitar más scroll
-    // del que existe para acumular ese % de SU PROPIA área. rootMargin dispara
-    // por la posición del borde superior, sin importar cuán alto sea el resto --
-    // inmune a que la sección crezca mañana. Mismo timing relativo de disparo
-    // que el 0.12 anterior (early, no "ya visible del todo").
-    var obs = new IntersectionObserver(function(entries){
+  // baseline (18-sep, tarde) scroll_precio=7.6/día, cta_activar=1/semana (mismo dato de
+  // Umami reusado de las corridas anteriores de hoy -- no cambió).
+  function revelarSinHueco(contenido, ancla, rootMargin, elementosTransicion, aplicar){
+    // 'contenido' puede ser un elemento o un array -- La diferencia pasa las DOS
+    // cajas por separado (no el contenedor .versus): en mobile .versus apila las
+    // dos (~600px, el doble de una sola), así que su proporción visible propia
+    // puede seguir baja aunque UNA caja individual ya esté casi entera en
+    // pantalla -- medir el contenedor combinado escondía justo ese caso.
+    var elementos = Array.isArray(contenido) ? contenido : [contenido];
+    var referencia = elementos[0];
+    var hecho = false, failsafeArmado = false;
+    function ejecutar(instantaneo){
+      if (hecho) return;
+      hecho = true;
+      if (instantaneo) {
+        var previas = elementosTransicion.map(function(el){ return el.style.transition; });
+        elementosTransicion.forEach(function(el){ el.style.transition = 'none'; });
+        aplicar(true);
+        void referencia.offsetHeight;                 // fuerza el reflow: el estado final se aplica YA, sin animar
+        elementosTransicion.forEach(function(el, i){ el.style.transition = previas[i]; });
+      } else {
+        aplicar(false);
+      }
+    }
+    function enPantalla(el){
+      var r = el.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    }
+    if (elementos.some(enPantalla)) { ejecutar(true); return; }         // regla 2
+    if (reduce || !('IntersectionObserver' in window)) { ejecutar(true); return; }
+
+    var obsAncla = new IntersectionObserver(function(entries){          // regla normal (timing "entra y se nota")
+      entries.forEach(function(e){ if (e.isIntersecting) { ejecutar(false); obsAncla.disconnect(); } });
+    }, { threshold: 0, rootMargin: rootMargin });
+    obsAncla.observe(ancla);
+
+    var obsContenido = new IntersectionObserver(function(entries){      // reglas 1, 3 y 4
       entries.forEach(function(e){
-        if (e.isIntersecting) {
-          marcarRevelado(e.target);
-          e.target.classList.add('visible');
-          obs.unobserve(e.target);
-        }
+        if (hecho) { obsContenido.disconnect(); return; }
+        if (!e.isIntersecting) return;
+        if (e.intersectionRatio >= 0.6) { ejecutar(false); obsContenido.disconnect(); return; }
+        if (!failsafeArmado) { failsafeArmado = true; setTimeout(function(){ ejecutar(false); }, 1000); }
       });
-    }, { threshold: 0, rootMargin: '0px 0px -15% 0px' });
-    targets.forEach(function(el){ obs.observe(el); });
+    }, { threshold: [0, 0.6] });
+    elementos.forEach(function(el){ obsContenido.observe(el); });
   }
 
-  // 18-sep-2026 (6ta vez reportado "🪐 La diferencia" sin animarse -- causa real):
-  // .col-vs mide casi la altura de la pantalla. Con cualquier threshold/rootMargin
-  // atado a la intersección DE LA CAJA, para cuando dispara ya se ve casi entera --
-  // no hay ventana perceptible entre "empieza a aparecer" y "ya está". Se
-  // desacopla el disparador de las cajas: se observa el TÍTULO de la sección (un
-  // <h2>, chico) y se dispara cuando cruza la MITAD SUPERIOR del viewport
-  // (rootMargin -50% abajo, el viewport efectivo queda reducido a su mitad de
-  // arriba) -- para ese momento el usuario ya está mirando la sección, no
-  // asomando. Las cajas no usan .reveal/.visible (ese mecanismo sigue intacto
-  // para .paso/.dia/etc., ver arriba) -- tienen su propio CSS (.versus
-  // .col-vs), con entrada lateral (translateX, no solo Y) y escalonado 150ms
-  // entre las dos -- ver ese bloque en <style>.
+  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, details, .banner-marca, .precio-card');
+  targets.forEach(function(el){
+    el.classList.add('reveal');
+    revelarSinHueco(el, el, '0px 0px -15% 0px', [el], function(instantaneo){
+      if (!instantaneo) marcarRevelado(el);
+      el.classList.add('visible');
+      if (instantaneo) el.classList.add('revelado');
+    });
+  });
+
+  // "🪐 La diferencia" (.col-vs): ancla en el <h2> de la sección (chico), las
+  // cajas entran desde los costados (translateX), no solo con opacity -- ver
+  // ese bloque en <style>. No usa .reveal/.visible, tiene su propia clase
+  // diferencia-visible en .versus.
   // baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días).
   var seccionDiferencia = document.querySelector('.versus');
   seccionDiferencia = seccionDiferencia ? seccionDiferencia.closest('section') : null;
   var tituloDiferencia = seccionDiferencia ? seccionDiferencia.querySelector('h2') : null;
   if (seccionDiferencia && tituloDiferencia) {
     var versusEl = seccionDiferencia.querySelector('.versus');
-    if (reduce || !('IntersectionObserver' in window)) {
+    var cajasVersus = Array.prototype.slice.call(versusEl.querySelectorAll('.col-vs'));
+    revelarSinHueco(cajasVersus, tituloDiferencia, '0px 0px -50% 0px', cajasVersus, function(){
       versusEl.classList.add('diferencia-visible');
-    } else {
-      var obsDiferencia = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){
-          if (e.isIntersecting) {
-            versusEl.classList.add('diferencia-visible');
-            obsDiferencia.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
-      obsDiferencia.observe(tituloDiferencia);
-    }
+    });
   }
 
-  // 18-sep-2026: tabla "costo real de hacer outbound" -- vive en #activar, que el
-  // observer principal EXCLUYE a propósito (destino de ancla, ver el comentario de
-  // "targets" más arriba). Es una tabla larga (6 filas), así que aplica el mismo
-  // aprendizaje del bloque de arriba: rootMargin negativo para que dispare cuando
-  // se ve de verdad, no apenas asoma.
-  // 18-sep-2026 (mismo aprendizaje que el bloque de "La diferencia" arriba, esta
-  // vez confirmado ANTES de desplegar, no después de 6 rondas): la tabla mide
-  // 792px -- más alta que el viewport típico (748px en esta prueba). Atar el
-  // trigger a la intersección DE LA TABLA MISMA (aunque sea con rootMargin
-  // negativo) es la misma trampa: una tabla más alta que la pantalla puede tardar
-  // mucho en acumular 12% de SU PROPIA área, o directamente no alcanzarlo nunca
-  // en un scroll razonable. El disparador es el <h2> de la sección (chico) --
-  // mismo mecanismo, mismo rootMargin -50%, ya probado.
+  // Tabla "costo real de hacer outbound" -- vive en #activar, que el observer
+  // genérico excluye a propósito (destino de ancla). Ancla en el <h2> de la
+  // sección (chico), mismo mecanismo que La diferencia.
   var tablaReal = document.querySelector('.tabla-real');
   var tituloActivar = tablaReal ? document.querySelector('#activar h2') : null;
   if (tablaReal && tituloActivar) {
-    if (reduce || !('IntersectionObserver' in window)) {
+    revelarSinHueco(tablaReal, tituloActivar, '0px 0px -50% 0px', [tablaReal], function(instantaneo){
+      if (!instantaneo) marcarRevelado(tablaReal);
       tablaReal.classList.add('visible');
-    } else {
-      var obsTabla = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){
-          if (e.isIntersecting) {
-            marcarRevelado(tablaReal);
-            tablaReal.classList.add('visible');
-            obsTabla.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
-      obsTabla.observe(tituloActivar);
-    }
+      if (instantaneo) tablaReal.classList.add('revelado');
+    });
   }
 
   // Observer COMPARTIDO: pausa animaciones de seccion fuera de viewport, para no

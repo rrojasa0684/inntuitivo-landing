@@ -22,6 +22,15 @@
 // pieza de este repo "cero framework, sin build" que necesita Node, porque es
 // la única pregunta ("¿cuánto mide esto YA RENDERIZADO?") que no se puede
 // contestar sin un motor de layout real.
+//
+// 18-sep-2026 (2da corrección): un threshold porcentual (p.ej. 0.6) YA NO es
+// violación por sí solo si el MISMO array de thresholds incluye también 0
+// (ej. threshold:[0, 0.6]). Con 0 presente, el callback del observer SÍ
+// dispara apenas cualquier parte del elemento cruza el borde -- lo que basta
+// para armar un failsafe por temporizador (ver revelarSinHueco() en
+// index.html) sin importar si el 0.6 llega a alcanzarse alguna vez. El riesgo
+// real que este chequeo cierra es "el callback nunca se invoca" -- eso solo
+// pasa cuando CERO de los thresholds configurados es alcanzable.
 
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
@@ -70,7 +79,8 @@ async function main() {
     for (const obs of window.__observaciones || []) {
       const thresholds = Array.isArray(obs.threshold) ? obs.threshold : [obs.threshold];
       const tienePorcentaje = thresholds.some((t) => t > 0);
-      if (!tienePorcentaje) continue;
+      const ceroPresente = thresholds.some((t) => t === 0);
+      if (!tienePorcentaje || ceroPresente) continue;
       const height = obs.el.getBoundingClientRect().height;
       if (height > viewportHeight) {
         out.push({
@@ -93,7 +103,7 @@ async function main() {
   await browser.close();
 
   if (violaciones.length > 0) {
-    console.error('::error::Elemento(s) observado(s) con threshold porcentual (>0) que miden más que el viewport de referencia (' + VIEWPORT.height + 'px) -- ese threshold puede no alcanzarse nunca en scroll real. Usá threshold:0 + rootMargin en vez de un threshold porcentual, o un elemento ancla chico (ver obsDiferencia/obsTabla en index.html).');
+    console.error('::error::Elemento(s) observado(s) con threshold porcentual (>0, y SIN 0 en el mismo array) que miden más que el viewport de referencia (' + VIEWPORT.height + 'px) -- el callback puede no invocarse nunca en scroll real. Agregá 0 al array de thresholds (para que el callback dispare igual y pueda armar un failsafe), o usá threshold:0 + rootMargin con un elemento ancla chico (ver revelarSinHueco() en index.html).');
     for (const v of violaciones) {
       console.error('  - ' + v.desc + ': threshold=' + JSON.stringify(v.threshold) + ', altura=' + v.height + 'px');
     }
