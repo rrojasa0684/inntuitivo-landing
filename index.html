@@ -388,6 +388,21 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 .semana > .reveal:nth-child(2){transition-delay:.12s}
 .semana > .reveal:nth-child(3){transition-delay:.24s}
 .semana > .reveal:nth-child(4){transition-delay:.36s}
+/* 17-sep: filas de #en-simple/#apollo, ~80ms entre una y otra (pedido de Ricardo) --
+   mismo patron nth-child que arriba, no una variable CSS nueva. .flecha de cada fila
+   lleva +.15s sobre el delay de su fila, para que el pop-in del acento se sienta
+   DESPUES de que la fila ya empezo a aparecer, no a la vez. */
+.compara-filas > .reveal:nth-child(2){transition-delay:.08s}
+.compara-filas > .reveal:nth-child(3){transition-delay:.16s}
+.compara-filas > .reveal:nth-child(4){transition-delay:.24s}
+.compara-filas > .reveal:nth-child(5){transition-delay:.32s}
+.compara-filas > .reveal:nth-child(6){transition-delay:.40s}
+.compara-filas > .reveal:nth-child(1) .flecha{transition-delay:.15s}
+.compara-filas > .reveal:nth-child(2) .flecha{transition-delay:.23s}
+.compara-filas > .reveal:nth-child(3) .flecha{transition-delay:.31s}
+.compara-filas > .reveal:nth-child(4) .flecha{transition-delay:.39s}
+.compara-filas > .reveal:nth-child(5) .flecha{transition-delay:.47s}
+.compara-filas > .reveal:nth-child(6) .flecha{transition-delay:.55s}
 
 /* 7b. Todos los CTA primarios ("activar el agente" + escuchar podcast): pulso + shine.
    El nav lleva un glow ~30% mas contenido: es chico y siempre visible, no debe cansar. */
@@ -418,7 +433,8 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .btn-primario::after,.nav-cta::after{display:none}
   .precio-card{animation:none}
   .satelite{animation:none;display:none}
-  .pasos > .reveal,.semana > .reveal,.versus > .reveal{transition-delay:0s}
+  .pasos > .reveal,.semana > .reveal,.versus > .reveal,.compara-filas > .reveal{transition-delay:0s}
+  .compara-fila .flecha{transition:none;transform:none;opacity:1}
   .talks-card a.talks-logo{transition:none}
 }
 
@@ -556,16 +572,48 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
      de una <table> real, para que apilar en mobile sea gratis (grid-template-columns
      pasa de 3 a 1 columna, sin scroll horizontal). Reusado por #en-simple y #apollo
      -- mismos tokens de color que el resto del sitio (var(--carta)/var(--linea)/
-     var(--tinta)/var(--tinta-suave)/var(--rosa-claro)), nada de paleta nueva. */
+     var(--tinta)/var(--tinta-suave)/var(--rosa-claro)/var(--gradiente)), nada de
+     paleta nueva. La animación al aparecer reusa el motor EXISTENTE de la página
+     (.reveal/.visible + el IntersectionObserver del script de abajo, mismo patrón
+     que .pasos/.semana) -- no uno nuevo; el stagger de ~80ms está en la sección "7a.
+     Cascada escalonada" del bloque style principal, junto a sus hermanos .pasos/.semana.
+
+     17-sep, 2ª pasada (jerarquía visual, pedido de Ricardo -- las dos secciones se
+     veían "dos cajas grises idénticas"): la columna .de (vendedor humano / Apollo)
+     va apagada -- opacity reducida, sin negrita, tamaño más chico. La .a (tu agente)
+     va brillante -- blanco pleno, negrita, con un punto del degradado de marca antes
+     del texto (mismo --gradiente que los CTA primarios y el filo de las cards de
+     Mercately/Academy). La comparación se lee ANTES de leer el texto, por contraste
+     solo.
+
+     baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días,
+     mismo número de hoy) -- jerarquía visual + animación, no copy; nada que se
+     espere que mueva la aguja de conversión por sí solo. Comparar de acá a 2
+     semanas. */
   .compara-filas{margin-top:28px;display:flex;flex-direction:column;gap:1px;border-radius:16px;overflow:hidden;border:1px solid var(--linea);background:var(--linea)}
-  .compara-fila{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;padding:20px 24px;background:var(--carta)}
-  .compara-fila .de{color:var(--tinta-suave);font-size:.96rem;line-height:1.5}
-  .compara-fila .a{color:var(--tinta);font-size:.96rem;line-height:1.5;font-weight:600}
-  .compara-fila .flecha{color:var(--rosa-claro);font-size:1.15rem;line-height:1}
+  .compara-fila{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;padding:26px 28px;background:var(--carta)}
+  .compara-fila .de{color:var(--tinta-suave);opacity:.62;font-weight:400;font-size:.92rem;line-height:1.55}
+  .compara-fila .a{color:var(--tinta);opacity:1;font-weight:700;font-size:.98rem;line-height:1.55}
+  .compara-fila .a::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gradiente);margin:0 9px 1px 0;vertical-align:middle;box-shadow:0 0 8px rgba(255,133,166,.55)}
+  .compara-fila .flecha{color:var(--rosa-claro);font-size:1.2rem;line-height:1;display:inline-block;opacity:0;transform:scale(.4);transition:opacity .45s ease,transform .45s ease}
+  .compara-fila.visible .flecha{opacity:1;transform:scale(1)}
   @media (max-width:768px){
-    .compara-fila{grid-template-columns:1fr;gap:6px;padding:18px 20px}
+    .compara-fila{grid-template-columns:1fr;gap:8px;padding:22px 20px}
     .compara-fila .flecha{display:none}
-    .compara-fila .a::before{content:"→ ";color:var(--rosa-claro)}
+    .compara-fila .a::before{content:"";width:0;margin:0}
+    .compara-fila .a{position:relative;padding-left:20px}
+    .compara-fila .a::after{content:"→";position:absolute;left:0;top:0;color:var(--rosa-claro)}
+  }
+
+  /* 17-sep, 3ª pasada (que #apollo no se lea como la misma caja repetida -- solo
+     3 filas, tratamiento más compacto: cards SEPARADAS con su propio filo de
+     degradado arriba, mismo motivo visual que .mercately__card::before /
+     .academy__card, en vez del bloque fusionado de líneas finas de #en-simple). */
+  #apollo .compara-filas{background:transparent;border:none;gap:14px}
+  #apollo .compara-fila{position:relative;border:1px solid var(--linea);border-radius:14px;padding:20px 24px;overflow:hidden}
+  #apollo .compara-fila::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--gradiente)}
+  @media (max-width:768px){
+    #apollo .compara-fila{padding:18px 20px}
   }
   </style>
 
@@ -749,6 +797,18 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .mercately__sub{
     margin:0 auto 26px;max-width:52ch;font-size:1.0625rem;line-height:1.6;color:var(--tinta-suave);
   }
+  /* 17-sep, 3ª corrección el mismo día -- Ricardo pidió invertir esto ("lo entendí al
+     revés"): "Activar mi agente" en degradado y "Conocer Mercately" en morado sólido.
+     Verificado contra el código ANTES de aplicarlo (regla del proyecto: el dato manda
+     sobre la instrucción cuando chocan) -- el botón "Activar mi agente 🤖" del HERO
+     (intocable, línea ~526) usa .btn-secundario, que es morado sólido
+     (".btn-secundario{background:var(--morado)}", línea 165), no degradado. El
+     degradado (.btn-primario) es el de "Ver una muestra gratis" en el hero. Así que
+     "Activar mi agente" en morado sólido acá SÍ es "el mismo estilo que el del hero" --
+     quedó como estaba (.btn.btn-secundario). Lo que si cambia: "Conocer Mercately"
+     vuelve a su estilo fantasma propio (no pasa a morado) -- si los dos CTA de esta
+     fila fueran morado sólido, se leerían como el mismo peso visual, perdiendo la
+     jerarquía primario/subordinado que esta tarjeta siempre tuvo. */
   .mercately__cta{
     display:inline-flex;align-items:center;gap:6px;
     min-height:50px;padding:0 26px;border-radius:999px;
@@ -1373,7 +1433,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // #muestra y #activar quedan fuera: son destino de ancla y, al llegar por
   // salto, puede quedar visible menos del 12% que exige el observer — nunca
   // dispararia y la seccion se quedaria en opacity:0.
-  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, .col-vs, details, .banner-marca, .precio-card');
+  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, .col-vs, details, .banner-marca, .precio-card, .compara-fila');
   targets.forEach(function(el){ el.classList.add('reveal'); });
   if (reduce || !('IntersectionObserver' in window)) {
     targets.forEach(function(el){ el.classList.add('visible'); });
