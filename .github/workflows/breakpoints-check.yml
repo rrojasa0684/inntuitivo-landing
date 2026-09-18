@@ -1,0 +1,17 @@
+name: breakpoints-check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "onboarding.html"
+      - "geo-chips.css"
+      - "breakpoints-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash breakpoints-check.sh

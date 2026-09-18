@@ -156,7 +156,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <p class="sub">Conecta tu buzón para que tu agente lea las respuestas y te avise cuando alguien te conteste. Con eso ya arranca. Enviar desde tu propio dominio, con tu marca, es un upgrade opcional que puedes hacer cuando quieras.</p>
   <div class="panel">
     <label for="email">Tu dirección de correo</label>
-    <input id="email" type="email" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
+    <input id="email" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
 
     <!-- B · LECTURA (OBLIGATORIO): IMAP (993, no bloqueado) — leer las respuestas. Va PRIMERO. -->
     <div id="lectura" class="oculto" style="margin-top:20px">
@@ -218,7 +218,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.</p>
   <div class="panel">
     <label for="remail">Tu correo de pago</label>
-    <input id="remail" type="email" placeholder="el correo con el que te suscribiste" spellcheck="false">
+    <input id="remail" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" placeholder="el correo con el que te suscribiste" spellcheck="false">
     <button id="rbtn" class="btn btn-primario">Enviarme un enlace nuevo</button>
     <div id="rresultado" class="resultado"></div>
   </div>
@@ -234,6 +234,10 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 const API='https://api.inntuitivo.com';
 const $=id=>document.getElementById(id);
 const token=new URLSearchParams(location.search).get('token')||'';
+// 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
+// dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
+// pattern nuevo de los inputs type=email de index.html: exige un punto en el dominio.
+const esEmailValido=email=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 let prov=null,tmr=null,perfil=null;
 
 // Definición de los campos editables del paso 2 (por tarjeta). `campo` casa con las
@@ -467,7 +471,7 @@ function pintarRegistros(regs){
   document.querySelectorAll('#registros [data-copiar]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.copiar)));
 }
 async function cargarDominio(){
-  const email=$('email').value.trim();if(!email.includes('@'))return;
+  const email=$('email').value.trim();if(!esEmailValido(email))return;
   $('envio').classList.remove('oculto');
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
@@ -527,7 +531,7 @@ function pintarProveedor(d){
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
   $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft 365 — te escribimos':'Conectar lectura';
 }
-async function detectar(){const email=$('email').value.trim();if(!email.includes('@'))return;
+async function detectar(){const email=$('email').value.trim();if(!esEmailValido(email))return;
   $('lectura').classList.remove('oculto');
   try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(r.ok)pintarProveedor(await r.json());}catch(e){}}
 $('sitio').addEventListener('blur',()=>{const v=$('sitio').value.trim();if(v&&!/^https?:\/\//i.test(v))$('sitio').value='https://'+v;});
@@ -557,7 +561,7 @@ function reanudarBuzon(b){
 
 // --- reemisión ---
 $('rbtn').addEventListener('click',async()=>{
-  const email=$('remail').value.trim();if(!email.includes('@'))return;$('rbtn').disabled=true;
+  const email=$('remail').value.trim();if(!esEmailValido(email))return;$('rbtn').disabled=true;
   try{
     const r=await fetch(API+'/onboarding/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
     const d=await r.json();

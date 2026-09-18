@@ -13,6 +13,12 @@
 }
 .geo-chip:hover{border-color:var(--rosa-claro)}
 .geo-chip input{position:absolute;opacity:0;width:1px;height:1px}
+/* 18-sep-2026: el checkbox real queda invisible (arriba) para dibujar el chip a mano --
+   eso también se llevó puesto el foco nativo que un checkbox visible sí tiene. Sin esto,
+   alguien tabulando por el selector de países no puede ver cuál chip tiene el foco.
+   :has() en vez de depender del orden del DOM -- funciona igual si el input es el primer
+   hijo o no, y no exige tocar el markup de geo-chips.js. */
+.geo-chip:has(input:focus-visible){outline:2px solid var(--rosa-claro);outline-offset:2px}
 .geo-chip.geo-chip-on{background:var(--gradiente);border-color:transparent;color:#fff;font-weight:600}
 .geo-chip.geo-chip-on::before{content:"✓ "}
 .geo-chip-todas{border-color:rgba(255,133,166,.5);background:rgba(255,133,166,.07);color:var(--tinta)}
@@ -23,6 +29,6 @@
   border-radius:999px;padding:2px 8px;white-space:nowrap;
 }
 /* 44px de alto mínimo en mobile -- toque fácil con el pulgar, no solo estético. */
-@media (max-width:767px){
+@media (max-width:840px){
   .geo-chip{min-height:44px;padding:10px 18px;font-size:.95rem}
 }
