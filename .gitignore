@@ -1,5 +1,9 @@
 .claude/
 
+# ops/observer-threshold-check.mjs (Playwright) -- ver package.json
+node_modules/
+package-lock.json
+
 # ── Materiales de diseño / handoff internos — NUNCA al repo público ──
 # Regla 19 aplicada al gitignore: se ignora la CLASE (handoff/diseño), no el
 # nombre que ya vimos. Entró como design_handoff_*, luego inntuitivo_academy,

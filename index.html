@@ -1741,6 +1741,15 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   if (reduce || !('IntersectionObserver' in window)) {
     targets.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
   } else {
+    // 18-sep-2026: threshold:0.12 -> threshold:0 + rootMargin. Es la MISMA causa
+    // raíz que rompió "La diferencia", la tabla de precios y (recién detectado)
+    // scroll_precio hoy: un threshold porcentual depende de la ALTURA del propio
+    // elemento -- un elemento que crece (o ya es alto: FAQ 919px, "Así escribe"
+    // 847px, ambos más altos que un viewport típico) puede necesitar más scroll
+    // del que existe para acumular ese % de SU PROPIA área. rootMargin dispara
+    // por la posición del borde superior, sin importar cuán alto sea el resto --
+    // inmune a que la sección crezca mañana. Mismo timing relativo de disparo
+    // que el 0.12 anterior (early, no "ya visible del todo").
     var obs = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         if (e.isIntersecting) {
@@ -1749,7 +1758,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           obs.unobserve(e.target);
         }
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0, rootMargin: '0px 0px -15% 0px' });
     targets.forEach(function(el){ obs.observe(el); });
   }
 
@@ -2138,12 +2147,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  var precio = document.getElementById('activar');                           // scroll a precio
-  if (precio && 'IntersectionObserver' in window) {
+  // 18-sep-2026: rompió hoy -- observaba #activar ENTERO (threshold:0.4) y ese
+  // elemento pasó de ~1000-1200px a 2775px al agregarse la tabla de precios.
+  // Medido en vivo: la proporción de intersección máxima alcanzable en TODO el
+  // scroll es 0.241 -- nunca llega a 0.4, el evento no podía dispararse más.
+  // Mismo fix que el resto de esta corrida: threshold:0 + rootMargin, atado
+  // ahora a .precio-card en vez de #activar completo -- además de arreglar el
+  // disparo, es más correcto: "vio_precio" debería significar que vio el
+  // PRECIO, no que asomó el título de la sección.
+  // baseline (18-sep, ~1h después del deploy de la tabla que rompió esto) scroll_precio=7.6/día,
+  // cta_activar=1/semana (mismo dato de Umami reusado de la corrida de hace ~1h -- no cambió
+  // en ese lapso, no es un placeholder viejo).
+  var precioCard = document.querySelector('.precio-card');                   // scroll a precio
+  if (precioCard && 'IntersectionObserver' in window) {
     var visto = false, io = new IntersectionObserver(function (e) {
       if (e[0].isIntersecting && !visto) { visto = true; track('scroll_precio'); io.disconnect(); }
-    }, { threshold: 0.4 });
-    io.observe(precio);
+    }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
+    io.observe(precioCard);
   }
 });
 </script>

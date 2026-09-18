@@ -1,0 +1,9 @@
+{
+  "name": "inntuitivo-landing-ci-tools",
+  "private": true,
+  "description": "La landing en sí sigue siendo cero framework, sin build (ver README). Esto existe SOLO para ops/observer-threshold-check.mjs -- el único chequeo de CI que necesita un motor de layout real (medir altura ya renderizada), imposible por grep/parseo estático. No se sirve ni se importa desde index.html.",
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.47.2"
+  }
+}

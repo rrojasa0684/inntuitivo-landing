@@ -1,0 +1,26 @@
+name: observer-threshold-check
+
+# 18-sep-2026: candado para la clase de bug que rompió tres cosas en un mismo día
+# (La diferencia, la tabla de precios, scroll_precio) -- un IntersectionObserver
+# con threshold porcentual sobre un elemento que puede superar el viewport. Ver
+# el header de ops/observer-threshold-check.mjs para el detalle completo.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "ops/observer-threshold-check.mjs"
+      - "package.json"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: node ops/observer-threshold-check.mjs
