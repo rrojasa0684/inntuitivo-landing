@@ -644,10 +644,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .compara-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px}
   .paso .cmp-humano{margin:0 0 10px;font-size:.85rem;line-height:1.5;color:var(--tinta-suave)}
   .paso .cmp-agente{margin:0;font-size:1.02rem;font-weight:700;line-height:1.5;color:var(--tinta)}
-  /* Subida de 8px (no 24px como el resto de .reveal) -- más sutil, pedido explícito.
-     Especificidad por selector, no !important: .compara-grid > .reveal gana sobre la
-     regla base .reveal por tener más clases, sin tocarla para el resto del sitio. */
-  .compara-grid > .reveal{transform:translateY(8px)}
+  /* 17-sep, bug real cazado por Ricardo con valores computados en vivo (no estimados):
+     esta regla ganaba TAMBIÉN sobre .reveal.visible{transform:translateY(0)} (misma
+     especificidad -- 2 clases cada una -- y esta venía después en el archivo), así
+     que el transform quedaba CONGELADO en 8px para siempre, nunca volvía a 0. El
+     fade (opacity) sí se veía; el desplazamiento no. Se saca el override -- las
+     cards usan el translateY(24px) estándar de .reveal, como el resto del sitio, sin
+     ninguna regla que pueda competir con .visible.
+
+     baseline scroll_precio=10.3/día, cta_activar=0/semana (mismo número citado en
+     el hero). Comparar de acá a 2 semanas. */
   .compara-grid > .reveal:nth-child(2){transition-delay:.06s}
   .compara-grid > .reveal:nth-child(3){transition-delay:.12s}
   .compara-grid > .reveal:nth-child(4){transition-delay:.18s}
