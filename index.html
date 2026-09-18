@@ -257,7 +257,15 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
    comparación necesita apilar por PLAN en mobile (una tarjeta por columna), no por
    fila (el patrón responsive-table clásico), y eso no se resuelve con CSS solo
    sin reordenar el DOM. */
-.tabla-real{background:var(--carta);border:1px solid var(--linea);border-radius:20px;padding:32px 28px;margin-top:36px}
+/* 18-sep, unificación con .precio-card: mismo fondo sólido (#180E31, el de
+   .precio-inner, no el --carta translúcido de las demás cajas), mismo radio
+   (20px) y mismo padding interno (40px, con los mismos cortes responsive que
+   .precio-inner) -- misma familia visual. El borde SÍ diverge a propósito:
+   3px para igualar el grosor del anillo degradado de .precio-card, pero en
+   --linea (tenue) en vez del gradiente rosa -- ese brillo se queda exclusivo
+   de la tarjeta de precio, que es la conclusión de la página; la tabla es el
+   argumento que lleva ahí. */
+.tabla-real{background:#180E31;border:3px solid var(--linea);border-radius:20px;padding:40px;margin-top:36px}
 .tabla-real-intro{color:var(--tinta-suave);font-size:1rem;line-height:1.6;margin-bottom:24px;max-width:60ch}
 .tabla-nota{display:block;font-size:.78rem;color:var(--tinta-suave);opacity:.75;margin-top:2px;font-weight:400}
 
@@ -301,7 +309,9 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .tabla-real-fuentes a{color:var(--rosa-claro)}
 
 /* Precio */
-.precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:44px}
+/* 18-sep: margin-top bajó de 44px a 16px para leerse pegada a .tabla-real
+   (el argumento) en vez de como una sección aparte -- son un solo punto. */
+.precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:16px}
 .precio-inner{background:#180E31;border-radius:17px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
 .oferta{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;background:var(--gradiente);color:#fff;padding:6px 14px;border-radius:999px;display:inline-block;margin-bottom:16px}
 .cifra{font-family:'Audiowide',sans-serif;font-weight:400;font-size:2.3rem;color:#fff;line-height:1.2}
@@ -332,7 +342,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 @media (max-width:840px){
   .hero{grid-template-columns:1fr;padding:28px 0 44px}
   .pasos,.versus,.precio-inner{grid-template-columns:1fr}
-  .precio-inner{padding:28px}
+  .precio-inner,.tabla-real{padding:28px}
   section{padding:32px 0}
 }
 
@@ -432,7 +442,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
   .panel{padding:16px}
   .feed{font-size:.8rem}
   footer{flex-direction:column;align-items:flex-start;gap:20px}
-  .precio-inner{padding:22px}
+  .precio-inner,.tabla-real{padding:22px}
   .banner-marca{padding:30px 18px}
   nav{flex-wrap:wrap;gap:10px}
   .hero p.sub,.hero p.que-es{font-size:1.02rem}
@@ -1443,6 +1453,11 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <p class="micro tabla-real-fuentes">Precios verificados el 18-sep-2026 contra las páginas de precios públicas de Apollo, Lusha y Hunter (plan de entrada, facturación mensual, sin compromiso anual). Si ves un precio viejo, escríbenos — <a href="https://github.com/rrojasa0684/inntuitivo-landing/blob/main/precio-competencia-check.sh" target="_blank" rel="noopener">este chequeo</a> avisa solo cuando toca reverificar.</p>
     </div>
 
+    <!-- 18-sep-2026: unificación visual .tabla-real + .precio-card (mismo fondo/radio/padding,
+         borde tenue en la tabla, borde rosa exclusivo de esta tarjeta, hueco 44px->16px) --
+         baseline (18-sep, previo a este cambio) scroll_precio=7.6/día, cta_activar=1/semana
+         (Umami, últimos 7 días, "Todo el tráfico": llegan=76, ven el precio=53, tocan
+         "Activar mi agente"=1). Comparar de acá a 2 semanas. -->
     <div class="precio-card">
       <div class="precio-inner">
         <div>
