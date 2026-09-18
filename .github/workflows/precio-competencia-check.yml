@@ -1,0 +1,31 @@
+name: precio-competencia-check
+
+# 18-sep-2026: la tabla "costo real de hacer outbound" (#activar en index.html)
+# cita precios públicos de Apollo, Lusha y Hunter -- una tabla de precios
+# desactualizada es PEOR que no tenerla. Este chequeo no reverifica los precios
+# (eso lo hace un humano mirando cada página), solo avisa cuando pasó demasiado
+# tiempo desde la última vez -- ver el header de precio-competencia-check.sh.
+#
+# `schedule` además de `push`: a diferencia de los otros checks de este repo (que
+# solo corren cuando alguien toca el archivo), este tiene que avisar aunque NADIE
+# toque index.html por meses -- ese es justo el caso que hace que la tabla quede
+# vieja sin que nadie se entere. Corre el día 1 de cada mes; si ese día cae dentro
+# del umbral (90 días desde la última verificación) no hace nada, así que en la
+# práctica solo se pone rojo de verdad cerca de cuando toca reverificar.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "precio-competencia-check.sh"
+  schedule:
+    - cron: "0 12 1 * *"
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash precio-competencia-check.sh

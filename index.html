@@ -251,6 +251,55 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
   .versus .col-vs{opacity:1;transform:none;transition:none}
 }
 
+/* 18-sep-2026: tabla "costo real de hacer outbound" -- gancho de activación, no
+   ficha técnica. Dos marcados (tabla real para desktop, tarjetas para mobile) en
+   vez de forzar un <table> a reflow por columna en CSS puro -- una tabla de
+   comparación necesita apilar por PLAN en mobile (una tarjeta por columna), no por
+   fila (el patrón responsive-table clásico), y eso no se resuelve con CSS solo
+   sin reordenar el DOM. */
+.tabla-real{background:var(--carta);border:1px solid var(--linea);border-radius:20px;padding:32px 28px;margin-top:36px}
+.tabla-real-intro{color:var(--tinta-suave);font-size:1rem;line-height:1.6;margin-bottom:24px;max-width:60ch}
+.tabla-nota{display:block;font-size:.78rem;color:var(--tinta-suave);opacity:.75;margin-top:2px;font-weight:400}
+
+/* Desktop: tabla real */
+.tabla-real-tabla-wrap{overflow-x:auto}
+.tabla-real-tabla{width:100%;border-collapse:collapse;min-width:600px}
+.tabla-real-tabla th,.tabla-real-tabla td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--linea);font-size:.94rem;vertical-align:top}
+.tabla-real-tabla thead th{font-size:.78rem;letter-spacing:.03em;text-transform:uppercase;color:var(--tinta-suave);font-weight:600;border-bottom:1px solid var(--linea);padding-bottom:16px}
+.tabla-real-tabla tbody th{color:#fff;font-weight:600;white-space:nowrap}
+.tabla-real-tabla td{color:var(--tinta-suave)}
+.tabla-real-tabla thead .col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:12px 12px 0 0}
+.tabla-real-tabla td.col-inntuitivo{background:rgba(255,133,166,.08);color:var(--tinta);font-weight:600;border-left:2px solid var(--rosa-claro);border-right:2px solid var(--rosa-claro)}
+.tabla-real-tabla .fila-gancho th,.tabla-real-tabla .fila-gancho td{font-size:1.2rem;font-weight:700;padding-top:20px;padding-bottom:20px;border-bottom:none;border-top:2px solid var(--linea)}
+.tabla-real-tabla .fila-gancho th{color:#fff}
+.tabla-real-tabla .fila-gancho td.col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:0 0 12px 12px;font-size:1.55rem;border-left:2px solid transparent;border-right:2px solid transparent}
+
+/* Mobile (≤840px, mismo corte que .hero/.pasos/.versus/.precio-inner): tarjetas
+   apiladas, una por plan -- la tabla real se oculta, las tarjetas se muestran. */
+.tabla-real-cards{display:none}
+@media (max-width:840px){
+  .tabla-real-tabla-wrap{display:none}
+  .tabla-real-cards{display:flex;flex-direction:column;gap:16px}
+  .tabla-real-card{background:#180E31;border:1px solid var(--linea);border-radius:16px;padding:22px 20px}
+  .tabla-real-card h3{font-size:1rem;font-weight:600;color:#fff;margin-bottom:14px}
+  .tabla-real-card dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--linea);font-size:.92rem}
+  .tabla-real-card dl div:last-child{border-bottom:none}
+  .tabla-real-card dt{color:var(--tinta-suave);flex-shrink:0}
+  .tabla-real-card dd{color:var(--tinta);text-align:right;font-weight:600}
+  .tabla-real-card dd .tabla-nota{text-align:right}
+  .tabla-real-card.col-inntuitivo{background:var(--gradiente);border-color:transparent}
+  .tabla-real-card.col-inntuitivo dt{color:rgba(255,255,255,.75)}
+  .tabla-real-card.col-inntuitivo dd{color:#fff}
+  .tabla-real-card.col-inntuitivo dl div{border-bottom-color:rgba(255,255,255,.2)}
+  .tabla-real-card .fila-gancho{padding-top:14px;margin-top:4px;border-top:2px solid var(--linea) !important}
+  .tabla-real-card .fila-gancho dt,.tabla-real-card .fila-gancho dd{font-size:1.15rem;font-weight:700}
+  .tabla-real-card.col-inntuitivo .fila-gancho{border-top-color:rgba(255,255,255,.3) !important}
+}
+
+.tabla-real-cta{display:block;width:100%;text-align:center;margin-top:28px}
+.tabla-real-fuentes{margin-top:14px;text-align:center}
+.tabla-real-fuentes a{color:var(--rosa-claro)}
+
 /* Precio */
 .precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:44px}
 .precio-inner{background:#180E31;border-radius:17px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
@@ -1261,6 +1310,132 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   <section id="activar">
     <span class="eyebrow">✨ Precio</span>
     <h2>Una inversión, no un empleado</h2>
+
+    <!-- 18-sep-2026: tabla comparativa "costo real de hacer outbound" -- no compara
+         licencia contra licencia (ahí Apollo gana: 275M de contactos, integraciones,
+         plan gratis) sino el costo TOTAL, con la persona que opera la herramienta
+         incluida -- esa es la diferencia estructural real (ellos necesitan a
+         alguien, nosotros no). Datos verificados contra las páginas de precios
+         públicas de cada uno, ver la nota al pie y precio-competencia-check.sh (el
+         candado que avisa cuando hay que reverificar).
+
+         precio-competencia-verificado: 2026-09-18
+         Fuentes: apollo.io/pricing (Basic $49/mes anual · $59/mes mensual, por
+         asiento -- la página renderiza los números por JS y no se pudieron leer
+         directo; cruzado contra Landbase, Warmly, Salesmotion, Saleshandy, Enrich
+         y Hackingdemand, las seis convergen en la misma cifra), apollo.io/onboarding
+         (setup: sesión de 30-60 min, primera secuencia enviada en esa sesión),
+         lusha.com/pricing (Starter $37.45/mes anual · $49.90/mes mensual, por
+         créditos -- "para equipos de más de 5 usuarios, contactar a ventas"),
+         docs.lusha.com/user-guide/getting-started (setup: "en minutos"),
+         hunter.io/pricing (Starter $34/mes anual · $49/mes mensual -- "unlimited
+         team members", EXPLÍCITO que factura por cuenta, no por asiento),
+         hunter.io/blog/hunter-starter-guide (setup: "under five minutes"). Ninguna
+         de las tres páginas ni su documentación mostró español en el contenido
+         obtenido -- no se encontró evidencia de soporte en español en ninguna
+         búsqueda adicional tampoco.
+
+         18-sep-2026 (corrección de precisión, pedido de Ricardo): "por usuario" en
+         la fila de licencia generalizaba sobre las tres herramientas -- Hunter
+         cobra por CUENTA con miembros ilimitados, no por asiento. Corregido para
+         no prometer más de lo que es real para Hunter.
+
+         baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
+         días). -->
+    <div class="tabla-real reveal">
+      <p class="tabla-real-intro">No comparamos qué tan buena es cada herramienta. Comparamos cuánto sale hacer outbound de verdad cada mes — con la persona que la opera incluida en la cuenta.</p>
+
+      <div class="tabla-real-tabla-wrap">
+        <table class="tabla-real-tabla">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Apollo, Lusha, Hunter</th>
+              <th scope="col">Contratar un vendedor</th>
+              <th scope="col" class="col-inntuitivo">Inntuitivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Licencia al mes</th>
+              <td>$34–$59 <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter cobra por cuenta, sin límite de usuarios</span></td>
+              <td>—</td>
+              <td class="col-inntuitivo">$45 <span class="tabla-nota">todo tu equipo</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Quién lo opera</th>
+              <td>Un vendedor o SDR</td>
+              <td>Se opera solo</td>
+              <td class="col-inntuitivo">Nadie — el agente hace el trabajo</td>
+            </tr>
+            <tr>
+              <th scope="row">Costo de esa persona</th>
+              <td>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></td>
+              <td>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></td>
+              <td class="col-inntuitivo">$0</td>
+            </tr>
+            <tr>
+              <th scope="row">Cuánto tarda en arrancar</th>
+              <td>30–60 min de onboarding <span class="tabla-nota">operarla bien lleva más</span></td>
+              <td>Semanas <span class="tabla-nota">buscar, entrevistar, contratar</span></td>
+              <td class="col-inntuitivo">En cuanto conectas tu correo</td>
+            </tr>
+            <tr>
+              <th scope="row">En español</th>
+              <td>No <span class="tabla-nota">sitio y producto en inglés</span></td>
+              <td>Depende de a quién contrates</td>
+              <td class="col-inntuitivo">Sí, nativo</td>
+            </tr>
+            <tr class="fila-gancho">
+              <th scope="row">Costo real al mes</th>
+              <td>$450–$1.560</td>
+              <td>$400–$1.500</td>
+              <td class="col-inntuitivo">$45</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tabla-real-cards">
+        <div class="tabla-real-card">
+          <h3>Apollo, Lusha, Hunter</h3>
+          <dl>
+            <div><dt>Licencia al mes</dt><dd>$34–$59 <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter por cuenta, sin límite</span></dd></div>
+            <div><dt>Quién lo opera</dt><dd>Un vendedor o SDR</dd></div>
+            <div><dt>Costo de esa persona</dt><dd>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></dd></div>
+            <div><dt>Cuánto tarda en arrancar</dt><dd>30–60 min de onboarding <span class="tabla-nota">operarla bien lleva más</span></dd></div>
+            <div><dt>En español</dt><dd>No <span class="tabla-nota">sitio y producto en inglés</span></dd></div>
+            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$450–$1.560</dd></div>
+          </dl>
+        </div>
+        <div class="tabla-real-card">
+          <h3>Contratar un vendedor</h3>
+          <dl>
+            <div><dt>Licencia al mes</dt><dd>—</dd></div>
+            <div><dt>Quién lo opera</dt><dd>Se opera solo</dd></div>
+            <div><dt>Costo de esa persona</dt><dd>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></dd></div>
+            <div><dt>Cuánto tarda en arrancar</dt><dd>Semanas <span class="tabla-nota">buscar, entrevistar, contratar</span></dd></div>
+            <div><dt>En español</dt><dd>Depende de a quién contrates</dd></div>
+            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$400–$1.500</dd></div>
+          </dl>
+        </div>
+        <div class="tabla-real-card col-inntuitivo">
+          <h3>Inntuitivo</h3>
+          <dl>
+            <div><dt>Licencia al mes</dt><dd>$45 <span class="tabla-nota">todo tu equipo</span></dd></div>
+            <div><dt>Quién lo opera</dt><dd>Nadie — el agente hace el trabajo</dd></div>
+            <div><dt>Costo de esa persona</dt><dd>$0</dd></div>
+            <div><dt>Cuánto tarda en arrancar</dt><dd>En cuanto conectas tu correo</dd></div>
+            <div><dt>En español</dt><dd>Sí, nativo</dd></div>
+            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$45</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <a class="btn btn-primario tabla-real-cta" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+      <p class="micro tabla-real-fuentes">Precios verificados el 18-sep-2026 contra las páginas de precios públicas de Apollo, Lusha y Hunter (plan de entrada, facturación mensual, sin compromiso anual). Si ves un precio viejo, escribinos — <a href="https://github.com/rrojasa0684/inntuitivo-landing/blob/main/precio-competencia-check.sh" target="_blank" rel="noopener">este chequeo</a> avisa solo cuando toca reverificar.</p>
+    </div>
+
     <div class="precio-card">
       <div class="precio-inner">
         <div>
@@ -1572,6 +1747,38 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         });
       }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
       obsDiferencia.observe(tituloDiferencia);
+    }
+  }
+
+  // 18-sep-2026: tabla "costo real de hacer outbound" -- vive en #activar, que el
+  // observer principal EXCLUYE a propósito (destino de ancla, ver el comentario de
+  // "targets" más arriba). Es una tabla larga (6 filas), así que aplica el mismo
+  // aprendizaje del bloque de arriba: rootMargin negativo para que dispare cuando
+  // se ve de verdad, no apenas asoma.
+  // 18-sep-2026 (mismo aprendizaje que el bloque de "La diferencia" arriba, esta
+  // vez confirmado ANTES de desplegar, no después de 6 rondas): la tabla mide
+  // 792px -- más alta que el viewport típico (748px en esta prueba). Atar el
+  // trigger a la intersección DE LA TABLA MISMA (aunque sea con rootMargin
+  // negativo) es la misma trampa: una tabla más alta que la pantalla puede tardar
+  // mucho en acumular 12% de SU PROPIA área, o directamente no alcanzarlo nunca
+  // en un scroll razonable. El disparador es el <h2> de la sección (chico) --
+  // mismo mecanismo, mismo rootMargin -50%, ya probado.
+  var tablaReal = document.querySelector('.tabla-real');
+  var tituloActivar = tablaReal ? document.querySelector('#activar h2') : null;
+  if (tablaReal && tituloActivar) {
+    if (reduce || !('IntersectionObserver' in window)) {
+      tablaReal.classList.add('visible');
+    } else {
+      var obsTabla = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting) {
+            marcarRevelado(tablaReal);
+            tablaReal.classList.add('visible');
+            obsTabla.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
+      obsTabla.observe(tituloActivar);
     }
   }
 
