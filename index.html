@@ -276,11 +276,17 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .tabla-real-tabla thead th{font-size:.78rem;letter-spacing:.03em;text-transform:uppercase;color:var(--tinta-suave);font-weight:600;border-bottom:1px solid var(--linea);padding-bottom:16px}
 .tabla-real-tabla tbody th{color:#fff;font-weight:600;white-space:nowrap}
 .tabla-real-tabla td{color:var(--tinta-suave)}
-.tabla-real-tabla thead .col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:12px 12px 0 0}
-.tabla-real-tabla td.col-inntuitivo{background:rgba(255,133,166,.08);color:var(--tinta);font-weight:600;border-left:2px solid var(--rosa-claro);border-right:2px solid var(--rosa-claro)}
+/* 18-sep: la columna Inntuitivo leía como TRES piezas (encabezado degradado, filas con
+   borde lateral plano, fila-gancho degradada) porque los divisores horizontales que la
+   tabla hereda (border-bottom/border-top) cruzaban por dentro de la columna y la
+   cortaban. Se anulan solo acá, y el borde lateral de 2px pasa a un halo suave (box-
+   shadow, no un border plano) -- "elegida", no "encendida": nunca compite con el anillo
+   animado de .precio-card, que sigue siendo lo más brillante de la sección. */
+.tabla-real-tabla thead .col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:16px 16px 0 0;border-bottom:none;box-shadow:0 -4px 20px rgba(255,133,166,.18)}
+.tabla-real-tabla td.col-inntuitivo{background:rgba(255,133,166,.1);color:var(--tinta);font-weight:600;border-bottom:none;box-shadow:inset 1px 0 0 rgba(255,133,166,.28),inset -1px 0 0 rgba(255,133,166,.28)}
 .tabla-real-tabla .fila-gancho th,.tabla-real-tabla .fila-gancho td{font-size:1.2rem;font-weight:700;padding-top:20px;padding-bottom:20px;border-bottom:none;border-top:2px solid var(--linea)}
 .tabla-real-tabla .fila-gancho th{color:#fff}
-.tabla-real-tabla .fila-gancho td.col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:0 0 12px 12px;font-size:1.55rem;border-left:2px solid transparent;border-right:2px solid transparent}
+.tabla-real-tabla .fila-gancho td.col-inntuitivo{background:var(--gradiente);color:#fff;border-radius:0 0 16px 16px;font-size:1.55rem;border-top:none;box-shadow:0 4px 20px rgba(255,133,166,.18)}
 
 /* Mobile (≤840px, mismo corte que .hero/.pasos/.versus/.precio-inner): tarjetas
    apiladas, una por plan -- la tabla real se oculta, las tarjetas se muestran. */
@@ -304,7 +310,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
   .tabla-real-card.col-inntuitivo .fila-gancho{border-top-color:rgba(255,255,255,.3) !important}
 }
 
-.tabla-real-cta{display:block;width:100%;text-align:center;margin-top:28px}
+.tabla-real-cta{display:block;width:fit-content;margin:28px auto 0}
 .tabla-real-fuentes{margin-top:14px;text-align:center}
 .tabla-real-fuentes a{color:var(--rosa-claro)}
 
@@ -343,6 +349,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
   .hero{grid-template-columns:1fr;padding:28px 0 44px}
   .pasos,.versus,.precio-inner{grid-template-columns:1fr}
   .precio-inner,.tabla-real{padding:28px}
+  .tabla-real-cta{width:100%}
   section{padding:32px 0}
 }
 
@@ -1442,7 +1449,14 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
       </div>
 
-      <a class="btn btn-primario tabla-real-cta" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+      <!-- 18-sep-2026: CTA de la tabla dejó de apuntar directo a /suscribir -- ahora ancla
+           a #precio (la tarjeta "Un precio por agente", justo abajo), mismo evento Umami
+           cta_activar que el botón real de esa tarjeta. Emoji 🚀->🤖 para igualar al resto
+           de "Activar mi agente" del sitio. Ancho natural en vez de 100% (se veía
+           estirado); ancho completo se mantiene en móvil, que ahí es lo normal.
+           baseline (18-sep, mismo dato que la unificación visual de este rato)
+           scroll_precio=7.6/día, cta_activar=1/semana (Umami, últimos 7 días). -->
+      <a class="btn btn-primario tabla-real-cta" href="#precio">Activar mi agente 🤖</a>
       <!-- 18-sep-2026: fix de voseo en esta nota al pie -- el verbo estaba
            conjugado en vos en vez de tú, cazado por test_index_html_voseo.py en
            outreach-engine (el fix anterior lo describía citando el verbo viejo
@@ -1458,7 +1472,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
          baseline (18-sep, previo a este cambio) scroll_precio=7.6/día, cta_activar=1/semana
          (Umami, últimos 7 días, "Todo el tráfico": llegan=76, ven el precio=53, tocan
          "Activar mi agente"=1). Comparar de acá a 2 semanas. -->
-    <div class="precio-card">
+    <div class="precio-card" id="precio">
       <div class="precio-inner">
         <div>
           <span class="oferta">Un precio por agente 🚀</span>
@@ -1951,8 +1965,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var r = new URLSearchParams(location.search).get('r');
   if (r && codigos[r]) track('origen-' + codigos[r]);
 
-  document.querySelectorAll('a[href*="/suscribir"]').forEach(function (a) {
-    a.addEventListener('click', function () { track('cta_activar'); });      // clic suscribir
+  document.querySelectorAll('a[href*="/suscribir"], .tabla-real-cta').forEach(function (a) {
+    a.addEventListener('click', function () { track('cta_activar'); });      // clic suscribir (o su ancla a la tarjeta de precio)
   });
   document.querySelectorAll('a[href="#muestra"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_muestra'); });      // clic ver muestra gratis
