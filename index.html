@@ -615,16 +615,27 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
+  <!-- 17-sep: baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
+       días) -- mismo número de hoy citado arriba en el hero, no una medición nueva; este
+       bloque nunca tuvo un CTA a /suscribir hasta ahora, así que no tiene su propio
+       histórico que comparar. Cambio: se agrega un CTA primario ("Activar mi agente")
+       al banner Mercately -- antes el único link de acá mandaba tráfico AFUERA del
+       embudo (a Mercately), sin ninguna forma de activar el agente desde este bloque.
+       Comparar cta_activar de acá a 2 semanas. -->
   <!-- Banner alianza Mercately — entre Partners y Academy. Mismo tratamiento de tarjeta
        que .academy__card (filo degradado, fondo/borde/radio) para que se lea como una
        sección más del sitio, no un anuncio pegado. El logo es el MISMO archivo gris del
        carrusel #partners (partners/mercately-partners.png) -- ningún azul/verde de marca
-       Mercately entra acá. El CTA es subordinado a "Activar mi agente": estilo fantasma
-       propio (borde fino, sin relleno, sin el pulso/shine de los CTA primarios, ver
-       comentario "7b." más abajo) -- ya NO es el mismo estilo que .btn-secundario, que
-       desde el 2-sep tiene relleno sólido (ver ".btn-secundario{background:var(--morado)"
-       más arriba); .mercately__cta define su propio fondo/borde, no depende de esa clase.
-       No un botón de Mercately. -->
+       Mercately entra acá.
+
+       17-sep: el bloque ganó su propio CTA primario ("Activar mi agente", .btn.btn-primario,
+       mismo href/tracking que el de #activar -- ver a[href*="/suscribir"] en el script de
+       Analytics) porque el único CTA de acá mandaba tráfico AFUERA del embudo. .mercately__cta
+       ("Conocer Mercately →") queda como el secundario, subordinado: estilo fantasma propio
+       (borde fino, sin relleno, sin el pulso/shine del primario, ver comentario "7b." más
+       abajo) -- ya NO es el mismo estilo que .btn-secundario, que desde el 2-sep tiene
+       relleno sólido (ver ".btn-secundario{background:var(--morado)" más arriba);
+       .mercately__cta define su propio fondo/borde, no depende de esa clase. -->
   <style>
   /* bottom 0 -- .academy que sigue ya trae 96px de padding-top fijo (no se toca,
      ya desplegada). Con los dos en 96 el gap medía 192px: el ritmo real del sitio
@@ -667,6 +678,11 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .mercately__cta:hover{border-color:var(--rosa-claro);transform:translateY(-2px)}
   .mercately__cta:active{transform:translateY(0)}
   .mercately__cta:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:3px}
+  /* 17-sep: .cta-row es flex sin justify-content (flex-start por defecto) -- la
+     tarjeta es text-align:center, así que sin esto la fila de CTAs quedaba pegada
+     a la izquierda dentro de un bloque centrado. Override acotado a este bloque,
+     no se toca .cta-row global (la usan otras secciones alineadas a la izquierda). */
+  .mercately .cta-row{justify-content:center}
   @media (max-width:767px){
     .mercately{padding:56px 16px 0}
     .mercately__card{padding:40px 20px;border-radius:20px}
@@ -686,8 +702,14 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <img class="mercately__logo" src="partners/mercately-partners.png" alt="Mercately" height="30" loading="lazy">
       <p class="mercately__eyebrow">🤝 Alianza</p>
       <h2 class="mercately__title" id="mercately-title">Mercately + Inntuitivo</h2>
-      <p class="mercately__sub">Mercately atiende con IA a quien ya te escribió por WhatsApp. Nuestro agente de IA te trae a quien todavía no sabe que existes. Las dos mitades del mismo embudo. 🚀</p>
-      <a class="mercately__cta" href="https://app.mercately.com/register?partner_id=8db3b072" target="_blank" rel="noopener noreferrer">Conocer Mercately →</a>
+      <p class="mercately__sub">Responder rápido a quien te escribe no sirve de nada si nadie te escribe.</p>
+      <p class="mercately__sub"><strong>Mercately</strong> es el CRM con IA para WhatsApp que usan más de 1.500 empresas en Latinoamérica: atiende, califica y da seguimiento a cada conversación que entra.</p>
+      <p class="mercately__sub"><strong>Inntuitivo</strong> llena esa bandeja. Nuestro agente encuentra empresas de tu mercado, investiga cada una y les escribe primero — en tu nombre.</p>
+      <p class="mercately__sub">Las dos mitades del mismo embudo. 🚀</p>
+      <div class="cta-row">
+        <a class="btn btn-primario" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+        <a class="mercately__cta" href="https://app.mercately.com/register?partner_id=8db3b072" target="_blank" rel="noopener noreferrer">Conocer Mercately →</a>
+      </div>
     </div>
   </section>
 
