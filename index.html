@@ -429,24 +429,28 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 /* 7b. Todos los CTA primarios ("activar el agente" + escuchar podcast): pulso + shine.
    El nav lleva un glow ~30% mas contenido: es chico y siempre visible, no debe cansar.
 
-   17-sep (diagnóstico de rendimiento): la versión vieja animaba box-shadow -- no
-   dispara reflow, pero SÍ repinta cada frame, corriendo siempre (3s infinite), y con
-   el swap de colores de hoy hay más botones .btn-primario en pantalla que antes. Se
-   evaluaron 2 opciones (pausar con el mismo observer de arriba, o mover la animación
-   a una propiedad compositor-friendly): se eligió la 2ª -- pausar con el observer NO
-   resuelve el caso más caro, el nav-cta, que está SIEMPRE visible (nav sticky) y
-   nunca sale de pantalla para pausarse. El glow ahora vive en un ::before aparte con
-   box-shadow FIJO (se calcula una sola vez) cuya OPACITY es lo que anima -- mismo
-   efecto visual, pero opacity es compositor-only, cero repintado por frame, sin
-   importar cuánto tiempo corra. ::after (el brillo diagonal al hover) se clipea con
-   su propio clip-path en vez del overflow:hidden del padre, que ahora hace falta
-   liberar para que el glow del ::before pueda salir del cuadro del botón. */
-.btn-primario,.nav-cta{position:relative}
-.btn-primario::before,.nav-cta::before{content:"";position:absolute;inset:-6px;border-radius:inherit;box-shadow:0 10px 30px rgba(255,110,146,.42);opacity:0;pointer-events:none;animation:pulso-glow 3s ease-in-out infinite}
-.nav-cta::before{box-shadow:0 5px 18px rgba(255,110,146,.29)}
-@keyframes pulso-glow{0%,100%{opacity:0}50%{opacity:1}}
-.btn-primario::after,.nav-cta::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);pointer-events:none;clip-path:inset(0 round 999px)}
+   17-sep, REVERTIDO el mismo día: se probó mover el pulso de box-shadow a un
+   ::before con opacity animada (compositor-only, sin repintado) -- en producción
+   apareció una mancha gris flotando sobre el contenido en varios lugares (nav,
+   Inntuitivo Talks, sección de precio) y el sitio se sintió más lento. No se
+   terminó de diagnosticar la causa exacta en vivo (podría ser el ::before
+   escapando de su botón, o una interacción con position:sticky del nav) -- ante la
+   duda, se vuelve a la versión ANTERIOR, probada y estable, en vez de seguir
+   depurando con el sitio roto para cualquiera que lo visite. Un botón que pulsa
+   con box-shadow (repinta, pero contenido) es mejor que una mancha encima del
+   contenido. Si se retoma la versión compositor-only, verificarla antes de
+   producción, no en vivo.
+
+   baseline scroll_precio=10.3/día, cta_activar=0/semana (mismo número citado en
+   el hero) -- revert urgente, sitio roto para cualquier visitante hasta este
+   deploy. Comparar de acá a 2 semanas. */
+.btn-primario,.nav-cta{position:relative;overflow:hidden}
+.btn-primario{animation:pulso-cta 3s ease-in-out infinite}
+.nav-cta{animation:pulso-cta-nav 3s ease-in-out infinite}
+.btn-primario::after,.nav-cta::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);pointer-events:none}
 .btn-primario:hover::after,.nav-cta:hover::after{animation:brillo-cta .8s ease}
+@keyframes pulso-cta{0%,100%{box-shadow:0 8px 24px rgba(222,5,64,.28)}50%{box-shadow:0 10px 30px rgba(255,110,146,.42)}}
+@keyframes pulso-cta-nav{0%,100%{box-shadow:0 4px 14px rgba(222,5,64,.20)}50%{box-shadow:0 5px 18px rgba(255,110,146,.29)}}
 @keyframes brillo-cta{from{left:-130%}to{left:150%}}
 
 /* 7d. Borde vivo de la tarjeta de precio */
