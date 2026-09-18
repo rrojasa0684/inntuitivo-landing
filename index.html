@@ -393,7 +393,17 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
    el hero) -- afecta TODAS las secciones con .reveal, incluida "🪐 La diferencia"
    (.col-vs, mismo bug, mismo fix, verificado que ya estaba enganchada al mismo
    observer). Comparar de acá a 2 semanas. */
-.reveal{opacity:0;transform:translateY(24px)}
+/* 18-sep-2026 (5ta vez que se reporta "🪐 La diferencia" sin animarse): verificado
+   con scroll incremental real contra producción que el mecanismo SÍ corre (opacity
+   0->1, transform 24px->0, clase .visible se agrega, la transición corre y
+   termina) -- no es un bug de "nace visible" ni de CSS pisado por otra regla
+   (mismos 3 sospechosos de bugs anteriores, descartados de nuevo). Lo que sí:
+   24px/600ms es sutil, y el trigger (threshold 0.12, sin rootMargin) puede caer
+   muy cerca de cuando el elemento ya está centrado -- para cuando el ojo lo mira
+   fijo, la transición corta ya terminó. Subido a 30px, mismo criterio "si no se
+   percibe, subí distancia" que ya se aplicó una vez esta sesión.
+   baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días). */
+.reveal{opacity:0;transform:translateY(30px)}
 .reveal:not(.revelado){transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
