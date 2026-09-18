@@ -232,6 +232,25 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .con-agente h3{color:#fff}
 .con-agente li::before{content:"✓";color:var(--rosa-claro);flex-shrink:0;font-weight:700}
 
+/* 18-sep-2026 (6ta vez reportado "🪐 La diferencia" sin animarse -- mecanismo
+   dedicado, no .reveal/.visible): .col-vs mide casi la altura de la pantalla,
+   así que CUALQUIER trigger atado a la intersección de la caja misma dispara
+   cuando ya se ve casi entera -- no hay ventana perceptible. El disparador acá
+   es el <h2> de la sección (JS, ver el bloque "obsDiferencia" en <script>), y
+   la entrada es lateral (translateX) además de vertical -- dos cajas
+   convergiendo desde los costados es visible aunque el fade en sí no lo sea.
+   700ms/40px (más lento y más grande que el .reveal genérico de 600ms/30px,
+   a propósito: acá el efecto tiene que notarse, no solo estar "técnicamente
+   corriendo") + 150ms de escalón entre las dos (transition-delay en con-agente,
+   independiente del escalón de .12s que usan .pasos/.semana). */
+.versus .col-vs{opacity:0;transition:opacity .7s ease,transform .7s ease}
+.versus .col-vs.sin-agente{transform:translate(-40px,20px)}
+.versus .col-vs.con-agente{transform:translate(40px,20px);transition-delay:.15s}
+.versus.diferencia-visible .col-vs{opacity:1;transform:translate(0,0)}
+@media (prefers-reduced-motion:reduce){
+  .versus .col-vs{opacity:1;transform:none;transition:none}
+}
+
 /* Precio */
 .precio-card{background:var(--carta);border-radius:20px;padding:3px;background-image:var(--gradiente);margin-top:44px}
 .precio-inner{background:#180E31;border-radius:17px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
@@ -1490,24 +1509,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // salto, puede quedar visible menos del 12% que exige el observer — nunca
   // dispararia y la seccion se quedaria en opacity:0.
   //
-  // 18-sep-2026 (5ta vez reportado "🪐 La diferencia" sin animarse -- causa real,
-  // no percepción ni caché): .col-vs son cajas ALTAS (media pantalla cada una).
-  // Con threshold:0.12 sin rootMargin, disparan apenas el 12% del borde SUPERIOR
-  // asoma por el fondo del viewport -- para una caja alta eso pasa muy temprano
-  // (confirmado con barrido de scroll cada 100px: dispara al mismo px relativo
-  // que .paso, pero .paso es baja así que ese punto YA es "a la vista"; .col-vs
-  // sigue teniendo la mayoría de su alto fuera de pantalla en ese momento). La
-  // transición de 600ms termina mientras el usuario sigue bajando -- para cuando
-  // el ojo llega al centro de la caja, ya terminó. .col-vs sale del observer
-  // COMPARTIDO (que .paso/.dia/details/etc. siguen usando sin cambios) y pasa a
-  // uno propio con rootMargin -25% abajo: el viewport efectivo se achica un 25%
-  // desde el fondo, así que .col-vs no cuenta como "a la vista" hasta que está
-  // bastante más adentro de la pantalla real -- no solo asomando.
-  // baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días).
+  // 18-sep-2026: "🪐 La diferencia" (.col-vs) sale COMPLETO de este mecanismo --
+  // ver el bloque dedicado más abajo. Los intentos anteriores (bajar threshold,
+  // rootMargin -25%) seguían disparando por la intersección de LA CAJA MISMA, y
+  // .col-vs mide casi la altura de la pantalla: para cuando "entra lo suficiente"
+  // para disparar, ya se ve casi completa -- no hay margen real para que el fade
+  // se perciba como fade y no como aparición instantánea. El disparador ahora es
+  // el TÍTULO de la sección (mucho más chico), y las cajas entran desde los
+  // costados, no solo con opacity -- ver abajo.
   var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, details, .banner-marca, .precio-card');
-  var targetsAltos = document.querySelectorAll('.col-vs');
   targets.forEach(function(el){ el.classList.add('reveal'); });
-  targetsAltos.forEach(function(el){ el.classList.add('reveal'); });
   // 17-sep-2026: 'revelado' se agrega DESPUÉS de que termina la transición de
   // aparecer -- retira la transition-shorthand de .reveal (ver ese CSS) para que
   // .paso/.dia/.col-vs/details recuperen su transition de hover normal (.2s) en vez
@@ -1518,7 +1529,6 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   }
   if (reduce || !('IntersectionObserver' in window)) {
     targets.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
-    targetsAltos.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
   } else {
     var obs = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
@@ -1530,17 +1540,39 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       });
     }, { threshold: 0.12 });
     targets.forEach(function(el){ obs.observe(el); });
+  }
 
-    var obsAltos = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if (e.isIntersecting) {
-          marcarRevelado(e.target);
-          e.target.classList.add('visible');
-          obsAltos.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -25% 0px' });
-    targetsAltos.forEach(function(el){ obsAltos.observe(el); });
+  // 18-sep-2026 (6ta vez reportado "🪐 La diferencia" sin animarse -- causa real):
+  // .col-vs mide casi la altura de la pantalla. Con cualquier threshold/rootMargin
+  // atado a la intersección DE LA CAJA, para cuando dispara ya se ve casi entera --
+  // no hay ventana perceptible entre "empieza a aparecer" y "ya está". Se
+  // desacopla el disparador de las cajas: se observa el TÍTULO de la sección (un
+  // <h2>, chico) y se dispara cuando cruza la MITAD SUPERIOR del viewport
+  // (rootMargin -50% abajo, el viewport efectivo queda reducido a su mitad de
+  // arriba) -- para ese momento el usuario ya está mirando la sección, no
+  // asomando. Las cajas no usan .reveal/.visible (ese mecanismo sigue intacto
+  // para .paso/.dia/etc., ver arriba) -- tienen su propio CSS (.versus
+  // .col-vs), con entrada lateral (translateX, no solo Y) y escalonado 150ms
+  // entre las dos -- ver ese bloque en <style>.
+  // baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días).
+  var seccionDiferencia = document.querySelector('.versus');
+  seccionDiferencia = seccionDiferencia ? seccionDiferencia.closest('section') : null;
+  var tituloDiferencia = seccionDiferencia ? seccionDiferencia.querySelector('h2') : null;
+  if (seccionDiferencia && tituloDiferencia) {
+    var versusEl = seccionDiferencia.querySelector('.versus');
+    if (reduce || !('IntersectionObserver' in window)) {
+      versusEl.classList.add('diferencia-visible');
+    } else {
+      var obsDiferencia = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting) {
+            versusEl.classList.add('diferencia-visible');
+            obsDiferencia.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -50% 0px' });
+      obsDiferencia.observe(tituloDiferencia);
+    }
   }
 
   // Observer COMPARTIDO: pausa animaciones de seccion fuera de viewport, para no
