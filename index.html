@@ -1489,8 +1489,25 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // #muestra y #activar quedan fuera: son destino de ancla y, al llegar por
   // salto, puede quedar visible menos del 12% que exige el observer — nunca
   // dispararia y la seccion se quedaria en opacity:0.
-  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, .col-vs, details, .banner-marca, .precio-card');
+  //
+  // 18-sep-2026 (5ta vez reportado "🪐 La diferencia" sin animarse -- causa real,
+  // no percepción ni caché): .col-vs son cajas ALTAS (media pantalla cada una).
+  // Con threshold:0.12 sin rootMargin, disparan apenas el 12% del borde SUPERIOR
+  // asoma por el fondo del viewport -- para una caja alta eso pasa muy temprano
+  // (confirmado con barrido de scroll cada 100px: dispara al mismo px relativo
+  // que .paso, pero .paso es baja así que ese punto YA es "a la vista"; .col-vs
+  // sigue teniendo la mayoría de su alto fuera de pantalla en ese momento). La
+  // transición de 600ms termina mientras el usuario sigue bajando -- para cuando
+  // el ojo llega al centro de la caja, ya terminó. .col-vs sale del observer
+  // COMPARTIDO (que .paso/.dia/details/etc. siguen usando sin cambios) y pasa a
+  // uno propio con rootMargin -25% abajo: el viewport efectivo se achica un 25%
+  // desde el fondo, así que .col-vs no cuenta como "a la vista" hasta que está
+  // bastante más adentro de la pantalla real -- no solo asomando.
+  // baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días).
+  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, details, .banner-marca, .precio-card');
+  var targetsAltos = document.querySelectorAll('.col-vs');
   targets.forEach(function(el){ el.classList.add('reveal'); });
+  targetsAltos.forEach(function(el){ el.classList.add('reveal'); });
   // 17-sep-2026: 'revelado' se agrega DESPUÉS de que termina la transición de
   // aparecer -- retira la transition-shorthand de .reveal (ver ese CSS) para que
   // .paso/.dia/.col-vs/details recuperen su transition de hover normal (.2s) en vez
@@ -1501,6 +1518,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   }
   if (reduce || !('IntersectionObserver' in window)) {
     targets.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
+    targetsAltos.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
   } else {
     var obs = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
@@ -1512,6 +1530,17 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       });
     }, { threshold: 0.12 });
     targets.forEach(function(el){ obs.observe(el); });
+
+    var obsAltos = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          marcarRevelado(e.target);
+          e.target.classList.add('visible');
+          obsAltos.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -25% 0px' });
+    targetsAltos.forEach(function(el){ obsAltos.observe(el); });
   }
 
   // Observer COMPARTIDO: pausa animaciones de seccion fuera de viewport, para no
