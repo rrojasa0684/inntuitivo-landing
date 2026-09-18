@@ -372,7 +372,26 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 .wsp-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,211,102,.4)}
 
 /* Aparicion al hacer scroll */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+/* 17-sep-2026 (bug real, cazado por Ricardo comparando con .banner-marca en vivo):
+   .reveal y .paso/.dia/.col-vs/details (más abajo, "Tarjetas vivas") declaran
+   transition en la MISMA propiedad -- transition es un shorthand, no se mezcla
+   entre reglas, la que gana se lo lleva ENTERA. Con igual especificidad (una
+   clase cada una), la de abajo (.paso...) ganaba por orden de fuente: opacity
+   perdía su transición del todo (el fade quedaba instantáneo, imperceptible) y
+   transform pasaba de .6s a .2s. No era solo de las cards nuevas -- las de "Cómo
+   funciona" (.paso, mismo mecanismo desde antes) tenían el mismo bug.
+   Fix: transition SOLO vive acá mientras el elemento no terminó de revelarse
+   (:not(.revelado), que agrega el observer al terminar la transición) --
+   especificidad más alta que .paso... mientras dura, así que gana sin importar
+   el orden. Una vez revelado, se retira y el hover de .paso vuelve a su .2s
+   normal -- no se sacrifica la velocidad del hover para siempre.
+
+   baseline scroll_precio=10.3/día, cta_activar=0/semana (mismo número citado en
+   el hero) -- afecta TODAS las secciones con .reveal, incluida "🪐 La diferencia"
+   (.col-vs, mismo bug, mismo fix, verificado que ya estaba enganchada al mismo
+   observer). Comparar de acá a 2 semanas. */
+.reveal{opacity:0;transform:translateY(24px)}
+.reveal:not(.revelado){transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* Tarjetas vivas */
@@ -1101,6 +1120,18 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form select option{background:#1a1030;color:var(--tinta)}
   .ms-form input:focus,.ms-form textarea:focus,.ms-form select:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
+  /* 17-sep-2026 (multiselector de países): MISMO componente que onboarding.html
+     (.geo-grid/.geo-op, ya probado en mobile) -- duplicado acá porque los dos HTML
+     no comparten hoja de estilos (mismo patrón que GEO_OPCIONES, ya duplicado entre
+     los dos archivos), no una versión distinta. 2 columnas en desktop, 1 en mobile. */
+  .geo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:4px}
+  .geo-op{display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);font-size:.95rem;margin:0;padding:9px 11px;border:1.5px solid var(--linea);border-radius:10px;background:rgba(0,0,0,.22);cursor:pointer}
+  .geo-op:hover{border-color:var(--rosa-claro)}
+  .geo-op input{width:auto;margin:0;accent-color:var(--rojo)}
+  /* "Toda Latinoamérica": ocupa las 2 columnas y se distingue como atajo, no como
+     un país más -- filas de países quedan debajo. */
+  .geo-op-todas{grid-column:1 / -1;border-color:rgba(255,133,166,.5);background:rgba(255,133,166,.07)}
+  @media (max-width:520px){.geo-grid{grid-template-columns:1fr}}
   .ms-decisor-opciones{display:flex;gap:18px;margin-top:2px}
   .ms-decisor-opcion{display:flex!important;align-items:center;gap:6px;font-size:.92rem;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);margin:0!important;cursor:pointer}
   .ms-decisor-opcion input{width:auto!important;padding:0!important}
@@ -1144,30 +1175,29 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <label for="ms-target">¿A qué tipo de empresas les vendes? <span class="ms-hint">El rubro de tus clientes, no el tuyo; y que sean empresas, no personas. Cuanto más específico seas —tamaño, rubro—, mejor busca tu agente.</span></label>
           <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos» — no «turismo» a secas."></textarea>
           <div id="ms-target-nudge" class="ms-nudge" aria-live="polite"></div>
-          <label for="ms-geo">¿Dónde están tus clientes? <span class="ms-hint">El país donde quieres que tu agente busque. Si vendes en varios, elige la región.</span></label>
-          <select id="ms-geo" name="geografia" required>
-            <option value="" disabled selected>Elige un país o región…</option>
-            <option value="Latinoamérica">Toda Latinoamérica (o no estoy seguro)</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Bolivia">Bolivia</option>
-            <option value="Chile">Chile</option>
-            <option value="Colombia">Colombia</option>
-            <option value="Costa Rica">Costa Rica</option>
-            <option value="Ecuador">Ecuador</option>
-            <option value="El Salvador">El Salvador</option>
-            <option value="España">España</option>
-            <option value="Guatemala">Guatemala</option>
-            <option value="Honduras">Honduras</option>
-            <option value="México">México</option>
-            <option value="Nicaragua">Nicaragua</option>
-            <option value="Panamá">Panamá</option>
-            <option value="Paraguay">Paraguay</option>
-            <option value="Perú">Perú</option>
-            <option value="Puerto Rico">Puerto Rico</option>
-            <option value="República Dominicana">República Dominicana</option>
-            <option value="Uruguay">Uruguay</option>
-            <option value="Venezuela">Venezuela</option>
-          </select>
+          <label for="ms-geo-todas">¿Dónde están tus clientes? <span class="ms-hint">Marca uno o varios países donde quieres que tu agente busque. Si vendes en toda la región, usa el primer atajo.</span></label>
+          <div class="geo-grid" id="ms-geo-grid">
+            <label class="geo-op geo-op-todas"><input type="checkbox" id="ms-geo-todas">Toda Latinoamérica (marca todos)</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Argentina">Argentina</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Bolivia">Bolivia</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Chile">Chile</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Colombia">Colombia</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Costa Rica">Costa Rica</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Ecuador">Ecuador</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="El Salvador">El Salvador</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="España">España</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Guatemala">Guatemala</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Honduras">Honduras</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="México">México</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Nicaragua">Nicaragua</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Panamá">Panamá</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Paraguay">Paraguay</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Perú">Perú</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Puerto Rico">Puerto Rico</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="República Dominicana">República Dominicana</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Uruguay">Uruguay</label>
+            <label class="geo-op"><input type="checkbox" class="ms-geo-chk" value="Venezuela">Venezuela</label>
+          </div>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <!-- 17-sep (2ª tanda, hallazgo de Ronald): baseline scroll_precio=73/7días=10.4/día,
@@ -1455,12 +1485,24 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // dispararia y la seccion se quedaria en opacity:0.
   var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, .col-vs, details, .banner-marca, .precio-card');
   targets.forEach(function(el){ el.classList.add('reveal'); });
+  // 17-sep-2026: 'revelado' se agrega DESPUÉS de que termina la transición de
+  // aparecer -- retira la transition-shorthand de .reveal (ver ese CSS) para que
+  // .paso/.dia/.col-vs/details recuperen su transition de hover normal (.2s) en vez
+  // de quedar con la de .6s para siempre. Un solo listener {once:true} alcanza:
+  // opacity y transform duran lo mismo (.6s), llegan casi juntos.
+  function marcarRevelado(el){
+    el.addEventListener('transitionend', function(){ el.classList.add('revelado'); }, { once: true });
+  }
   if (reduce || !('IntersectionObserver' in window)) {
-    targets.forEach(function(el){ el.classList.add('visible'); });
+    targets.forEach(function(el){ el.classList.add('visible'); el.classList.add('revelado'); });
   } else {
     var obs = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
-        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        if (e.isIntersecting) {
+          marcarRevelado(e.target);
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
       });
     }, { threshold: 0.12 });
     targets.forEach(function(el){ obs.observe(el); });
@@ -1640,15 +1682,33 @@ document.addEventListener('DOMContentLoaded', function () {
         if (msDecisorWrap.hidden) document.getElementById('ms-decisor-correo').value = '';
       });
     });
+    // 17-sep-2026 (multiselector de países): "Toda Latinoamérica" es un ATAJO que
+    // marca los 19 checkboxes reales -- nunca se manda como valor propio (un string
+    // "Latinoamérica" no matchea el país de NINGÚN borrador individual río abajo,
+    // ver filtrar_mismo_pais en outreach-engine -- el trial jamás se ofrecería).
+    // Si se destilda un país a mano, "todas" se destilda sola (ya no aplica a los 19).
+    var msGeoTodas = document.getElementById('ms-geo-todas');
+    var msGeoChks = function () { return Array.prototype.slice.call(msForm.querySelectorAll('.ms-geo-chk')); };
+    if (msGeoTodas) {
+      msGeoTodas.addEventListener('change', function () {
+        msGeoChks().forEach(function (c) { c.checked = msGeoTodas.checked; });
+      });
+      msGeoChks().forEach(function (c) {
+        c.addEventListener('change', function () {
+          msGeoTodas.checked = msGeoChks().every(function (x) { return x.checked; });
+        });
+      });
+    }
     msForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var res = document.getElementById('ms-res');
       var btn = document.getElementById('ms-btn');
       var decisorElegido = msForm.querySelector('input[name="es_decisor"]:checked');
+      var geografias = msGeoChks().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
       var datos = {
         sitio_web: (msForm.sitio_web.value || '').trim(),
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
-        geografia: (msForm.geografia.value || '').trim(),
+        geografias: geografias,
         correo: (msForm.correo.value || '').trim(),
         r: r || '',                             // código de origen del ?r= (linkedin, etc.), no visible al usuario
         ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
@@ -1659,9 +1719,9 @@ document.addEventListener('DOMContentLoaded', function () {
           datos.correo_decisor = (msForm.correo_decisor.value || '').trim();
         }
       }
-      if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografia || !datos.correo) {
+      if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografias.length || !datos.correo) {
         res.className = 'ms-resultado error';
-        res.innerHTML = '<span class="titulo">Faltan datos</span>Completa tu sitio web, a quién le vendes, dónde están tus clientes y tu correo.';
+        res.innerHTML = '<span class="titulo">Faltan datos</span>Completa tu sitio web, a quién le vendes, dónde están tus clientes (al menos un país) y tu correo.';
         return;
       }
       var textoBtn = btn.textContent;
