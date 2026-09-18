@@ -1,0 +1,23 @@
+name: cta-color-check
+
+# 17-sep-2026 (causa raíz de un vaivén de 4 rondas en el bloque Mercately, ver el
+# header de cta-color-por-accion-check.sh en la raíz de este repo): el color de un
+# CTA .btn significa la ACCIÓN, no el lugar -- btn-primario (degradado) = activar,
+# btn-secundario (morado) = todo lo demás.
+#
+# Mismo límite honesto que los otros checks de este repo: corre DESPUÉS de que el
+# push ya aterrizó (no hay branch protection pagado) -- avisa fuerte, no impide.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "cta-color-por-accion-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash cta-color-por-accion-check.sh
