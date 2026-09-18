@@ -9,6 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- 17-sep-2026: selector de países COMPARTIDO con index.html (la muestra) -- ver
+     geo-chips.js/.css (lista, comportamiento, estilo en un solo lugar) y
+     geo-paises-compartidos-check.sh. -->
+<link rel="stylesheet" href="geo-chips.css">
 <style>
 :root{
   --rojo:#DE0540; --morado:#452774; --morado-oscuro:#2E1A4F;
@@ -98,13 +102,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 .pie a{color:var(--rosa-claro)}
 .geo-hint{font-size:.85rem;color:var(--tinta-suave);margin:4px 0 10px}
 .geo-hint b{color:#E7DEF7}
-.geo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:4px}
-.geo-op{display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);font-size:.95rem;margin:0;padding:9px 11px;border:1.5px solid var(--linea);border-radius:10px;background:rgba(0,0,0,.22);cursor:pointer}
-.geo-op:hover{border-color:var(--rosa-claro)}
-.geo-op input{width:auto;margin:0;accent-color:var(--rojo)}
-.geo-op.sug{border-color:rgba(255,198,92,.6);background:rgba(255,198,92,.06)}
-.geo-sug{margin-left:auto;font-size:.66rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#3A2400;background:var(--alerta);border-radius:999px;padding:2px 8px;white-space:nowrap}
-@media (max-width:520px){.fila2{grid-template-columns:1fr}.geo-grid{grid-template-columns:1fr}}
+@media (max-width:520px){.fila2{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.btn-primario{animation:none}.btn-primario::after{display:none}.spin{animation-duration:0s}}
 </style>
 </head>
@@ -231,6 +229,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <p class="pie"><a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos de servicio</a> · <a href="/terminos.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a></p>
 </div>
 
+<script src="geo-chips.js"></script>
 <script>
 const API='https://api.inntuitivo.com';
 const $=id=>document.getElementById(id);
@@ -345,19 +344,23 @@ async function pollAnalisis(){
 }
 
 // --- PASO 2: render editable con baja confianza ---
-// Geografía: mismas opciones que la muestra. value canónico ('Latinoamérica' es amplia en discovery).
-const GEO_OPCIONES=['Latinoamérica','Argentina','Bolivia','Chile','Colombia','Costa Rica','Ecuador','El Salvador','España','Guatemala','Honduras','México','Nicaragua','Panamá','Paraguay','Perú','Puerto Rico','República Dominicana','Uruguay','Venezuela'];
-const geoNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+// Geografía: lista, normalización y chips COMPARTIDOS con index.html (la muestra) --
+// ver geo-chips.js. "Latinoamérica" YA NO es un valor (17-sep-2026, multiselector) --
+// un string "Latinoamérica" no matcheaba el país de NINGÚN candidato individual río
+// abajo en el gate de la muestra/trial (ver filtrar_mismo_pais en outreach-engine);
+// geoChipsHTML la renderiza aparte, como ATAJO que marca los países reales, nunca
+// como su propio valor.
 // El hidden 'f-geografia_objetivo' lleva el string coma-separado que profiler.py ya splitea.
-function geoSync(){const sel=[...document.querySelectorAll('.geo-chk:checked')].map(c=>c.value);const h=$('f-geografia_objetivo');if(h)h.value=sel.join(', ');}
 // Muestra la inferencia como SUGERENCIA (tag 'sugerido'), nunca pre-marcada: el cliente elige.
 function geoControl(id,v){
-  const nv=geoNorm(v);
-  const opts=GEO_OPCIONES.map(o=>{const sug=nv&&nv.includes(geoNorm(o));
-    return '<label class="geo-op'+(sug?' sug':'')+'"><input type="checkbox" class="geo-chk" value="'+escapa(o)+'" onchange="geoSync()">'+escapa(o)+(sug?'<span class="geo-sug">sugerido</span>':'')+'</label>';}).join('');
   return '<input id="f-'+id+'" type="hidden" value="">'
     +(v?'<div class="geo-hint">Detectamos <b>'+escapa(v)+'</b>. Marca los países o regiones donde quieres vender — no lo elegimos por ti.</div>':'')
-    +'<div class="geo-grid">'+opts+'</div>';
+    +window.geoChipsHTML('geo-todas',v);
+}
+// Conecta el toggle de chips tras insertar geoControl() en el DOM (innerHTML pisa
+// cualquier listener previo) y sincroniza el hidden que confirmar() lee.
+function geoInit(){
+  window.geoInitChips('geo-todas',function(sel){const h=$('f-geografia_objetivo');if(h)h.value=sel.join(', ');});
 }
 function confMap(p){const m={};(p.inferencias||[]).forEach(i=>{if(m[i.campo]==null||i.confianza<m[i.campo])m[i.campo]=i.confianza;});return m;}
 function renderPerfil(p){
@@ -380,6 +383,7 @@ function renderPerfil(p){
   }).join('');
   const fs=(p.inferencias||[]).filter(i=>i.fuente);
   $('fuentes-lista').innerHTML=fs.length?fs.map(i=>'<div class="fuente">'+escapa(i.campo)+' ('+i.confianza+'/5) — <a href="'+escapa(i.fuente)+'" target="_blank" rel="noopener">'+escapa(i.fuente)+'</a></div>').join(''):'<div class="fuente" style="padding-left:0">Sin fuentes citadas (poca información pública del sitio).</div>';
+  geoInit();
 }
 $('btn-volver1').addEventListener('click',()=>{ver('step1');marcarPaso(1);});
 // Resalta la tarjeta y los campos vacíos del cliente ideal, y hace scroll a ellos.

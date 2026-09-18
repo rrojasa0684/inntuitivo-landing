@@ -1,0 +1,27 @@
+name: geo-paises-check
+
+# 17-sep-2026: index.html (la muestra) y onboarding.html (activación) comparten la
+# lista, el estilo y el comportamiento del selector de país en geo-chips.js/.css --
+# ver el header de geo-paises-compartidos-check.sh en la raíz de este repo. Este
+# check falla si alguna de las dos páginas deja de citar esos archivos o vuelve a
+# traer su propia lista de países hardcodeada.
+#
+# Mismo límite honesto que los otros checks de este repo: corre DESPUÉS de que el
+# push ya aterrizó (no hay branch protection pagado) -- avisa fuerte, no impide.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "onboarding.html"
+      - "geo-chips.js"
+      - "geo-chips.css"
+      - "geo-paises-compartidos-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash geo-paises-compartidos-check.sh

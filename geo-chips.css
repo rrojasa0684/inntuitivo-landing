@@ -1,0 +1,28 @@
+/* Estilos del selector de países en chips, COMPARTIDO entre index.html (muestra) y
+   onboarding.html (activación) -- ver geo-chips.js para la lista y el
+   comportamiento, y geo-paises-compartidos-check.sh para el candado que verifica
+   que las dos páginas sigan citando este archivo en vez de tener su propia copia. */
+.geo-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.geo-chip{
+  display:inline-flex;align-items:center;position:relative;
+  text-transform:none;letter-spacing:0;font-weight:400;
+  color:var(--tinta-suave);font-size:.92rem;margin:0;
+  padding:9px 16px;min-height:38px;border:1.5px solid var(--linea);
+  border-radius:999px;background:transparent;cursor:pointer;
+  transition:border-color .15s ease,background .15s ease,color .15s ease;
+}
+.geo-chip:hover{border-color:var(--rosa-claro)}
+.geo-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.geo-chip.geo-chip-on{background:var(--gradiente);border-color:transparent;color:#fff;font-weight:600}
+.geo-chip.geo-chip-on::before{content:"✓ "}
+.geo-chip-todas{border-color:rgba(255,133,166,.5);background:rgba(255,133,166,.07);color:var(--tinta)}
+.geo-chip-todas.geo-chip-on{background:var(--gradiente);color:#fff;border-color:transparent}
+.geo-chip-sug{
+  margin-left:6px;font-size:.66rem;font-weight:700;letter-spacing:.03em;
+  text-transform:uppercase;color:#3A2400;background:var(--alerta,#FFC65C);
+  border-radius:999px;padding:2px 8px;white-space:nowrap;
+}
+/* 44px de alto mínimo en mobile -- toque fácil con el pulgar, no solo estético. */
+@media (max-width:767px){
+  .geo-chip{min-height:44px;padding:10px 18px;font-size:.95rem}
+}

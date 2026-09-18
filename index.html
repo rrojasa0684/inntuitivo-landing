@@ -134,6 +134,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- 17-sep-2026: selector de países COMPARTIDO con onboarding.html -- ver geo-chips.js/.css
+     (lista, comportamiento, estilo en un solo lugar) y geo-paises-compartidos-check.sh. -->
+<link rel="stylesheet" href="geo-chips.css">
 <style>
 :root{
   --rojo:#DE0540;
@@ -1138,33 +1141,15 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-form select option{background:#1a1030;color:var(--tinta)}
   .ms-form input:focus,.ms-form textarea:focus,.ms-form select:focus{border-color:var(--rosa-claro);outline:none}
   .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
-  /* 17-sep-2026, 2ª pasada (Ricardo: checkboxes apilados ocupaban demasiado y las
-     MAYÚSCULAS venían de un bug real -- .geo-op{text-transform:none} (1 clase,
-     specificity 0,1,0) perdía contra .ms-form label{text-transform:uppercase}
-     (1 clase + 1 elemento, specificity 0,1,1) -- ganaba SIEMPRE, sin importar el
-     orden, porque .ms-form label es más específica. Ahora "chips" -- botones-
-     etiqueta que fluyen (flex-wrap), no una grilla de 2 columnas -- caben en 4-5
-     filas en desktop y 6-7 en mobile en vez de 10 filas fijas. Especificidad
-     .ms-form .geo-chip (2 clases) para ganarle a .ms-form label sin dudas. */
-  .geo-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-  .ms-form .geo-chip{
-    display:inline-flex;align-items:center;position:relative;
-    text-transform:none;letter-spacing:0;font-weight:400;
-    color:var(--tinta-suave);font-size:.92rem;margin:0;
-    padding:9px 16px;min-height:38px;border:1.5px solid var(--linea);
-    border-radius:999px;background:transparent;cursor:pointer;
-    transition:border-color .15s ease,background .15s ease,color .15s ease;
-  }
-  .geo-chip:hover{border-color:var(--rosa-claro)}
-  .geo-chip input{position:absolute;opacity:0;width:1px;height:1px}
-  .geo-chip.geo-chip-on{background:var(--gradiente);border-color:transparent;color:#fff;font-weight:600}
-  .geo-chip.geo-chip-on::before{content:"✓ "}
-  .geo-chip-todas{border-color:rgba(255,133,166,.5);background:rgba(255,133,166,.07);color:var(--tinta)}
-  .geo-chip-todas.geo-chip-on{background:var(--gradiente);color:#fff;border-color:transparent}
-  /* 44px de toque en mobile (pedido explícito), no solo estético. */
-  @media (max-width:767px){
-    .ms-form .geo-chip{min-height:44px;padding:10px 18px;font-size:.95rem}
-  }
+  /* 17-sep-2026: el resto del look de los chips (color, hover, estado marcado,
+     tamaño en mobile) vive en geo-chips.css, COMPARTIDO con onboarding.html --
+     esta regla es la ÚNICA que se queda acá, porque tiene que ganarle a
+     .ms-form label{text-transform:uppercase} (1 clase + 1 elemento, specificity
+     0,1,1), que geo-chips.css's .geo-chip{text-transform:none} (1 clase,
+     0,1,0) SOLO pierde en esta página -- onboarding.html no tiene un
+     ".ms-form label" que compita, así que ahí no hace falta este refuerzo.
+     Sin este override las mayúsculas vuelven: bug real, ver historial. */
+  .ms-form .geo-chip{text-transform:none}
   /* baseline scroll_precio=10.3/día, cta_activar=0/semana (mismo número citado en el
      hero). Comparar de acá a 2 semanas. */
   .ms-decisor-opciones{display:flex;gap:18px;margin-top:2px}
@@ -1218,28 +1203,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos» — no «turismo» a secas."></textarea>
           <div id="ms-target-nudge" class="ms-nudge" aria-live="polite"></div>
           <label for="ms-geo-todas">¿Dónde están tus clientes? <span class="ms-hint">Marca uno o varios países donde quieres que tu agente busque. Si vendes en toda la región, usa el primer atajo.</span></label>
-          <div class="geo-chips" id="ms-geo-grid">
-            <label class="geo-chip geo-chip-todas"><input type="checkbox" id="ms-geo-todas">Toda Latinoamérica</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="México">México</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Colombia">Colombia</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Argentina">Argentina</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Chile">Chile</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Perú">Perú</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="España">España</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Bolivia">Bolivia</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Costa Rica">Costa Rica</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Ecuador">Ecuador</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="El Salvador">El Salvador</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Guatemala">Guatemala</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Honduras">Honduras</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Nicaragua">Nicaragua</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Panamá">Panamá</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Paraguay">Paraguay</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Puerto Rico">Puerto Rico</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="República Dominicana">República Dominicana</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Uruguay">Uruguay</label>
-            <label class="geo-chip"><input type="checkbox" class="ms-geo-chk" value="Venezuela">Venezuela</label>
-          </div>
+          <div id="ms-geo-grid"></div>
           <label for="ms-correo">Tu correo</label>
           <input id="ms-correo" name="correo" type="email" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
           <!-- 17-sep (2ª tanda, hallazgo de Ronald): baseline scroll_precio=73/7días=10.4/día,
@@ -1671,6 +1635,13 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 <!-- Analytics (Umami, cookieless) -->
 <script defer src="https://analytics.inntuitivo.com/script.js"
         data-website-id="0fb992b8-c3ab-4f40-baeb-d715f962d5fd"></script>
+<!-- 17-sep-2026: selector de países COMPARTIDO con onboarding.html -- ver geo-chips.css/.js
+     y geo-paises-compartidos-check.sh (candado: falla si alguna de las dos páginas deja
+     de citar estos archivos o vuelve a traer su propia lista de países). El markup
+     estático duplicado que tenía esta página se reemplazó por window.geoChipsHTML()/
+     geoInitChips() (ver más abajo, dentro del handler de #ms-form).
+     baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días). -->
+<script src="geo-chips.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   function track(n, d) { if (window.umami) umami.track(n, d); }
@@ -1714,35 +1685,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (msDecisorWrap.hidden) document.getElementById('ms-decisor-correo').value = '';
       });
     });
-    // 17-sep-2026 (multiselector de países): "Toda Latinoamérica" es un ATAJO que
-    // marca los 19 checkboxes reales -- nunca se manda como valor propio (un string
-    // "Latinoamérica" no matchea el país de NINGÚN borrador individual río abajo,
-    // ver filtrar_mismo_pais en outreach-engine -- el trial jamás se ofrecería).
-    // Si se destilda un país a mano, "todas" se destilda sola (ya no aplica a los 19).
-    // Chips: el estado "marcado" se ve con .geo-chip-on en el <label> padre, no con
-    // el checkbox nativo (queda visualmente oculto, sigue accesible por teclado).
-    var msGeoTodas = document.getElementById('ms-geo-todas');
-    var msGeoChks = function () { return Array.prototype.slice.call(msForm.querySelectorAll('.ms-geo-chk')); };
-    var msGeoPintar = function (c) { c.parentElement.classList.toggle('geo-chip-on', c.checked); };
-    if (msGeoTodas) {
-      msGeoTodas.addEventListener('change', function () {
-        msGeoChks().forEach(function (c) { c.checked = msGeoTodas.checked; msGeoPintar(c); });
-        msGeoPintar(msGeoTodas);
-      });
-      msGeoChks().forEach(function (c) {
-        c.addEventListener('change', function () {
-          msGeoPintar(c);
-          msGeoTodas.checked = msGeoChks().every(function (x) { return x.checked; });
-          msGeoPintar(msGeoTodas);
-        });
-      });
-    }
+    // 17-sep-2026 (multiselector de países): lista, chips y comportamiento del
+    // selector COMPARTIDOS con onboarding.html -- ver geo-chips.js. "Toda
+    // Latinoamérica" es un ATAJO que marca todos los checkboxes reales -- nunca se
+    // manda como valor propio (un string "Latinoamérica" no matchea el país de
+    // NINGÚN borrador individual río abajo, ver filtrar_mismo_pais en
+    // outreach-engine -- el trial jamás se ofrecería).
+    document.getElementById('ms-geo-grid').innerHTML = window.geoChipsHTML('ms-geo-todas', '');
+    var msGeografiasSeleccionadas = [];
+    window.geoInitChips('ms-geo-todas', function (sel) { msGeografiasSeleccionadas = sel; });
     msForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var res = document.getElementById('ms-res');
       var btn = document.getElementById('ms-btn');
       var decisorElegido = msForm.querySelector('input[name="es_decisor"]:checked');
-      var geografias = msGeoChks().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+      var geografias = msGeografiasSeleccionadas;
       var datos = {
         sitio_web: (msForm.sitio_web.value || '').trim(),
         a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
