@@ -539,6 +539,64 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </header>
 
+  <!-- 17-sep (hallazgo de Ricardo, feedback de prospectos reales -- Boyalá, Ronald,
+       Ilan de GetRich, Daniel de Rem Soluciones -- necesitaron que se los explicaran
+       por teléfono/WhatsApp): el hero describe capacidades pero nunca da una
+       categoría conocida. Dos secciones nuevas, inmediatamente después del hero y
+       antes de Partners -- "en simple" nombra la categoría (un vendedor) con la
+       misma palabra que usa Ricardo al explicarlo por teléfono; la de Apollo nombra
+       la comparación que los prospectos YA hacen solos, en vez de dejarla para la
+       llamada. NO se tocó el hero ni el banner-marca (instrucción explícita).
+
+       baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días,
+       mismo número citado arriba) -- toda la landing recién arranca a medirse hoy,
+       no hay separación fina por sección todavía. Comparar de acá a 2 semanas. -->
+  <style>
+  /* Componente genérico "fila de comparación": una card por fila (de -> a), en vez
+     de una <table> real, para que apilar en mobile sea gratis (grid-template-columns
+     pasa de 3 a 1 columna, sin scroll horizontal). Reusado por #en-simple y #apollo
+     -- mismos tokens de color que el resto del sitio (var(--carta)/var(--linea)/
+     var(--tinta)/var(--tinta-suave)/var(--rosa-claro)), nada de paleta nueva. */
+  .compara-filas{margin-top:28px;display:flex;flex-direction:column;gap:1px;border-radius:16px;overflow:hidden;border:1px solid var(--linea);background:var(--linea)}
+  .compara-fila{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;padding:20px 24px;background:var(--carta)}
+  .compara-fila .de{color:var(--tinta-suave);font-size:.96rem;line-height:1.5}
+  .compara-fila .a{color:var(--tinta);font-size:.96rem;line-height:1.5;font-weight:600}
+  .compara-fila .flecha{color:var(--rosa-claro);font-size:1.15rem;line-height:1}
+  @media (max-width:768px){
+    .compara-fila{grid-template-columns:1fr;gap:6px;padding:18px 20px}
+    .compara-fila .flecha{display:none}
+    .compara-fila .a::before{content:"→ ";color:var(--rosa-claro)}
+  }
+  </style>
+
+  <section id="en-simple">
+    <span class="eyebrow">🧑‍💼 En simple</span>
+    <h2>Es un vendedor.</h2>
+    <p class="intro">Uno que no duerme, no renuncia, y cuesta $45 al mes.</p>
+    <p class="intro" style="margin-top:8px">Un vendedor junior en Costa Rica cuesta entre $900 y $1.400 al mes, tarda semanas en arrancar, y hace esto:</p>
+    <div class="compara-filas">
+      <div class="compara-fila"><span class="de">Busca empresas que podrían ser clientes</span><span class="flecha">→</span><span class="a">Lo mismo, en la web abierta, todos los días</span></div>
+      <div class="compara-fila"><span class="de">Revisa cuáles son reales y tienen a quién escribirle</span><span class="flecha">→</span><span class="a">Valida el sitio, el dominio y el correo. Si no lo puede comprobar, lo descarta</span></div>
+      <div class="compara-fila"><span class="de">Lee cada empresa para encontrar de qué hablarle</span><span class="flecha">→</span><span class="a">Lee el sitio de cada una y busca algo específico y verificable</span></div>
+      <div class="compara-fila"><span class="de">Escribe el correo, uno por uno</span><span class="flecha">→</span><span class="a">Escribe uno distinto por empresa, citando ese dato con su fuente</span></div>
+      <div class="compara-fila"><span class="de">Manda, espera, da seguimiento</span><span class="flecha">→</span><span class="a">Manda a ritmo humano, hace dos seguimientos, y para si le dicen que no</span></div>
+      <div class="compara-fila"><span class="de">Te avisa cuando alguien está interesado</span><span class="flecha">→</span><span class="a">Igual — y solo entonces. Lo demás lo maneja solo</span></div>
+    </div>
+    <p class="intro" style="margin-top:24px">Tú no tocas nada. Conectas tu correo una vez y el agente trabaja en tu nombre.</p>
+  </section>
+
+  <section id="apollo">
+    <span class="eyebrow">🆚 ¿Es como Apollo?</span>
+    <h2>No.</h2>
+    <p class="intro">Apollo (o Lusha, o Hunter) es una herramienta: te da una base de datos y plantillas, y alguien de tu equipo tiene que armar las listas, escribir las secuencias y mandarlas. Si nadie la opera, no pasa nada.</p>
+    <p class="intro" style="margin-top:8px">Inntuitivo no tiene panel que operar. Es el que hace el trabajo.</p>
+    <div class="compara-filas">
+      <div class="compara-fila"><span class="de">Apollo te da contactos de una base comprada</span><span class="flecha">→</span><span class="a">Tu agente busca en la web abierta y valida que la empresa exista hoy</span></div>
+      <div class="compara-fila"><span class="de">Apollo cobra por asiento, pensado para equipos de ventas</span><span class="flecha">→</span><span class="a">$45 al mes, sin importar cuántos seas, pensado para quien no tiene equipo de ventas</span></div>
+      <div class="compara-fila"><span class="de">Apollo asume que tienes un SDR que lo opere</span><span class="flecha">→</span><span class="a">Tu agente ES el SDR</span></div>
+    </div>
+  </section>
+
   <!-- Partners -->
   <style>
   .partners{position:relative;overflow:hidden;padding:84px 0 88px;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea)}
