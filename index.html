@@ -1116,11 +1116,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   .ms-que li::before{content:"✓";color:var(--rosa-claro);font-weight:700;flex-shrink:0}
   .ms-fit{margin-top:18px;font-size:.9rem;color:var(--tinta-suave);border-top:1px solid var(--linea);padding-top:16px;line-height:1.55}
   .ms-fit strong{color:var(--tinta);font-weight:600}
-  .ms-mas{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:28px 26px;margin-top:28px}
-  .ms-mas h3{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:16px}
-  .ms-mas ul{list-style:none}
-  .ms-mas li{padding:9px 0;font-size:.97rem;color:var(--tinta-suave);display:flex;gap:11px;line-height:1.5}
-  .ms-mas li .ic{flex-shrink:0}
+  /* 17-sep-2026: fusiona el contenido de la ex-caja .ms-mas dentro de .ms-que --
+     el grid ya igualaba el alto del CONTENEDOR (align-items:stretch) pero el
+     contenido de .ms-que terminaba antes, dejando un hueco vacío visible; medido
+     antes del fix: .ms-que=1028.09px / .ms-form=1028.09px de contenedor, con
+     .ms-mas suelta debajo en 266px. Después: .ms-que=.ms-form=1054.375px, sin
+     caja suelta. baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami,
+     últimos 7 días, mismo número citado arriba en el bloque Mercately). */
+  .ms-noves-title{font-size:1.05rem;font-weight:600;color:#fff;margin:24px 0 16px;padding-top:20px;border-top:1px solid var(--linea)}
+  .ms-que .ms-noves li::before{content:none}
+  .ms-que .ms-noves li .ic{flex-shrink:0}
   .ms-form{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:22px;display:flex;flex-direction:column}
   .ms-form h3{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:6px}
   .ms-form p.ms-nota{font-size:.86rem;color:var(--tinta-suave);margin-bottom:6px}
@@ -1195,6 +1200,13 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <li>Cada borrador cita algo del sitio de esa empresa, no de una plantilla. Son distintos porque cada empresa lo es.</li>
         </ul>
         <p class="ms-fit"><strong>Un dato honesto:</strong> funciona cuando tus clientes son empresas con web y un correo de contacto —pymes, startups, despachos contables, bufetes, consultoras, clínicas privadas—. Si les vendes a personas y no a empresas (por ejemplo, casas o seguros a particulares), el agente no las va a encontrar: busca empresas, no individuos.</p>
+        <h3 class="ms-noves-title">La muestra gratis 💸 te enseña los borradores. Esto es lo que no ves:</h3>
+        <ul class="ms-noves">
+          <li><span class="ic" aria-hidden="true">📤</span><span>El envío sale en tu nombre, escalonado, a ritmo humano — como lo mandarías tú. Y si conectas tu dominio, desde tu propia dirección.</span></li>
+          <li><span class="ic" aria-hidden="true">🚫</span><span>Si alguien pide la baja o un correo rebota, no se le vuelve a escribir. Nunca.</span></li>
+          <li><span class="ic" aria-hidden="true">✋</span><span>Si alguien responde, su secuencia se cancela sola: nadie recibe un «última vez que te escribo» después de haberte contestado.</span></li>
+          <li><span class="ic" aria-hidden="true">🔔</span><span>Solo recibes un aviso cuando hay interés real. Una respuesta cortés pero sin compromiso va a tu reporte semanal, no te interrumpe.</span></li>
+        </ul>
       </div>
       <div class="ms-form">
         <h3>Pide tu muestra gratis 💸</h3>
@@ -1250,16 +1262,6 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <div id="ms-res" class="ms-resultado" role="status" aria-live="polite"></div>
         </form>
       </div>
-    </div>
-
-    <div class="ms-mas">
-      <h3>La muestra gratis 💸 te enseña los borradores. Esto es lo que no ves:</h3>
-      <ul>
-        <li><span class="ic" aria-hidden="true">📤</span><span>El envío sale en tu nombre, escalonado, a ritmo humano — como lo mandarías tú. Y si conectas tu dominio, desde tu propia dirección.</span></li>
-        <li><span class="ic" aria-hidden="true">🚫</span><span>Si alguien pide la baja o un correo rebota, no se le vuelve a escribir. Nunca.</span></li>
-        <li><span class="ic" aria-hidden="true">✋</span><span>Si alguien responde, su secuencia se cancela sola: nadie recibe un «última vez que te escribo» después de haberte contestado.</span></li>
-        <li><span class="ic" aria-hidden="true">🔔</span><span>Solo recibes un aviso cuando hay interés real. Una respuesta cortés pero sin compromiso va a tu reporte semanal, no te interrumpe.</span></li>
-      </ul>
     </div>
   </section>
 
