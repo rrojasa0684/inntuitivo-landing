@@ -22,6 +22,24 @@ name: index-baseline-check
 # GitHub notifica por default a quien pusheó cuando su propia corrida falla. Es
 # "avisa fuerte e inevitable", no "impide" -- la decisión de no pagar branch
 # protection ya está tomada, esto no la revierte.
+#
+# ⚠️ 17-sep-2026: bug real cazado en vivo, no un flake -- reproducido DETERMINÍSTICAMENTE
+# dos veces (corrida original + rerun manual, mismo resultado ambas), con la marca de
+# "baseline" genuinamente presente en el diff (confirmado clonando el repo y corriendo
+# `git diff <before> <head> -- index.html | grep` a mano). La versión vieja encadenaba
+# `grep -E '^\+' | grep -iq 'baseline'` DENTRO de un `if` bajo `set -o pipefail`: cuando
+# el segundo grep (-q) encuentra su match y sale temprano, el primer grep puede seguir
+# escribiendo al pipe ya cerrado -> SIGPIPE ("grep: write error: Broken pipe" en el log).
+# Con `pipefail`, el bash 5.x del runner de Ubuntu reportó eso como fallo del `if` aunque
+# el ÚLTIMO comando de la cadena (`grep -iq`) haya salido con éxito -- comportamiento que
+# el bash 3.2 de este Mac NO reproduce (probado local, mismo script, mismo rango de
+# commits: encuentra el match sin problema). No vale la pena perseguir CUÁL versión de
+# bash tiene la semántica "correcta" de pipefail+SIGPIPE -- el fix real es no depender de
+# un consumidor que sale temprano (`-q`) en medio de una cadena de pipes: se captura la
+# salida en una variable primero y se le pasa a un SOLO grep por here-string, sin ningún
+# proceso productor compitiendo contra uno que corta la lectura. Mismo motivo por el que
+# ops/test-linux.sh existe en outreach-engine (paridad de SO/versión antes de confiar) --
+# acá el bug vivía en el propio SCRIPT de CI, no en el código que audita.
 
 on:
   push:
@@ -47,12 +65,14 @@ jobs:
             before=$(git rev-list --max-parents=0 HEAD | tail -1)
           fi
 
-          if ! git diff --name-only "$before" HEAD | grep -qx "index.html"; then
+          archivos_cambiados=$(git diff --name-only "$before" HEAD)
+          if ! grep -qx "index.html" <<< "$archivos_cambiados"; then
             echo "index.html no cambió en este push. OK."
             exit 0
           fi
 
-          if git diff "$before" HEAD -- index.html | grep -E '^\+' | grep -iq 'baseline'; then
+          diff_index_html=$(git diff "$before" HEAD -- index.html)
+          if grep -iqE '^\+.*baseline' <<< "$diff_index_html"; then
             echo "Marca de baseline encontrada en el diff. OK."
             exit 0
           fi

@@ -20,6 +20,15 @@
 #
 # Para saltarlo a propósito (un cambio que de verdad no toca nada de
 # conversión: un typo, un link roto): git push --no-verify.
+#
+# 17-sep-2026: mismo fix que el gemelo servidor (.github/workflows/
+# index-baseline-check.yml) -- la línea de `marca` encadenaba dos greps en
+# pipe bajo `pipefail`, donde el segundo (-q) puede cortar la lectura del
+# primero apenas encuentra su match, generando SIGPIPE. Se probó (bash 3.2
+# de este Mac, gemelo servidor corre bash 5.x de Ubuntu) que la semántica de
+# pipefail+SIGPIPE difiere entre versiones -- el fix no depende de acertarle
+# a cuál versión es "correcta", evita el patrón entero (un solo grep, sin
+# consumidor que corte la lectura de un productor).
 set -euo pipefail
 
 zero="0000000000000000000000000000000000000000"
@@ -42,7 +51,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   tocado=$(git diff --name-only "${rango_names[@]}" -- index.html 2>/dev/null || true)
   [ -z "$tocado" ] && continue  # index.html no cambia en este push
 
-  marca=$(git diff "${rango_diff[@]}" -- index.html 2>/dev/null | grep -E '^\+' | grep -iq 'baseline' && echo si || echo no)
+  diff_index_html=$(git diff "${rango_diff[@]}" -- index.html 2>/dev/null || true)
+  marca=$(grep -iqE '^\+.*baseline' <<< "$diff_index_html" && echo si || echo no)
   if [ "$marca" = "no" ]; then
     bloqueado=1
     detalle="$detalle  - $local_ref ($remote_sha..$local_sha)\n"

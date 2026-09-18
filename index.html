@@ -675,21 +675,45 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 
   <!-- 17-sep: baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
        días) -- mismo número de hoy citado arriba en el hero, no una medición nueva; este
-       bloque nunca tuvo un CTA a /suscribir hasta ahora, así que no tiene su propio
+       bloque nunca tuvo un CTA a #activar hasta ahora, así que no tiene su propio
        histórico que comparar. Cambio: se agrega un CTA primario ("Activar mi agente")
        al banner Mercately -- antes el único link de acá mandaba tráfico AFUERA del
        embudo (a Mercately), sin ninguna forma de activar el agente desde este bloque.
-       Comparar cta_activar de acá a 2 semanas. -->
+       Comparar cta_ver_precio de acá a 2 semanas.
+
+       17-sep, corregido el mismo día (bug real, cazado por Ricardo): el CTA nació
+       apuntando directo a /suscribir -- saltaba la sección de precio (la persona iba
+       al checkout sin ver qué incluye) y salía del sitio (Umami perdía el evento).
+       Corregido a #activar: mismo destino/tracking que el botón "Activar mi agente"
+       DEL HERO (.btn-secundario, línea ~510) -- no el botón real de checkout que
+       vive DENTRO de #activar (ese sí apunta a /suscribir a propósito: ya viene con
+       precio y qué incluye en pantalla). Ver cta-activacion-fuera-de-sitio-check.sh
+       (raíz del repo, candado agregado el mismo día para que esto no se repita en
+       el próximo bloque).
+
+       17-sep, 2ª corrección el mismo día (consistencia visual, cazada por Ricardo):
+       nació con .btn-primario (degradado rosa-morado) -- pero ESE estilo es el de
+       "Ver una muestra gratis" en el hero; "Activar mi agente" del hero usa
+       .btn-secundario (morado sólido, línea 510). Mismo CTA, dos colores distintos
+       en la misma página. Corregido a .btn-secundario -- clase COMPARTIDA con el
+       hero, no un color copiado a mano: el próximo bloque que agregue "Activar mi
+       agente" hereda el estilo correcto solo con usar esa clase, sin decidir nada.
+
+       baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días,
+       mismo número de hoy citado arriba -- href/color, no copy, nada que mover la
+       aguja de conversión por sí solo). Comparar de acá a 2 semanas. -->
   <!-- Banner alianza Mercately — entre Partners y Academy. Mismo tratamiento de tarjeta
        que .academy__card (filo degradado, fondo/borde/radio) para que se lea como una
        sección más del sitio, no un anuncio pegado. El logo es el MISMO archivo gris del
        carrusel #partners (partners/mercately-partners.png) -- ningún azul/verde de marca
        Mercately entra acá.
 
-       17-sep: el bloque ganó su propio CTA primario ("Activar mi agente", .btn.btn-primario,
-       mismo href/tracking que el de #activar -- ver a[href*="/suscribir"] en el script de
-       Analytics) porque el único CTA de acá mandaba tráfico AFUERA del embudo. .mercately__cta
-       ("Conocer Mercately →") queda como el secundario, subordinado: estilo fantasma propio
+       17-sep: el bloque ganó su propio CTA ("Activar mi agente", .btn.btn-secundario --
+       MISMA clase que el "Activar mi agente" del HERO, morado sólido, no el degradado
+       de .btn-primario -- mismo href/tracking también: ver a[href="#activar"] en el
+       script de Analytics, dispara cta_ver_precio) porque el único CTA de acá
+       mandaba tráfico AFUERA del embudo. .mercately__cta ("Conocer Mercately →") queda
+       como el secundario, subordinado: estilo fantasma propio
        (borde fino, sin relleno, sin el pulso/shine del primario, ver comentario "7b." más
        abajo) -- ya NO es el mismo estilo que .btn-secundario, que desde el 2-sep tiene
        relleno sólido (ver ".btn-secundario{background:var(--morado)" más arriba);
@@ -765,7 +789,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <p class="mercately__sub"><strong>Inntuitivo</strong> llena esa bandeja. Nuestro agente encuentra empresas de tu mercado, investiga cada una y les escribe primero — en tu nombre.</p>
       <p class="mercately__sub">Las dos mitades del mismo embudo. 🚀</p>
       <div class="cta-row">
-        <a class="btn btn-primario" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+        <a class="btn btn-secundario" href="#activar">Activar mi agente 🚀</a>
         <a class="mercately__cta" href="https://app.mercately.com/register?partner_id=8db3b072" target="_blank" rel="noopener noreferrer">Conocer Mercately →</a>
       </div>
     </div>

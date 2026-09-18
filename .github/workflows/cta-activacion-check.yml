@@ -1,0 +1,25 @@
+name: cta-activacion-check
+
+# 17-sep-2026 (bug real, cazado por Ricardo): un CTA "Activar mi agente" nuevo
+# (bloque de alianza Mercately) apuntaba directo a https://api.inntuitivo.com/
+# suscribir en vez de al ancla #activar -- saltaba la sección de precio y
+# perdía el evento de Umami del embudo. Ver el header de
+# cta-activacion-fuera-de-sitio-check.sh (raíz de este repo) para el método.
+#
+# Mismo límite honesto que index-baseline-check.yml y readme-check.yml: no hay
+# branch protection pagado, así que esto corre DESPUÉS de que el push ya
+# aterrizó -- avisa fuerte (check rojo en Actions), no impide.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "cta-activacion-fuera-de-sitio-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash cta-activacion-fuera-de-sitio-check.sh
