@@ -44,6 +44,14 @@
       "mainEntity": [
         {
           "@type": "Question",
+          "name": "¿Qué es Inntuitivo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Un agente de IA que hace el trabajo de prospección de punta a punta: busca empresas de tu mercado en la web abierta, verifica que sean reales y que tengan un correo alcanzable, lee el sitio de cada una para encontrar algo específico de qué hablarles, escribe un correo distinto para cada una citando ese dato con su fuente, lo envía en tu nombre, da seguimiento, y te avisa solo cuando alguien responde en serio. En corto: es como tener un vendedor, sin contratarlo. Tú conectas tu correo una vez y no vuelves a tocar nada."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "¿Los mensajes suenan a robot?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -96,6 +104,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Te das de baja tú mismo: en los correos de tu agente hay un enlace, y confirmas la baja desde el correo que te enviamos —así nos aseguramos de que eres tú—. En cuanto confirmas, tu agente se apaga y deja de enviar en tu nombre. Sin permanencia ni penalidad. Te enviamos por correo la lista de tus prospectos con el estado de cada uno — son tuyos. Cualquier duda, escríbenos y lo vemos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Quién es Houston?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te manda tu muestra y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre."
           }
         },
         {
@@ -392,31 +408,50 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
    secciones, no acá -- son las únicas que lo usan, ver su bloque style propio. */
 
 /* 7b. Todos los CTA primarios ("activar el agente" + escuchar podcast): pulso + shine.
-   El nav lleva un glow ~30% mas contenido: es chico y siempre visible, no debe cansar. */
-.btn-primario,.nav-cta{position:relative;overflow:hidden}
-.btn-primario{animation:pulso-cta 3s ease-in-out infinite}
-.nav-cta{animation:pulso-cta-nav 3s ease-in-out infinite}
-.btn-primario::after,.nav-cta::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);pointer-events:none}
+   El nav lleva un glow ~30% mas contenido: es chico y siempre visible, no debe cansar.
+
+   17-sep (diagnóstico de rendimiento): la versión vieja animaba box-shadow -- no
+   dispara reflow, pero SÍ repinta cada frame, corriendo siempre (3s infinite), y con
+   el swap de colores de hoy hay más botones .btn-primario en pantalla que antes. Se
+   evaluaron 2 opciones (pausar con el mismo observer de arriba, o mover la animación
+   a una propiedad compositor-friendly): se eligió la 2ª -- pausar con el observer NO
+   resuelve el caso más caro, el nav-cta, que está SIEMPRE visible (nav sticky) y
+   nunca sale de pantalla para pausarse. El glow ahora vive en un ::before aparte con
+   box-shadow FIJO (se calcula una sola vez) cuya OPACITY es lo que anima -- mismo
+   efecto visual, pero opacity es compositor-only, cero repintado por frame, sin
+   importar cuánto tiempo corra. ::after (el brillo diagonal al hover) se clipea con
+   su propio clip-path en vez del overflow:hidden del padre, que ahora hace falta
+   liberar para que el glow del ::before pueda salir del cuadro del botón. */
+.btn-primario,.nav-cta{position:relative}
+.btn-primario::before,.nav-cta::before{content:"";position:absolute;inset:-6px;border-radius:inherit;box-shadow:0 10px 30px rgba(255,110,146,.42);opacity:0;pointer-events:none;animation:pulso-glow 3s ease-in-out infinite}
+.nav-cta::before{box-shadow:0 5px 18px rgba(255,110,146,.29)}
+@keyframes pulso-glow{0%,100%{opacity:0}50%{opacity:1}}
+.btn-primario::after,.nav-cta::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);pointer-events:none;clip-path:inset(0 round 999px)}
 .btn-primario:hover::after,.nav-cta:hover::after{animation:brillo-cta .8s ease}
-@keyframes pulso-cta{0%,100%{box-shadow:0 8px 24px rgba(222,5,64,.28)}50%{box-shadow:0 10px 30px rgba(255,110,146,.42)}}
-@keyframes pulso-cta-nav{0%,100%{box-shadow:0 4px 14px rgba(222,5,64,.20)}50%{box-shadow:0 5px 18px rgba(255,110,146,.29)}}
 @keyframes brillo-cta{from{left:-130%}to{left:150%}}
 
 /* 7d. Borde vivo de la tarjeta de precio */
 @property --giro-borde{syntax:'<angle>';initial-value:135deg;inherits:false}
 .precio-card{background-image:linear-gradient(var(--giro-borde),#DE0540,#452774);animation:girar-borde 8s linear infinite}
 @keyframes girar-borde{to{--giro-borde:495deg}}
+/* 17-sep (diagnóstico de rendimiento): corría infinito aunque #activar estuviera
+   fuera de pantalla -- MISMO mecanismo que .partners.pausada (pausaObs, ver script
+   de abajo), no uno nuevo. */
+.precio-card.pausada{animation-play-state:paused}
 
 /* 7f. Satelite en orbita del panel del agente */
 .panel{position:relative}
 .satelite{position:absolute;top:0;left:0;width:6px;height:6px;border-radius:50%;background:var(--rosa-claro);box-shadow:0 0 8px 2px rgba(255,110,146,.7),0 0 16px 5px rgba(255,110,146,.22);offset-path:inset(-3px round 20px);offset-distance:0%;offset-rotate:0deg;animation:orbita 12s linear infinite;pointer-events:none;z-index:1}
 @keyframes orbita{to{offset-distance:100%}}
+/* 17-sep: mismo motivo que arriba -- el panel del hero sale de pantalla al hacer
+   scroll y el satélite seguía orbitando. */
+.panel.pausada .satelite{animation-play-state:paused}
 
 @media (prefers-reduced-motion:reduce){
   .reveal{opacity:1;transform:none;transition:none}
   .cosmos,.cosmos::after{animation:none}
   .paso:hover,.dia:hover,.wsp-cta:hover{transform:none}
-  .btn-primario,.nav-cta{animation:none}
+  .btn-primario::before,.nav-cta::before{animation:none;opacity:0}
   .btn-primario::after,.nav-cta::after{display:none}
   .precio-card{animation:none}
   .satelite{animation:none;display:none}
@@ -604,7 +639,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   <section id="en-simple">
     <span class="eyebrow">🧑‍💼 En simple</span>
     <h2>Es un vendedor.</h2>
-    <p class="intro">Uno que no duerme, no renuncia, y cuesta $45 al mes.</p>
+    <p class="intro">Uno que no duerme, no renuncia, no pide vacaciones, y cuesta $45 al mes.</p>
     <!-- 17-sep, verificado antes de publicar (pedido de Ricardo): rango regional, no
          solo Costa Rica. Piso ~$400 -- SDR junior en Brasil, base+comisión R$3.500-
          5.000/mes (ContactSDR/SDRMAX/Glassdoor.br 2026) a ~5.3 BRL/USD ≈ $660-$943, y
@@ -1199,6 +1234,26 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   <section>
     <span class="eyebrow">👨‍🚀 Preguntas frecuentes</span>
     <h2>Lo que todos preguntan antes de empezar</h2>
+    <!-- baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días,
+         mismo número citado en el hero) -- 2 preguntas nuevas al FAQ, animación de
+         las cards de "Es un vendedor"/Apollo (ya corría, se confirmó), y 2 fixes de
+         rendimiento (girar-borde/satelite pausados fuera de viewport, pulso de CTA
+         movido de box-shadow a opacity). Comparar de acá a 2 semanas.
+
+     17-sep (Ricardo, feedback de prospectos reales que necesitaron que se los
+         explicaran por teléfono/WhatsApp): falta la pregunta más básica de todas.
+         Va PRIMERA, antes de cualquier otra -- no había ninguna pregunta redundante
+         que sacar ("¿Para quién NO sirve?" es un ángulo distinto, negativo, no "qué
+         es"). Verificado contra las otras dos superficies donde el producto se
+         describe a sí mismo (knowledge/whatsapp-faq.md y el system prompt de Houston
+         en app/whatsapp/conocimiento.py, ambos en outreach-engine): mismo
+         mecanismo (web abierta, no base comprada; investiga cada sitio; cita fuente;
+         envía en tu nombre; avisa solo con interés real), sin contradicción. -->
+    <details>
+      <summary>¿Qué es Inntuitivo?</summary>
+      <p>Un agente de IA que hace el trabajo de prospección de punta a punta: busca empresas de tu mercado en la web abierta, verifica que sean reales y que tengan un correo alcanzable, lee el sitio de cada una para encontrar algo específico de qué hablarles, escribe un correo distinto para cada una citando ese dato con su fuente, lo envía en tu nombre, da seguimiento, y te avisa solo cuando alguien responde en serio.</p>
+      <p>En corto: es como tener un vendedor, sin contratarlo. Tú conectas tu correo una vez y no vuelves a tocar nada.</p>
+    </details>
     <details>
       <summary>¿Los mensajes suenan a robot?</summary>
       <p>No. El agente usa el tono que defines en tu onboarding y personaliza cada mensaje con la investigación real de cada prospecto. Solo afirma lo que puede respaldar con una fuente verificable: nada de datos inventados ni frases genéricas.</p>
@@ -1226,6 +1281,15 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     <details>
       <summary>¿Qué pasa si cancelo?</summary>
       <p>Te das de baja tú mismo: en los correos de tu agente hay un enlace, y confirmas la baja desde el correo que te enviamos —así nos aseguramos de que eres tú—. En cuanto confirmas, tu agente se apaga y deja de enviar en tu nombre. Sin permanencia ni penalidad. Te enviamos por correo la lista de tus prospectos con el estado de cada uno — son tuyos. Cualquier duda, escríbenos y lo vemos.</p>
+    </details>
+    <!-- 17-sep: no de primera -- no es la duda principal de un visitante nuevo (esa
+         es "¿qué es"). Verificado sin contradicción contra knowledge/whatsapp-faq.md
+         (la nota "Houston sos vos -- el agente de correo es otra pieza, no sos vos")
+         y el system prompt de Houston en app/whatsapp/conocimiento.py ("Houston, el
+         asistente de Inntuitivo"), ambos en outreach-engine -- mismo mecanismo. -->
+    <details>
+      <summary>¿Quién es Houston?</summary>
+      <p>El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te manda tu muestra y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre.</p>
     </details>
     <details>
       <summary>¿Para quién NO sirve Inntuitivo?</summary>
@@ -1404,6 +1468,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // componer loops infinitos que compiten con el resto de la pagina.
   //  - Partners (.partners): marquee, clase 'pausada' cuando NO intersecta.
   //  - Academy (#academy): astronauta, clase 'is-visible' cuando SI intersecta.
+  //  - 17-sep (diagnóstico de rendimiento): .precio-card (borde giratorio) y .panel
+  //    (satélite en órbita) se suman con el MISMO patrón 'pausada' que .partners --
+  //    corrían infinito fuera de pantalla, eran la excepción a como ya se porta el
+  //    resto del sitio.
   var _academy = document.getElementById('academy');
   if (!reduce && 'IntersectionObserver' in window) {
     var pausaObs = new IntersectionObserver(function(entries){
@@ -1413,8 +1481,12 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       });
     }, { threshold: 0 });
     var _partners = document.querySelector('.partners');
+    var _precioCard = document.querySelector('.precio-card');
+    var _panel = document.querySelector('.panel');
     if (_partners) pausaObs.observe(_partners);
     if (_academy) pausaObs.observe(_academy);
+    if (_precioCard) pausaObs.observe(_precioCard);
+    if (_panel) pausaObs.observe(_panel);
   } else if (_academy) {
     // sin IntersectionObserver (o reduced-motion): que el astronauta no quede trabado en pausa
     _academy.classList.add('is-visible');
