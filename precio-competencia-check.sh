@@ -19,7 +19,12 @@ set -euo pipefail
 ARCHIVO="index.html"
 UMBRAL_DIAS="${1:-90}"
 
-marca=$(grep -oE 'precio-competencia-verificado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$ARCHIVO" | head -1 | awk '{print $2}')
+# `|| true` a propósito (18-sep-2026, bug real cazado en outreach-engine con el
+# mismo patrón): bajo `set -e`+`pipefail`, un grep sin match dentro de `$(...)`
+# mata el script ACÁ MISMO, antes de llegar al `if [ -z "$marca" ]` de abajo --
+# el "no hay marca" es un resultado ESPERADO que el script tiene que poder
+# reportar, no un fallo que lo aborte en silencio.
+marca=$(grep -oE 'precio-competencia-verificado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$ARCHIVO" | head -1 | awk '{print $2}' || true)
 
 if [ -z "$marca" ]; then
     echo "::error::No encontré la marca 'precio-competencia-verificado: AAAA-MM-DD' en $ARCHIVO -- la tabla de precios de la competencia no tiene fecha de verificación. Agregala junto al bloque .tabla-real."

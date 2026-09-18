@@ -15,7 +15,11 @@ set -euo pipefail
 PERMITIDOS="520 840"
 ARCHIVOS="index.html onboarding.html geo-chips.css"
 
-encontrados=$(grep -ohE '@media[^{]*max-width:[0-9]+px' $ARCHIVOS | grep -oE '[0-9]+px' | grep -oE '[0-9]+' | sort -un)
+# `|| true` a propósito (18-sep-2026): bajo `set -e`+`pipefail`, si NINGÚN
+# archivo tiene un @media(max-width:...) que matchee, el grep sin match mata
+# el script acá -- "cero breakpoints encontrados" tiene que poder llegar al
+# for de abajo (vacío, sin iterar) en vez de abortar sin explicación.
+encontrados=$(grep -ohE '@media[^{]*max-width:[0-9]+px' $ARCHIVOS | grep -oE '[0-9]+px' | grep -oE '[0-9]+' | sort -un || true)
 
 malos=""
 for v in $encontrados; do

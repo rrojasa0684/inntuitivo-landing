@@ -1,0 +1,21 @@
+name: pipefail-grep-check
+
+# 18-sep-2026: gemelo del mismo chequeo en outreach-engine (ops/pipefail-grep-
+# check.sh) -- cierra la clase de bug que ya mordió 4 veces en 2 repos: una
+# asignación "VAR=$(...grep...)" sin "|| true" bajo `set -e`+`pipefail` muere
+# en silencio ante un grep sin match, aunque el script tenga un
+# `if [ -z "$VAR" ]` escrito a propósito para reportarlo. Ver el header de
+# pipefail-grep-check.sh (raíz de este repo) para el detalle completo.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash pipefail-grep-check.sh .
