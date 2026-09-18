@@ -317,7 +317,18 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
   .tabla-real-card.col-inntuitivo .fila-gancho{border-top-color:rgba(255,255,255,.3) !important}
 }
 
-.tabla-real-cta{display:block;width:fit-content;margin:28px auto 0}
+/* 18-sep-2026 (2da corrección): en mobile (width:100% más abajo) faltaba
+   text-align:center -- el texto por defecto queda en "start" (izquierda),
+   así que dentro del pill de ancho completo el texto se apiña a la izquierda
+   y el gradiente vacío se estira a la derecha, leyéndose como "el botón está
+   desplazado". La CAJA sí estaba centrada (márgenes simétricos, confirmado
+   con getBoundingClientRect) -- el problema era el contenido adentro, no el
+   centrado del botón en sí. Mismo criterio que ya usa el CTA de .precio-card
+   (width:100%;text-align:center inline). Va en la regla base porque en
+   desktop (width:fit-content) no cambia nada -- el texto ya llena la caja. */
+.tabla-real-cta{display:block;width:fit-content;margin:28px auto 0;text-align:center}
+/* baseline (18-sep, tarde) scroll_precio=7.6/día, cta_activar=1/semana (mismo dato de
+   Umami reusado de las corridas anteriores de hoy -- no cambió). */
 .tabla-real-fuentes{margin-top:14px;text-align:center}
 .tabla-real-fuentes a{color:var(--rosa-claro)}
 
