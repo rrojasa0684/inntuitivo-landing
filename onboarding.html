@@ -564,15 +564,23 @@ $('alt-toggle').addEventListener('click',()=>{
 $('btn').addEventListener('click',async()=>{
   if(!prov)return;
   // 20-sep-2026: en modo buzón alternativo (M365 -> redirigido a Gmail/Zoho), el
-  // payload usa proveedor='otro' con los datos del buzón ALTERNATIVO, nunca el
-  // correo de Microsoft 365 -- probar_y_guardar() conecta ese buzón directo, sin
-  // exigir que coincida con el dominio de envío.
+  // payload usa proveedor='otro' con los datos del buzón ALTERNATIVO (el que se
+  // LEE), nunca el correo de Microsoft 365 -- probar_y_guardar() conecta ese buzón
+  // directo, sin exigir que coincida con el dominio de envío.
+  // 20-sep-2026 (code review, corregido el mismo día): email_envio SIEMPRE manda
+  // la dirección real de envío (el dominio M365 verificado, $('email').value) --
+  // sin esto, el backend pisaba email_envio con el buzón alternativo y Resend
+  // habría rechazado cada correo (From ya no coincidía con ningún dominio
+  // verificado). En modo normal es redundante (coincide con `email`), pero se
+  // manda igual: una sola fuente de verdad para el backend, no dos comportamientos.
   const payload=altModo?{
     proveedor:'otro',email:$('alt_email').value.trim(),password:$('alt_password').value,
     imap_host:$('alt_imap_host').value.trim(),imap_port:$('alt_imap_port').value.trim(),
+    email_envio:$('email').value.trim(),
   }:{proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
     imap_host:prov.proveedor==='otro'?$('imap_host').value.trim():prov.imap_host,
-    imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port};
+    imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port,
+    email_envio:$('email').value.trim()};
   $('btn').disabled=true;
   res($('resultado'),'alerta','<span class="spin"></span>Conectando…','Verificando la lectura de tu buzón…');
   try{
