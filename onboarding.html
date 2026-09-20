@@ -166,7 +166,19 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <ul class="instrucciones" id="prov-inst"></ul>
         <div class="nota" id="prov-nota"></div>
         <div id="prov-contacto" class="oculto" style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.9rem">
-          Escríbenos a <a href="mailto:info@inntuitivo.com?subject=Microsoft%20365%20%E2%80%94%20conectar%20la%20lectura">info@inntuitivo.com</a> y lo dejamos andando contigo. ¿Estás bloqueado y quieres resolverlo ya? <a href="https://wa.me/50672045991?text=Quiero%20conectar%20mi%20correo%20Microsoft%20365%20a%20mi%20agente" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.
+          ¿No puedes o no quieres hacer la redirección tú mismo? Escríbenos a <a href="mailto:info@inntuitivo.com?subject=Microsoft%20365%20%E2%80%94%20conectar%20la%20lectura">info@inntuitivo.com</a> o por <a href="https://wa.me/50672045991?text=Quiero%20conectar%20mi%20correo%20Microsoft%20365%20a%20mi%20agente" target="_blank" rel="noopener">WhatsApp</a> y lo vemos juntos — no hay plazo fijo, pero lo resolvemos.
+        </div>
+        <!-- 20-sep-2026 (auditoría de autonomía): salida self-service para M365 -- ya
+             era posible del lado del backend (probar_y_guardar no exige que el buzón
+             conectado coincida con el dominio de envío), solo faltaba la interfaz. -->
+        <button type="button" id="alt-toggle" class="btn btn-sec oculto" style="width:auto;padding:10px 20px;font-size:.85rem">Ya configuré la redirección — conectar mi buzón alternativo</button>
+        <div id="alt-mailbox" class="oculto" style="margin-top:14px">
+          <label for="alt_email">Buzón alternativo<span class="hint">Adonde rediriges las respuestas — un Gmail o Zoho, no tu correo de Microsoft 365.</span></label>
+          <input id="alt_email" type="email" autocomplete="off" placeholder="lecturas@gmail.com">
+          <label for="alt_password">Contraseña<span class="hint">Si es Gmail, necesitas una «contraseña de aplicación» (16 caracteres) — activa la verificación en 2 pasos en myaccount.google.com/security y créala en myaccount.google.com/apppasswords.</span></label>
+          <input id="alt_password" type="password" autocomplete="off" placeholder="••••••••">
+          <label>Servidor IMAP (lectura) y puerto<span class="hint">Gmail: imap.gmail.com, 993. Zoho: imap.zoho.com, 993.</span></label>
+          <div class="fila2"><input id="alt_imap_host" placeholder="imap.gmail.com"><input id="alt_imap_port" value="993" inputmode="numeric"></div>
         </div>
       </div>
       <div id="pass-wrap" class="oculto">
@@ -519,6 +531,7 @@ $('btn-verificar').addEventListener('click',async()=>{
   $('btn-verificar').disabled=false;
 });
 
+let altModo=false;
 function pintarProveedor(d){
   prov=d;$('prov').classList.remove('oculto');
   $('prov-nombre').textContent='Proveedor detectado: '+d.nombre;
@@ -528,8 +541,13 @@ function pintarProveedor(d){
   if(manual){$('imap_host').value=d.imap_host||'';$('imap_port').value=d.imap_port||993;}
   const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
   $('prov-contacto').classList.toggle('oculto',!micro);
+  // 20-sep-2026: M365 ya no deja todo deshabilitado -- ofrece el toggle de buzón
+  // alternativo (self-service, ver instrucciones de redirección arriba).
+  $('alt-toggle').classList.toggle('oculto',!micro);
+  if(!micro){altModo=false;$('alt-mailbox').classList.add('oculto');}
   if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
-  $('btn').disabled=micro;$('btn').textContent=micro?'Microsoft 365 — te escribimos':'Conectar lectura';
+  $('btn').disabled=micro&&!altModo;
+  $('btn').textContent=micro&&!altModo?'Microsoft 365 — usá el buzón alternativo abajo':'Conectar lectura';
 }
 async function detectar(){const email=$('email').value.trim();if(!esEmailValido(email))return;
   $('lectura').classList.remove('oculto');
@@ -537,9 +555,22 @@ async function detectar(){const email=$('email').value.trim();if(!esEmailValido(
 $('sitio').addEventListener('blur',()=>{const v=$('sitio').value.trim();if(v&&!/^https?:\/\//i.test(v))$('sitio').value='https://'+v;});
 $('email').addEventListener('blur',()=>{cargarDominio();detectar();});
 $('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{cargarDominio();detectar();},800);});
+$('alt-toggle').addEventListener('click',()=>{
+  altModo=true;
+  $('alt-mailbox').classList.remove('oculto');
+  $('btn').disabled=false;
+  $('btn').textContent='Conectar lectura';
+});
 $('btn').addEventListener('click',async()=>{
   if(!prov)return;
-  const payload={proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
+  // 20-sep-2026: en modo buzón alternativo (M365 -> redirigido a Gmail/Zoho), el
+  // payload usa proveedor='otro' con los datos del buzón ALTERNATIVO, nunca el
+  // correo de Microsoft 365 -- probar_y_guardar() conecta ese buzón directo, sin
+  // exigir que coincida con el dominio de envío.
+  const payload=altModo?{
+    proveedor:'otro',email:$('alt_email').value.trim(),password:$('alt_password').value,
+    imap_host:$('alt_imap_host').value.trim(),imap_port:$('alt_imap_port').value.trim(),
+  }:{proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
     imap_host:prov.proveedor==='otro'?$('imap_host').value.trim():prov.imap_host,
     imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port};
   $('btn').disabled=true;
