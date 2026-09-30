@@ -19,6 +19,7 @@
 <meta name="twitter:description" content="Tu agente busca empresas en la web abierta, escribe correos en tu nombre a ritmo humano y sin spam, y te avisa cuando alguien responde en serio. Arranca en cuanto conectas tu correo.">
 <meta name="twitter:image" content="https://www.inntuitivo.com/og-image.png">
 <link rel="canonical" href="https://www.inntuitivo.com/">
+<!-- 30-sep: baseline scroll_precio=2/día (14 en 7 días), cta_activar=1/semana (Umami, últimos 7 días). Solo se agregó el dato estructurado del producto con su oferta: no cambia nada visible. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -36,6 +37,39 @@
         "https://www.facebook.com/profile.php?id=100063653469778",
         "https://www.youtube.com/@inntuitivo",
         "https://www.linkedin.com/in/ricardo-rojas-araya-0146b230/"
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://www.inntuitivo.com/#producto",
+      "name": "Inntuitivo",
+      "url": "https://www.inntuitivo.com/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Un agente de IA que busca empresas en la web abierta, las investiga y escribe correos en tu nombre. Arranca en cuanto conectas tu correo.",
+      "publisher": { "@id": "https://www.inntuitivo.com/#organizacion" },
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Primer mes, incluye la puesta en marcha",
+          "price": "65",
+          "priceCurrency": "USD",
+          "url": "https://www.inntuitivo.com/"
+        },
+        {
+          "@type": "Offer",
+          "name": "Plan mensual desde el mes 2",
+          "price": "45",
+          "priceCurrency": "USD",
+          "url": "https://www.inntuitivo.com/",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "45",
+            "priceCurrency": "USD",
+            "billingDuration": 1,
+            "unitCode": "MON"
+          }
+        }
       ]
     },
     {
