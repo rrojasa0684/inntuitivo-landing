@@ -18,6 +18,7 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "precios-competencia.json"
       - "precio-competencia-check.sh"
   schedule:
     - cron: "0 12 1 * *"
