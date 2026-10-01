@@ -16,29 +16,29 @@
 # sin tocar el precio, no cuenta como reverificación).
 set -euo pipefail
 
-ARCHIVO="index.html"
+ARCHIVO="precios-competencia.json"  # 1-oct-2026: la fecha vive en este JSON (antes, una marca dentro de index.html)
 UMBRAL_DIAS="${1:-90}"
 
-# `|| true` a propósito (18-sep-2026, bug real cazado en outreach-engine con el
+# `|| true` a propósito (18-sep-2026, bug real cazado en otro proyecto con el
 # mismo patrón): bajo `set -e`+`pipefail`, un grep sin match dentro de `$(...)`
 # mata el script ACÁ MISMO, antes de llegar al `if [ -z "$marca" ]` de abajo --
 # el "no hay marca" es un resultado ESPERADO que el script tiene que poder
 # reportar, no un fallo que lo aborte en silencio.
-marca=$(grep -oE 'precio-competencia-verificado: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$ARCHIVO" | head -1 | awk '{print $2}' || true)
+marca=$(grep -oE '"verificado": *"[0-9]{4}-[0-9]{2}-[0-9]{2}"' "$ARCHIVO" | head -1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || true)
 
 if [ -z "$marca" ]; then
-    echo "::error::No encontré la marca 'precio-competencia-verificado: AAAA-MM-DD' en $ARCHIVO -- la tabla de precios de la competencia no tiene fecha de verificación. Agregala junto al bloque .tabla-real."
+    echo "::error::No encontré el campo "verificado" (AAAA-MM-DD) en $ARCHIVO -- la tabla de precios de la competencia no tiene fecha de verificación. "
     exit 1
 fi
 
-# Portable Mac/Linux (el mismo motivo que ops/test-linux.sh en outreach-engine):
+# Portable Mac/Linux (el mismo motivo que chequeo de pruebas en Linux del proyecto del motor):
 # `date -d` es GNU, `date -j -f` es BSD/macOS -- se intenta GNU primero, BSD si falla.
 if fecha_epoch=$(date -d "$marca" +%s 2>/dev/null); then
     :
 elif fecha_epoch=$(date -j -f "%Y-%m-%d" "$marca" +%s 2>/dev/null); then
     :
 else
-    echo "::error::La marca 'precio-competencia-verificado: $marca' no es una fecha válida (AAAA-MM-DD)."
+    echo "::error::La fecha "verificado" $marca no es una fecha válida (AAAA-MM-DD)."
     exit 1
 fi
 
@@ -46,12 +46,12 @@ hoy_epoch=$(date +%s)
 dias_pasados=$(( (hoy_epoch - fecha_epoch) / 86400 ))
 
 if [ "$dias_pasados" -lt 0 ]; then
-    echo "::error::La marca 'precio-competencia-verificado: $marca' está en el futuro -- ¿typo?"
+    echo "::error::La fecha "verificado" $marca está en el futuro -- ¿typo?"
     exit 1
 fi
 
 if [ "$dias_pasados" -gt "$UMBRAL_DIAS" ]; then
-    echo "::error::La tabla de precios de la competencia (#activar en $ARCHIVO) se verificó por última vez hace $dias_pasados días (umbral: $UMBRAL_DIAS) -- $marca. Revisá apollo.io/pricing, lusha.com/pricing y hunter.io/pricing de nuevo, actualizá los números que cambiaron, y mové la marca a la fecha de hoy."
+    echo "::error::La tabla de precios de la competencia (#activar en $ARCHIVO) se verificó por última vez hace $dias_pasados días (umbral: $UMBRAL_DIAS) -- $marca. Revisá apollo.io/pricing, lusha.com/pricing y hunter.io/pricing de nuevo, actualizá los números que cambiaron, y actualizá "verificado" a la fecha de hoy."
     exit 1
 fi
 

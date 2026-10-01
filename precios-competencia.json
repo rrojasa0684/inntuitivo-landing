@@ -1,0 +1,8 @@
+{
+  "verificado": "2026-10-01",
+  "competidores": [
+    {"id": "apollo", "nombre": "Apollo", "url": "https://www.apollo.io/pricing", "plan": "Basic", "entrada_mensual": "$65"},
+    {"id": "lusha", "nombre": "Lusha", "url": "https://www.lusha.com/pricing/", "plan": "Starter", "entrada_mensual": "$49.90"},
+    {"id": "hunter", "nombre": "Hunter", "url": "https://hunter.io/pricing", "plan": "Starter", "entrada_mensual": "$49"}
+  ]
+}

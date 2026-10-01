@@ -8,13 +8,13 @@
 # más abajo en index.html) nunca se disparaba.
 #
 # El ÚNICO lugar donde un link directo a /suscribir es correcto es DENTRO de
-# la sección #activar misma -- ahí la persona ya tiene precio y qué incluye
+# la sección #precio misma -- ahí la persona ya tiene precio y qué incluye
 # en pantalla, así que saltar directo al checkout es la intención. Cualquier
 # CTA "Activar mi agente" que aparezca en OTRO bloque (como Mercately, o el
 # próximo banner que se agregue) tiene que apuntar a "#activar", igual que el
 # del hero (.btn-secundario, ~línea 510) -- nunca directo a /suscribir.
 #
-# Método: ubica las líneas de la sección #activar (por profundidad de
+# Método: ubica las líneas de la sección #precio (por profundidad de
 # <section>, no por número fijo -- sobrevive a que el archivo crezca), y
 # falla si CUALQUIER href="https://api.inntuitivo.com/suscribir" aparece
 # FUERA de ese rango.
@@ -25,15 +25,15 @@ archivo="index.html"
 # `|| true` a propósito (18-sep-2026): bajo `set -e`+`pipefail`, un grep sin
 # match dentro de `$(...)` mata el script ACÁ, antes del `if [ -z "$inicio" ]`
 # de abajo que existe justo para reportar este caso.
-inicio=$(grep -n '<section id="activar"' "$archivo" | head -1 | cut -d: -f1 || true)
+inicio=$(grep -n '<section id="precio"' "$archivo" | head -1 | cut -d: -f1 || true)
 if [ -z "$inicio" ]; then
-  echo "::error::No encontré <section id=\"activar\"> en $archivo -- el chequeo no puede ubicar la sección de referencia. Revisá a mano si el id cambió de nombre."
+  echo "::error::No encontré <section id=\"precio\"> en $archivo -- el chequeo no puede ubicar la sección de referencia. Revisá a mano si el id cambió de nombre."
   exit 1
 fi
 
 fin=$(awk -v ini="$inicio" 'NR==ini{d=0} NR>=ini{ if ($0 ~ /<section/) d++; if ($0 ~ /<\/section>/) { d--; if (d==0) { print NR; exit } } }' "$archivo")
 if [ -z "$fin" ]; then
-  echo "::error::Encontré <section id=\"activar\"> en la línea $inicio pero no su </section> de cierre -- HTML roto o el chequeo no pudo seguirle el rastro. Revisá a mano."
+  echo "::error::Encontré <section id=\"precio\"> en la línea $inicio pero no su </section> de cierre -- HTML roto o el chequeo no pudo seguirle el rastro. Revisá a mano."
   exit 1
 fi
 
@@ -44,9 +44,9 @@ fi
 fuera=$(grep -n 'href="https://api.inntuitivo.com/suscribir"' "$archivo" | awk -F: -v ini="$inicio" -v fin="$fin" '{ if ($1 < ini || $1 > fin) print }' || true)
 
 if [ -n "$fuera" ]; then
-  echo "::error::Un CTA fuera de la sección #activar (líneas $inicio-$fin) apunta directo a /suscribir en vez de al ancla \"#activar\" -- salta la sección de precio y pierde el evento de Umami del embudo (cta_ver_precio). Cambiá el href a \"#activar\". Línea(s) con el problema:"
+  echo "::error::Un CTA fuera de la sección #precio (líneas $inicio-$fin) apunta directo a /suscribir en vez de al ancla \"#activar\" -- salta la sección de precio y pierde el evento de Umami del embudo (cta_ver_precio). Cambiá el href a \"#activar\". Línea(s) con el problema:"
   echo "$fuera"
   exit 1
 fi
 
-echo "CTA_ACTIVACION_OK -- ningún CTA fuera de #activar (líneas $inicio-$fin) apunta directo a /suscribir."
+echo "CTA_ACTIVACION_OK -- ningún CTA fuera de #precio (líneas $inicio-$fin) apunta directo a /suscribir."

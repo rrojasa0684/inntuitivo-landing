@@ -381,6 +381,21 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .precio-inner ul li{padding:6px 0;font-size:.96rem;display:flex;gap:10px}
 .precio-inner ul li::before{content:"✓";background:var(--gradiente);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
 
+/* 1-oct-2026: tarjeta unificada de precio (tabla + plan). Borde degradado animado = el de .precio-card; adentro, la tabla y el plan
+   sin caja propia, separados por una línea. Marca: Audiowide (títulos/precios), #DE0540 / #452774 / #FFFFFF. */
+.precio-unif{margin-top:28px}
+.precio-unif-inner{background:#180E31;border-radius:17px;padding:40px}
+.precio-unif .tabla-real{background:none;border:0;border-radius:0;padding:0;margin-top:0}
+.parte-titulo{font-family:'Audiowide',sans-serif;font-weight:400;font-size:1.05rem;color:#fff;margin:0 0 18px;letter-spacing:.02em}
+.precio-plan{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
+.precio-plan .precio-inner{padding:0;border-radius:0;background:none}
+.boton-plan{width:100%;text-align:center}
+.micro-plan{text-align:center;margin-top:12px}
+.precio-unif .tabla-real-fuentes{border-top:1px solid var(--linea);margin-top:28px;padding-top:18px;text-align:left}
+.precio-unif .tabla-real-tabla thead .col-inntuitivo{background:linear-gradient(135deg,#DE0540,#452774)}
+.precio-unif .tabla-real-tabla td.col-inntuitivo{background:rgba(222,5,64,.10)}
+@media (max-width:840px){.precio-unif-inner{padding:22px}}
+
 /* FAQ */
 details{background:var(--carta);border:1px solid var(--linea);border-radius:14px;padding:0 22px;margin-top:12px}
 summary{font-weight:600;cursor:pointer;font-size:1rem;color:#fff}
@@ -564,7 +579,7 @@ nav{position:sticky;top:0;background:rgba(13,7,34,.8);backdrop-filter:blur(10px)
 nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 /* El nav sticky mide ~78px, y a <=520px envuelve a dos filas (~130px).
    Sin este margen tapa el eyebrow y parte del h2 al saltar desde los CTAs. */
-#muestra,#activar{scroll-margin-top:140px}
+#muestra,#precio,#activar{scroll-margin-top:140px}
 
 /* --- Paquete de animacion (punto 7) --- */
 /* 7a. Cascada escalonada en los grids */
@@ -1387,20 +1402,21 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
-  <section id="activar">
+  <section id="precio">
     <span class="eyebrow">✨ Precio</span>
     <h2>Una inversión, no un empleado</h2>
+    <p class="tabla-real-intro">No comparamos qué tan buena es cada herramienta. Comparamos cuánto sale hacer outbound de verdad cada mes — con la persona que la opera incluida en la cuenta.</p>
 
     <!-- 18-sep-2026: tabla comparativa "costo real de hacer outbound" -- no compara
          licencia contra licencia (ahí Apollo gana: 275M de contactos, integraciones,
          plan gratis) sino el costo TOTAL, con la persona que opera la herramienta
          incluida -- esa es la diferencia estructural real (ellos necesitan a
          alguien, nosotros no). Datos verificados contra las páginas de precios
-         públicas de cada uno, ver la nota al pie y precio-competencia-check.sh (el
-         candado que avisa cuando hay que reverificar).
+         públicas de cada uno, ver la nota al pie y precios-competencia.json (fuente de la fecha
+         y de los precios; un chequeo semanal en CI los reverifica).
 
-         precio-competencia-verificado: 2026-09-18
-         Fuentes: apollo.io/pricing (Basic $49/mes anual · $59/mes mensual, por
+         (la fecha de verificación vive en precios-competencia.json, ya no acá)
+         Fuentes: apollo.io/pricing (Basic $65/mes facturado mensual -- leído el 1-oct con el verificador semanal; antes $59 -- por
          asiento -- la página renderiza los números por JS y no se pudieron leer
          directo; cruzado contra Landbase, Warmly, Salesmotion, Saleshandy, Enrich
          y Hackingdemand, las seis convergen en la misma cifra), apollo.io/onboarding
@@ -1422,9 +1438,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 
          baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
          días). -->
-    <div class="tabla-real reveal">
-      <p class="tabla-real-intro">No comparamos qué tan buena es cada herramienta. Comparamos cuánto sale hacer outbound de verdad cada mes — con la persona que la opera incluida en la cuenta.</p>
-
+    <!-- 1-oct-2026 (diseño aprobado "Precio Unificado", design/precio-unificado/): UNA tarjeta con la tabla (parte 1) y el plan (parte 2),
+         separadas por una línea interna. La sección conserva id="precio" (enlaces viejos a /#precio); el plan lleva id="activar" y es el destino de
+         todos los "Activar mi agente". Un solo botón de activar.
+         baseline (medido el 1-oct, Umami, últimos 7 días, todo el tráfico) scroll_precio=2/día (14 sesiones), cta_activar=1/semana. scroll_precio ahora mide
+         el PLAN (parte 2, #activar), no el borde superior de la tarjeta: la serie cambia de definición desde este cambio, comparar de acá a 2 semanas. La nota de precios lee fecha y rango de precios-competencia.json (el HTML trae el
+         valor del momento de la última revisión humana como respaldo sin JS: si la fecha del JSON avanza, ese texto sin JS queda en la fecha anterior, que sigue siendo cierta). -->
+    <div class="precio-card precio-unif">
+      <div class="precio-unif-inner">
+        <h3 class="parte-titulo">1 · Lo que cuesta cada opción</h3>
+        <div class="tabla-real reveal">
       <div class="tabla-real-tabla-wrap">
         <table class="tabla-real-tabla">
           <thead>
@@ -1438,7 +1461,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <tbody>
             <tr>
               <th scope="row">Licencia al mes</th>
-              <td>$34–$59 <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter cobra por cuenta, sin límite de usuarios</span></td>
+              <td><span data-precio="licencia-rango">$49–$65</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter cobra por cuenta, sin límite de usuarios</span></td>
               <td>—</td>
               <td class="col-inntuitivo">$45 <span class="tabla-nota">todo tu equipo</span></td>
             </tr>
@@ -1468,7 +1491,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
             </tr>
             <tr class="fila-gancho">
               <th scope="row">Costo real al mes</th>
-              <td>$450–$1.560</td>
+              <td>$450–$1.565</td>
               <td>$400–$1.500</td>
               <td class="col-inntuitivo">$45</td>
             </tr>
@@ -1480,12 +1503,12 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <div class="tabla-real-card">
           <h3>Apollo, Lusha, Hunter</h3>
           <dl>
-            <div><dt>Licencia al mes</dt><dd>$34–$59 <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter por cuenta, sin límite</span></dd></div>
+            <div><dt>Licencia al mes</dt><dd><span data-precio="licencia-rango">$49–$65</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter por cuenta, sin límite</span></dd></div>
             <div><dt>Quién lo opera</dt><dd>Un vendedor o SDR</dd></div>
             <div><dt>Costo de esa persona</dt><dd>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></dd></div>
             <div><dt>Cuánto tarda en arrancar</dt><dd>30–60 min de onboarding <span class="tabla-nota">operarla bien lleva más</span></dd></div>
             <div><dt>En español</dt><dd>No <span class="tabla-nota">sitio y producto en inglés</span></dd></div>
-            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$450–$1.560</dd></div>
+            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$450–$1.565</dd></div>
           </dl>
         </div>
         <div class="tabla-real-card">
@@ -1511,31 +1534,9 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           </dl>
         </div>
       </div>
-
-      <!-- 18-sep-2026: CTA de la tabla dejó de apuntar directo a /suscribir -- ahora ancla
-           a #precio (la tarjeta "Un precio por agente", justo abajo), mismo evento Umami
-           cta_activar que el botón real de esa tarjeta. Emoji 🚀->🤖 para igualar al resto
-           de "Activar mi agente" del sitio. Ancho natural en vez de 100% (se veía
-           estirado); ancho completo se mantiene en móvil, que ahí es lo normal.
-           baseline (18-sep, mismo dato que la unificación visual de este rato)
-           scroll_precio=7.6/día, cta_activar=1/semana (Umami, últimos 7 días). -->
-      <a class="btn btn-primario tabla-real-cta" href="#precio">Activar mi agente 🤖</a>
-      <!-- 18-sep-2026: fix de voseo en esta nota al pie -- el verbo estaba
-           conjugado en vos en vez de tú, cazado por test_index_html_voseo.py en
-           outreach-engine (el fix anterior lo describía citando el verbo viejo
-           dentro del propio comentario, lo que el mismo test de voseo lee como
-           substring y vuelve a marcar -- corregido sin citar la palabra literal).
-           baseline (18-sep, 2da corrección) scroll_precio=10.3/día,
-           cta_activar=0/semana (Umami, últimos 7 días). -->
-      <p class="micro tabla-real-fuentes">Precios verificados el 18-sep-2026 contra las páginas de precios públicas de Apollo, Lusha y Hunter (plan de entrada, facturación mensual, sin compromiso anual). Si ves un precio viejo, escríbenos — <a href="https://github.com/rrojasa0684/inntuitivo-landing/blob/main/precio-competencia-check.sh" target="_blank" rel="noopener">este chequeo</a> avisa solo cuando toca reverificar.</p>
-    </div>
-
-    <!-- 18-sep-2026: unificación visual .tabla-real + .precio-card (mismo fondo/radio/padding,
-         borde tenue en la tabla, borde rosa exclusivo de esta tarjeta, hueco 44px->16px) --
-         baseline (18-sep, previo a este cambio) scroll_precio=7.6/día, cta_activar=1/semana
-         (Umami, últimos 7 días, "Todo el tráfico": llegan=76, ven el precio=53, tocan
-         "Activar mi agente"=1). Comparar de acá a 2 semanas. -->
-    <div class="precio-card" id="precio">
+        </div>
+        <div class="precio-plan" id="activar">
+          <h3 class="parte-titulo">2 · Tu plan</h3>
       <div class="precio-inner">
         <div>
           <span class="oferta">Un precio por agente 🚀</span>
@@ -1553,11 +1554,14 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           </ul>
         </div>
         <div>
-          <a class="btn btn-primario" style="width:100%;text-align:center" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
-          <p class="micro" style="text-align:center;margin-top:12px">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $45/mes por PayPal (creas la cuenta en el momento, una sola vez). Cancela cuando quieras.</p>
+          <a class="btn btn-primario boton-plan" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+          <p class="micro micro-plan">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $45/mes por PayPal (creas la cuenta en el momento, una sola vez). Cancela cuando quieras.</p>
           <p class="demo-muestra">¿Prefieres ver primero cómo escribe? <a href="#muestra">Pide una muestra gratis</a></p>
-          <p class="micro" style="text-align:center;margin-top:12px">¿Dudas antes de activar? <a href="https://wa.me/50672045991?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
+          <p class="micro micro-plan">¿Dudas antes de activar? <a href="https://wa.me/50672045991?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
         </div>
+      </div>
+        </div>
+        <p class="micro tabla-real-fuentes">Precios de Apollo, Lusha y Hunter verificados el <span data-precio="fecha">18 de septiembre de 2026</span> contra sus páginas públicas (plan de entrada, facturación mensual, sin compromiso anual). ¿Ves un precio viejo? <a href="mailto:info@inntuitivo.com?subject=Precio%20desactualizado">Avísanos</a>.</p>
       </div>
     </div>
   </section>
@@ -1863,7 +1867,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     elementos.forEach(function(el){ obsContenido.observe(el); });
   }
 
-  var targets = document.querySelectorAll('section:not(#muestra):not(#activar), .paso, .dia, details, .banner-marca, .precio-card');
+  var targets = document.querySelectorAll('section:not(#muestra):not(#precio), .paso, .dia, details, .banner-marca');
   targets.forEach(function(el){
     el.classList.add('reveal');
     revelarSinHueco(el, el, '0px 0px -15% 0px', [el], function(instantaneo){
@@ -1893,7 +1897,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   // genérico excluye a propósito (destino de ancla). Ancla en el <h2> de la
   // sección (chico), mismo mecanismo que La diferencia.
   var tablaReal = document.querySelector('.tabla-real');
-  var tituloActivar = tablaReal ? document.querySelector('#activar h2') : null;
+  var tituloActivar = tablaReal ? document.querySelector('#precio h2') : null;
   if (tablaReal && tituloActivar) {
     revelarSinHueco(tablaReal, tituloActivar, '0px 0px -50% 0px', [tablaReal], function(instantaneo){
       if (!instantaneo) marcarRevelado(tablaReal);
@@ -2053,9 +2057,23 @@ document.addEventListener('DOMContentLoaded', function () {
   var r = new URLSearchParams(location.search).get('r');
   if (r && codigos[r]) track('origen-' + codigos[r]);
 
-  document.querySelectorAll('a[href*="/suscribir"], .tabla-real-cta').forEach(function (a) {
+  document.querySelectorAll('a[href*="/suscribir"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_activar'); });      // clic suscribir (o su ancla a la tarjeta de precio)
   });
+
+  // 1-oct-2026: fecha y rango de licencias de la nota/tabla salen de precios-competencia.json (el HTML trae el mismo valor de respaldo).
+  fetch('precios-competencia.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d || !d.verificado) return;
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d.verificado);
+    if (m) document.querySelectorAll('[data-precio="fecha"]').forEach(function (e) { e.textContent = parseInt(m[3], 10) + ' de ' + meses[parseInt(m[2], 10) - 1] + ' de ' + m[1]; });
+    var n = [];
+    (d.competidores || []).forEach(function (c) { var x = parseFloat(String(c.entrada_mensual).replace('$', '')); if (x) n.push(x); });
+    if (n.length) {
+      var f = function (x) { return '$' + (Math.round(x) === x ? x : Math.round(x)); };
+      document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });
+    }
+  }).catch(function () {});
   document.querySelectorAll('a[href="#muestra"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_muestra'); });      // clic ver muestra gratis
   });
@@ -2255,7 +2273,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // baseline (18-sep, ~1h después del deploy de la tabla que rompió esto) scroll_precio=7.6/día,
   // cta_activar=1/semana (mismo dato de Umami reusado de la corrida de hace ~1h -- no cambió
   // en ese lapso, no es un placeholder viejo).
-  var precioCard = document.querySelector('.precio-card');                   // scroll a precio
+  var precioCard = document.getElementById('activar');                        // scroll a precio = el plan (parte 2 de la tarjeta), no la tabla
   if (precioCard && 'IntersectionObserver' in window) {
     var visto = false, io = new IntersectionObserver(function (e) {
       if (e[0].isIntersecting && !visto) { visto = true; track('scroll_precio'); io.disconnect(); }
