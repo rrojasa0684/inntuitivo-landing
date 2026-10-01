@@ -1416,7 +1416,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
          y de los precios; un chequeo semanal en CI los reverifica).
 
          (la fecha de verificación vive en precios-competencia.json, ya no acá)
-         Fuentes: apollo.io/pricing (Basic $49/mes anual · $59/mes mensual, por
+         Fuentes: apollo.io/pricing (Basic $65/mes facturado mensual -- leído el 1-oct con el verificador semanal; antes $59 -- por
          asiento -- la página renderiza los números por JS y no se pudieron leer
          directo; cruzado contra Landbase, Warmly, Salesmotion, Saleshandy, Enrich
          y Hackingdemand, las seis convergen en la misma cifra), apollo.io/onboarding
@@ -1461,7 +1461,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           <tbody>
             <tr>
               <th scope="row">Licencia al mes</th>
-              <td><span data-precio="licencia-rango">$34–$59</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter cobra por cuenta, sin límite de usuarios</span></td>
+              <td><span data-precio="licencia-rango">$49–$65</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter cobra por cuenta, sin límite de usuarios</span></td>
               <td>—</td>
               <td class="col-inntuitivo">$45 <span class="tabla-nota">todo tu equipo</span></td>
             </tr>
@@ -1491,7 +1491,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
             </tr>
             <tr class="fila-gancho">
               <th scope="row">Costo real al mes</th>
-              <td>$450–$1.560</td>
+              <td>$450–$1.565</td>
               <td>$400–$1.500</td>
               <td class="col-inntuitivo">$45</td>
             </tr>
@@ -1503,12 +1503,12 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <div class="tabla-real-card">
           <h3>Apollo, Lusha, Hunter</h3>
           <dl>
-            <div><dt>Licencia al mes</dt><dd><span data-precio="licencia-rango">$34–$59</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter por cuenta, sin límite</span></dd></div>
+            <div><dt>Licencia al mes</dt><dd><span data-precio="licencia-rango">$49–$65</span> <span class="tabla-nota">por usuario (Apollo, Lusha) · Hunter por cuenta, sin límite</span></dd></div>
             <div><dt>Quién lo opera</dt><dd>Un vendedor o SDR</dd></div>
             <div><dt>Costo de esa persona</dt><dd>$400–$1.500 <span class="tabla-nota">/mes, LatAm</span></dd></div>
             <div><dt>Cuánto tarda en arrancar</dt><dd>30–60 min de onboarding <span class="tabla-nota">operarla bien lleva más</span></dd></div>
             <div><dt>En español</dt><dd>No <span class="tabla-nota">sitio y producto en inglés</span></dd></div>
-            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$450–$1.560</dd></div>
+            <div class="fila-gancho"><dt>Costo real al mes</dt><dd>$450–$1.565</dd></div>
           </dl>
         </div>
         <div class="tabla-real-card">
@@ -2068,7 +2068,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d.verificado);
     if (m) document.querySelectorAll('[data-precio="fecha"]').forEach(function (e) { e.textContent = parseInt(m[3], 10) + ' de ' + meses[parseInt(m[2], 10) - 1] + ' de ' + m[1]; });
     var n = [];
-    (d.competidores || []).forEach(function (c) { [c.entrada_anual, c.entrada_mensual].forEach(function (v) { var x = parseFloat(String(v).replace('$', '')); if (x) n.push(x); }); });
+    (d.competidores || []).forEach(function (c) { var x = parseFloat(String(c.entrada_mensual).replace('$', '')); if (x) n.push(x); });
     if (n.length) {
       var f = function (x) { return '$' + (Math.round(x) === x ? x : Math.round(x)); };
       document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });

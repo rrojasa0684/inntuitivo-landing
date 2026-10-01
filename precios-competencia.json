@@ -1,8 +1,8 @@
 {
-  "verificado": "2026-09-18",
+  "verificado": "2026-10-01",
   "competidores": [
-    {"id": "apollo", "nombre": "Apollo", "url": "https://www.apollo.io/pricing", "entrada_anual": "$49", "entrada_mensual": "$59", "anclas": ["$49"]},
-    {"id": "lusha", "nombre": "Lusha", "url": "https://www.lusha.com/pricing/", "entrada_anual": "$37.45", "entrada_mensual": "$49.90", "anclas": ["$37"]},
-    {"id": "hunter", "nombre": "Hunter", "url": "https://hunter.io/pricing", "entrada_anual": "$34", "entrada_mensual": "$49", "anclas": ["$34"]}
+    {"id": "apollo", "nombre": "Apollo", "url": "https://www.apollo.io/pricing", "plan": "Basic", "entrada_mensual": "$65"},
+    {"id": "lusha", "nombre": "Lusha", "url": "https://www.lusha.com/pricing/", "plan": "Starter", "entrada_mensual": "$49.90"},
+    {"id": "hunter", "nombre": "Hunter", "url": "https://hunter.io/pricing", "plan": "Starter", "entrada_mensual": "$49"}
   ]
 }
