@@ -62,8 +62,8 @@ jobs:
             echo "Qué hacer: abrir las 3 páginas, comparar con el JSON y, si cambiaron, actualizar precios-competencia.json (cifras y fecha) y la tabla de index.html en un PR."
             echo
             # Todo lo que viene del sitio de un tercero se limpia antes de ir al Issue: sin comillas invertidas (no puede cerrar el bloque de
-            # código), sin '<' '>' ni '@' (ni HTML ni menciones), solo ASCII imprimible y con tope de largo. Nunca se enlaza ni se ejecuta.
-            limpiar() { tr -cd '[:print:]\n' | tr -d '`<>@' | head -c 1500; }
+            # código), sin '<' '>' '@' '[' ']' '(' ')' (ni HTML, ni menciones, ni enlaces markdown) y con '//' roto (sin autoenlaces), solo ASCII imprimible y con tope de largo. Nunca se enlaza ni se ejecuta.
+            limpiar() { tr -cd '[:print:]\n' | tr -d '`<>@[]()' | sed 's#//#/ /#g' | head -c 1500; }
             echo '```json'; (cat resultado.json 2>/dev/null || echo '(sin resultado)') | limpiar; echo; echo '```'
             echo '```'; (cat error.txt 2>/dev/null || true) | limpiar; echo; echo '```'
             echo
