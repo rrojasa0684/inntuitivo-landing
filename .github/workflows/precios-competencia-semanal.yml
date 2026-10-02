@@ -50,18 +50,22 @@ jobs:
           git commit -m "chore: precios de la competencia verificados el $hoy (sin cambios)"
           git push
       - name: Cambió o falló -> Issue, sin publicar nada
-        if: steps.v.outputs.codigo != '0'
+        # always(): también si falló un paso ANTERIOR a la verificación (npm, navegador) -- entonces `codigo` queda vacío y cuenta como falla.
+        if: always() && steps.v.outputs.codigo != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh label create precios-competencia --color DE0540 --description "Revisión de precios de la competencia" 2>/dev/null || true
           {
-            echo "La verificación semanal de precios no pudo confirmar las cifras de precios-competencia.json (código ${{ steps.v.outputs.codigo }}). No se publicó ni cambió ningún precio."
+            echo "La verificación semanal de precios no pudo confirmar las cifras de precios-competencia.json (código '${{ steps.v.outputs.codigo }}', vacío = falló un paso anterior a la verificación). No se publicó ni cambió ningún precio."
             echo
             echo "Qué hacer: abrir las 3 páginas, comparar con el JSON y, si cambiaron, actualizar precios-competencia.json (cifras y fecha) y la tabla de index.html en un PR."
             echo
-            echo '```json'; cat resultado.json; echo '```'
-            echo '```'; head -c 1500 error.txt; echo '```'
+            # Todo lo que viene del sitio de un tercero se limpia antes de ir al Issue: sin comillas invertidas (no puede cerrar el bloque de
+            # código), sin '<' '>' ni '@' (ni HTML ni menciones), solo ASCII imprimible y con tope de largo. Nunca se enlaza ni se ejecuta.
+            limpiar() { tr -cd '[:print:]\n' | tr -d '`<>@' | head -c 1500; }
+            echo '```json'; (cat resultado.json 2>/dev/null || echo '(sin resultado)') | limpiar; echo; echo '```'
+            echo '```'; (cat error.txt 2>/dev/null || true) | limpiar; echo; echo '```'
             echo
             echo "Corrida: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           } > cuerpo.md
