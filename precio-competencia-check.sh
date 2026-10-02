@@ -42,6 +42,13 @@ else
     exit 1
 fi
 
+# Formato de precio (1-oct-2026, code review): lo que la página pinta como precio solo puede ser "$" + número. Cualquier otra cosa en el JSON es error.
+malos=$(grep -oE '"entrada_mensual": *"[^"]*"' "$ARCHIVO" | grep -vE '"entrada_mensual": *"\$[0-9]+(\.[0-9]{1,2})?"$' || true)
+if [ -n "$malos" ]; then
+    echo "::error::precios-competencia.json: entrada_mensual con formato inválido (solo \$ + número): $malos"
+    exit 1
+fi
+
 hoy_epoch=$(date +%s)
 dias_pasados=$(( (hoy_epoch - fecha_epoch) / 86400 ))
 
