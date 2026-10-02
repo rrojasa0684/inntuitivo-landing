@@ -1,0 +1,16 @@
+# 1-oct-2026 (decisión de Ricardo, code review punto 4): GitHub Pages publica este repo con Jekyll (build_type "legacy", rama main, raíz).
+# Aquí se excluye todo lo que NO sirve el sitio: herramientas de CI, diseño, documentación interna y dependencias.
+# Siguen publicados: index.html y las demás páginas, assets, robots.txt, sitemap.xml, CNAME y precios-competencia.json.
+exclude:
+  - "*.sh"
+  - "*.mjs"
+  - design
+  - ops
+  - docs
+  - README.md
+  - package.json
+  - package-lock.json
+  - node_modules
+  - .github
+  - .githooks
+  - .claude
