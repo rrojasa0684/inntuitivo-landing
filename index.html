@@ -398,6 +398,8 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
    (encabezado, filas, total); el "$45" del total en el rosado de la marca. En móvil, la tarjeta lleva el mismo borde y el mismo total. */
 .precio-unif .tabla-real-tabla thead .col-inntuitivo{box-shadow:inset 0 2px 0 var(--rosa-claro),inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),0 -4px 20px rgba(255,133,166,.18)}
 .precio-unif .tabla-real-tabla td.col-inntuitivo{box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro)}
+/* 1-oct-2026: separadores de fila dentro de la columna Inntuitivo, mismo grosor (1px) que las otras columnas y un tono suave sobre el fondo resaltado; no tocan el borde, el encabezado ni el total. */
+.precio-unif .tabla-real-tabla tbody tr:not(.fila-gancho) td.col-inntuitivo{border-bottom:1px solid rgba(255,133,166,.32)}
 .precio-unif .tabla-real-tabla .fila-gancho td.col-inntuitivo{color:var(--rosa-claro);box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),inset 0 -2px 0 var(--rosa-claro),0 4px 20px rgba(255,133,166,.18)}
 @media (max-width:840px){
   .precio-unif .tabla-real-card.col-inntuitivo{border:2px solid var(--rosa-claro)}
@@ -1447,7 +1449,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 
          baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7
          días). -->
-    <!-- baseline (1-oct, Umami 7 días) scroll_precio=2/día, cta_activar=1/semana: ajuste cosmético de la columna Inntuitivo, no toca conversión. -->
+    <!-- baseline (1-oct, Umami 7 días) scroll_precio=2/día, cta_activar=1/semana: ajustes cosméticos de la columna Inntuitivo (borde, emoji, total, separadores), no tocan conversión. -->
     <!-- 1-oct-2026 (diseño aprobado "Precio Unificado", design/precio-unificado/): UNA tarjeta con la tabla (parte 1) y el plan (parte 2),
          separadas por una línea interna. La sección conserva id="precio" (enlaces viejos a /#precio); el plan lleva id="activar" y es el destino de
          todos los "Activar mi agente". Un solo botón de activar.
