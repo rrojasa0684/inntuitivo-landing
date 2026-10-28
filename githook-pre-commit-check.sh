@@ -26,6 +26,12 @@ rechazado() {
 }
 
 [ -f "$HOOK" ] || { echo "FALLA no existe el hook a probar: $HOOK"; exit 1; }
+# git ignora en silencio un hook sin permiso de ejecución (la copia de abajo lo reactiva, así que se mira el original y, para el del repo, el modo guardado en git)
+[ -x "$HOOK" ] || mal "el hook no es ejecutable: git lo ignora ($HOOK)"
+if [ -z "${GITHOOK_RUTA:-}" ]; then
+    modo="$(git -C "$RAIZ" ls-files -s .githooks/pre-commit 2>/dev/null | cut -d' ' -f1)"
+    [ -z "$modo" ] || [ "$modo" = "100755" ] || mal "el hook está guardado en git con modo $modo (debe ser 100755): git lo ignora"
+fi
 git -C "$T" init -q -b main || { echo "FALLA no se pudo crear el repo temporal"; exit 1; }
 mkdir "$T/.githooks"; cp "$HOOK" "$T/.githooks/pre-commit"; chmod +x "$T/.githooks/pre-commit"
 paso config core.hooksPath .githooks
@@ -45,8 +51,8 @@ permitido "docs/ sobre main permitido" -m "docs: nota"
 paso checkout -q -b feat/tema; paso add js/a.js
 permitido "codigo en feat/ permitido" -m "feat: codigo"
 paso checkout -q main
-if g merge -q --no-ff -m "merge: tema" feat/tema >/dev/null 2>"$T/err" && [ -f "$T/js/a.js" ]; then ok "merge a main no bloqueado"
-else mal "merge a main no bloqueado: $(head -c 200 "$T/err")"; fi
+if g merge -q --no-ff -m "merge: tema" feat/tema >/dev/null 2>"$T/err" && [ -f "$T/js/a.js" ]; then ok "merge sin conflicto a main (no pasa por pre-commit)"
+else mal "merge sin conflicto a main: $(head -c 200 "$T/err")"; fi
 
 # merge con conflicto cerrado a mano: es el único camino que ejecuta pre-commit con MERGE_HEAD
 paso checkout -q -b feat/a; echo "linea-a" >> "$T/js/a.js"; paso commit -q -am "feat: a"
