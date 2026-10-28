@@ -30,6 +30,13 @@ g commit -q -m "feat: codigo" && ok "codigo en feat/ permitido" || mal "codigo e
 g checkout -q main
 g merge -q --no-ff -m "merge: tema" feat/tema && [ -f "$T/js/a.js" ] && ok "merge a main no bloqueado" || mal "merge a main no bloqueado"
 
+# merge con conflicto cerrado a mano: es el único camino que ejecuta pre-commit con MERGE_HEAD
+g checkout -q -b feat/a; echo "linea-a" >> "$T/js/a.js"; g commit -q -am "feat: a"
+g checkout -q main; echo "linea-main" >> "$T/js/a.js"; g checkout -q -b feat/b; g commit -q -am "feat: b"
+g checkout -q main; g merge -q feat/b; g merge -q feat/a 2>/dev/null || true
+echo "resuelto" > "$T/js/a.js"; g add js/a.js
+g commit -q --no-edit && ok "merge con conflicto cerrado a mano sobre main permitido" || mal "merge con conflicto cerrado a mano sobre main permitido"
+
 g mv js/a.js docs/a.js
 if g commit -q -m "docs: movido" 2>"$T/err"; then mal "renombre de codigo a docs/ rechazado"; else grep -q "js/a.js" "$T/err" && ok "renombre de codigo a docs/ rechazado" || mal "renombre rechazado sin nombrar el origen"; fi
 

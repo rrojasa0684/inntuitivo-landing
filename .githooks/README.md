@@ -36,4 +36,4 @@ No es un gate de CI porque este repo no tiene CI.
 
 ## `pre-commit` (ciclo de desarrollo, 27-oct-2026)
 
-Sobre `main` solo se commitea documentación: lo que está bajo `docs/` o termina en `.md` (los `.md` del repo no se publican: `_config.yml` los excluye). Todo lo demás va en una rama `feat/<tema>` o `fix/<tema>`; los merges no se bloquean. Probado por `githook-pre-commit-check.sh` (`--clon` además verifica `core.hooksPath`). Nunca `--no-verify`.
+Sobre `main` solo se commitea documentación: lo que está bajo `docs/` o termina en `.md` (ningún `.md` se publica: `_config.yml` excluye `"*.md"`). Todo lo demás va en una rama `feat/<tema>` o `fix/<tema>`; los merges no se bloquean. Probado por `githook-pre-commit-check.sh` (`--clon` además verifica `core.hooksPath`). Nunca `--no-verify`.

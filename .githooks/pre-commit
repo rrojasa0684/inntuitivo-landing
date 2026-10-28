@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Ciclo de desarrollo (decisión #44, 27-oct-2026): sobre `main` solo se commitea DOCUMENTACIÓN. Lista blanca que falla cerrado: en `main` se acepta únicamente lo que está bajo docs/ o termina en .md
-# (los .md del sitio no se publican: README.md y CLAUDE.md están en el exclude de _config.yml); todo lo demás (HTML, CSS, JS, imágenes, scripts, workflows, package.json, .githooks/...) va en
+# (ningún .md se publica: _config.yml excluye "*.md"); todo lo demás (HTML, CSS, JS, imágenes, scripts, workflows, package.json, .githooks/...) va en
 # una rama feat/<tema> o fix/<tema>. Los merges no se bloquean. Se activa con: git config core.hooksPath .githooks. Nunca se usa --no-verify.
 rama=$(git symbolic-ref --short -q HEAD || true)
 [ "$rama" = "main" ] || exit 0

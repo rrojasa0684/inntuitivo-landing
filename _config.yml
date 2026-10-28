@@ -3,6 +3,7 @@
 # Siguen publicados: index.html y las demás páginas, assets, robots.txt, sitemap.xml, CNAME y precios-competencia.json.
 exclude:
   - "*.sh"
+  - "*.md"
   - "*.mjs"
   - design
   - ops
