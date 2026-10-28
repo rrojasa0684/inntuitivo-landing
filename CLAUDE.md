@@ -22,3 +22,7 @@ El documento completo es `docs/PROCESO-DESARROLLO.md` (misma versión que en el 
 3. **El banner «🪐 Tu plataforma de agentes de IA más innovadora e inntuitiva ✨»** y su línea de apoyo.
 
 Ningún agente cambia ni reordena estos bloques. Los textos exactos están en `docs/memoria/copy-landing-bloqueado-3oct.md` del repo del motor (`outreach-engine`). El cumplimiento legal se resuelve con texto legal y cambios fuera de estos bloques.
+
+## CI de main (decisión #48, 28-oct-2026)
+
+En cada push a main, `.github/workflows/githook-check.yml` corre `ci-solo-docs-en-main.sh`: marca en rojo un commit de código que llegó sin pasar por una rama (misma lista blanca del hook: docs/ y archivos .md). Avisa, no bloquea.
