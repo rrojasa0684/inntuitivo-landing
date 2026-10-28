@@ -25,4 +25,4 @@ Ningún agente cambia ni reordena estos bloques. Los textos exactos están en `d
 
 ## CI de main (decisión #48, 28-oct-2026)
 
-En cada push a main, `githook-check.yml` corre `ci-solo-docs-en-main.sh`: marca en rojo un commit de código que llegó sin pasar por una rama (misma lista blanca del hook: docs/ y archivos .md). Avisa, no bloquea.
+En cada push a main, `.github/workflows/githook-check.yml` corre `ci-solo-docs-en-main.sh`: marca en rojo un commit de código que llegó sin pasar por una rama (misma lista blanca del hook: docs/ y archivos .md). Avisa, no bloquea.
