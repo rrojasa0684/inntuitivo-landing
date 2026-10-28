@@ -1,4 +1,5 @@
-.claude/
+.claude/*
+!.claude/agents/
 
 # ops/observer-threshold-check.mjs (Playwright) -- ver package.json
 node_modules/

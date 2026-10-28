@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Ciclo de desarrollo (decisión #44, 27-oct-2026): sobre `main` solo se commitea DOCUMENTACIÓN. Lista blanca que falla cerrado: en `main` se acepta únicamente lo que está bajo docs/ o termina en .md
+# (ningún .md se publica: _config.yml excluye "*.md"); todo lo demás (HTML, CSS, JS, imágenes, scripts, workflows, package.json, .githooks/...) va en
+# una rama feat/<tema> o fix/<tema>. Los merges no se bloquean. Se activa con: git config core.hooksPath .githooks. Nunca se usa --no-verify.
+rama=$(git symbolic-ref --short -q HEAD || true)
+[ "$rama" = "main" ] || exit 0
+[ -f "$(git rev-parse --git-path MERGE_HEAD)" ] && exit 0   # un merge con conflictos resuelto a mano no se bloquea
+# --no-renames: un `git mv app/x.py docs/x.py` lista las dos rutas; core.quotePath=false: los nombres con tildes no salen entre comillas
+no_doc=$(git -c core.quotePath=false diff --cached --name-only --no-renames | grep -v -E '^docs/|\.md$' || true)
+if [ -n "$no_doc" ]; then
+    echo "COMMIT RECHAZADO: sobre main solo se commitea documentación. Usá una rama feat/<tema> o fix/<tema> (docs/PROCESO-DESARROLLO.md). Archivos que no son documentación en este commit:" >&2
+    echo "$no_doc" | sed 's/^/  /' >&2
+    exit 1
+fi
+exit 0

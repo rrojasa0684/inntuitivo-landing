@@ -33,3 +33,7 @@ desde una máquina con este `core.hooksPath` configurado — NO protege un
 push desde otra máquina sin el mismo config, ni una edición hecha directo
 en el editor web de GitHub (que commitea sin pasar por ningún hook local).
 No es un gate de CI porque este repo no tiene CI.
+
+## `pre-commit` (ciclo de desarrollo, 27-oct-2026)
+
+Sobre `main` solo se commitea documentación: lo que está bajo `docs/` o termina en `.md` (ningún `.md` se publica: `_config.yml` excluye `"*.md"`). Todo lo demás va en una rama `feat/<tema>` o `fix/<tema>`; los merges no se bloquean. Probado por `githook-pre-commit-check.sh` (`--clon` además verifica `core.hooksPath`). Nunca `--no-verify`.
