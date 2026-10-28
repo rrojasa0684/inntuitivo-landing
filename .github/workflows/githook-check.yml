@@ -1,0 +1,15 @@
+name: githook-check
+
+# 28-oct-2026: corre githook-pre-commit-check.sh (prueba el hook .githooks/pre-commit en un repo temporal) en cada push y pull request. No toca la publicación
+# de GitHub Pages ni ningún archivo publicado: solo lee el repo. Sin --clon: core.hooksPath es por clon y en CI no aplica.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash githook-pre-commit-check.sh
