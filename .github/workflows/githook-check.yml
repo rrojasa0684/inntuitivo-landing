@@ -15,4 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: bash githook-pre-commit-check.sh
+      # Decisión #48 (28-oct-2026): solo en los push a main, marca en rojo un commit de código que llegó sin pasar por una rama (misma lista blanca del hook: docs/ y *.md). Avisa, no bloquea.
+      - name: autoprueba del chequeo de main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: bash ci-solo-docs-en-main.sh autoprueba
+      - name: commits nuevos de main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: bash ci-solo-docs-en-main.sh revisar "${{ github.event.before }}" "${{ github.sha }}"
