@@ -117,9 +117,10 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <div id="cargando" class="cargando"><span class="spin"></span> Cargando tu configuración…</div>
 
 <div id="pasos" class="pasos oculto">
-  <span class="p" data-p="1"><span class="n">1</span> Sitio</span>
-  <span class="p" data-p="2"><span class="n">2</span> Perfil</span>
-  <span class="p" data-p="3"><span class="n">3</span> Buzón</span>
+  <span class="p" data-p="1"><span class="n">1</span> Pagar</span>
+  <span class="p" data-p="2"><span class="n">2</span> Tu negocio</span>
+  <span class="p" data-p="3"><span class="n">3</span> Conectar</span>
+  <span class="p" data-p="4"><span class="n">4</span> Confirmar</span>
 </div>
 
 <!-- PASO 1 -->
@@ -151,65 +152,47 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 
 <!-- PASO 3 -->
 <section id="step3" class="oculto">
-  <span class="eyebrow">Paso 3 · Tu buzón</span>
+  <span class="eyebrow">Paso 3 · Tu correo</span>
   <h1>Conecta <em>tu correo</em></h1>
-  <p class="sub">Conecta tu buzón para que tu agente lea las respuestas y te avise cuando alguien te conteste. Con eso ya arranca. Enviar desde tu propio dominio, con tu marca, es un upgrade opcional que puedes hacer cuando quieras.</p>
+  <p class="sub">Escribe tu correo y sigue las indicaciones. Nosotros probamos todo por ti: toma unos minutos.</p>
   <div class="panel">
-    <label for="email">Tu dirección de correo</label>
-    <input id="email" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" autocomplete="email" placeholder="tucorreo@tudominio.com" spellcheck="false">
-
-    <!-- B · LECTURA (OBLIGATORIO): IMAP (993, no bloqueado) — leer las respuestas. Va PRIMERO. -->
-    <div id="lectura" class="oculto" style="margin-top:20px">
-      <h3 style="margin:0 0 8px">1 · Tu buzón — conéctalo para arrancar</h3>
-      <div id="prov" class="provaviso oculto">
-        <span class="nombre-prov" id="prov-nombre"></span>
-        <ul class="instrucciones" id="prov-inst"></ul>
-        <div class="nota" id="prov-nota"></div>
-        <div id="prov-contacto" class="oculto" style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:.9rem">
-          ¿No puedes o no quieres hacer la redirección tú mismo? Puede que tu administrador de Microsoft 365 tenga que habilitar el reenvío externo primero: mira la <a href="https://learn.microsoft.com/es-es/microsoft-365/admin/email/configure-email-forwarding?view=o365-worldwide" target="_blank" rel="noopener">documentación oficial de Microsoft</a>. Si aun así te trabas, escríbenos a <a href="mailto:info@inntuitivo.com?subject=Microsoft%20365%20%E2%80%94%20conectar%20la%20lectura">info@inntuitivo.com</a> y Houston te guía.
-        </div>
-        <!-- 20-sep-2026 (auditoría de autonomía): salida self-service para M365 -- ya
-             era posible del lado del backend (probar_y_guardar no exige que el buzón
-             conectado coincida con el dominio de envío), solo faltaba la interfaz. -->
-        <button type="button" id="alt-toggle" class="btn btn-sec oculto" style="width:auto;padding:10px 20px;font-size:.85rem">Ya configuré la redirección — conectar mi buzón alternativo</button>
-        <div id="alt-mailbox" class="oculto" style="margin-top:14px">
-          <label for="alt_email">Buzón alternativo<span class="hint">Adonde rediriges las respuestas — un Gmail o Zoho, no tu correo de Microsoft 365.</span></label>
-          <input id="alt_email" type="email" autocomplete="off" placeholder="lecturas@gmail.com">
-          <label for="alt_password">Contraseña<span class="hint">Si es Gmail, necesitas una «contraseña de aplicación» (16 caracteres) — activa la verificación en 2 pasos en myaccount.google.com/security y créala en myaccount.google.com/apppasswords.</span></label>
-          <input id="alt_password" type="password" autocomplete="off" placeholder="••••••••">
-          <label>Servidor IMAP (lectura) y puerto<span class="hint">Gmail: imap.gmail.com, 993. Zoho: imap.zoho.com, 993.</span></label>
-          <div class="fila2"><input id="alt_imap_host" placeholder="imap.gmail.com"><input id="alt_imap_port" value="993" inputmode="numeric"></div>
-        </div>
+    <div id="bloque-conectar">
+      <label for="email">Tu correo de trabajo</label>
+      <input id="email" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" autocomplete="email" placeholder="tucorreo@tuempresa.com" spellcheck="false">
+      <div id="aviso-ms" class="provaviso oculto">Tu correo es de Microsoft. Esa conexión la estamos terminando: déjanos avisarte por correo apenas esté lista, y vuelves aquí con un solo toque.</div>
+      <div id="guia" class="provaviso oculto">
+        <span class="nombre-prov" id="guia-nombre"></span>
+        <ol class="instrucciones" id="guia-pasos"></ol>
+        <a id="guia-enlace" class="btn btn-sec oculto" target="_blank" rel="noopener" style="margin-top:10px"></a>
+        <img id="guia-imagen" class="oculto" alt="Esquema de dónde copiar la contraseña" style="width:100%;max-width:520px;margin-top:12px;border-radius:10px" loading="lazy">
       </div>
       <div id="pass-wrap" class="oculto">
         <label for="password" id="pass-label">Contraseña</label>
         <input id="password" type="password" autocomplete="off" placeholder="••••••••">
       </div>
       <div id="manual" class="oculto">
-        <label>Servidor IMAP (lectura) y puerto</label>
-        <div class="fila2"><input id="imap_host" placeholder="imap.tuproveedor.com"><input id="imap_port" value="993" inputmode="numeric"></div>
+        <div class="nota">No pudimos reconocer tu proveedor solos. Escribe estas dos direcciones; las encuentras en la ayuda de tu proveedor.</div>
+        <label for="host_envio">Dirección para enviar</label>
+        <input id="host_envio" placeholder="envio.tuproveedor.com" autocomplete="off" spellcheck="false">
+        <label for="host_recibo">Dirección para recibir</label>
+        <input id="host_recibo" placeholder="recibo.tuproveedor.com" autocomplete="off" spellcheck="false">
       </div>
-      <button id="btn" class="btn btn-primario" disabled style="margin-top:10px">Conectar lectura</button>
+      <button id="btn" class="btn btn-primario" disabled style="margin-top:16px">Conectar mi correo</button>
+      <button id="btn-despues" class="btn btn-sec" type="button">Lo termino después</button>
       <div id="resultado" class="resultado"></div>
     </div>
 
-    <!-- A · ENVÍO (OPCIONAL): verificar el dominio del cliente en Resend. Va SEGUNDO, no bloquea. -->
-    <div id="envio" class="oculto" style="margin-top:24px">
-      <h3 style="margin:0 0 8px">2 · Tu dominio — envía con tu marca <span style="opacity:.65;font-weight:400">(opcional, cuando quieras)</span></h3>
-      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#B5A9D4;margin-bottom:12px">
-        Tu agente ya arranca sin esto. Si conectas tu dominio, tus correos saldrán desde tu propia dirección. 🔒 <strong>No toca tu correo actual</strong>: agregas 3 registros nuevos (en un subdominio <code>send.</code>); tu email sigue entrando y saliendo igual.
+    <div id="bloqueo" class="oculto">
+      <h3 style="margin:0 0 8px">Tu empresa debe aprobar esta conexión</h3>
+      <p class="nota" id="bloqueo-msg"></p>
+      <div id="bloqueo-form">
+        <label for="admin_email">Correo de tu administrador<span class="hint">Le mandamos los pasos oficiales y probamos solos cuando los haga.</span></label>
+        <input id="admin_email" type="email" autocomplete="off" placeholder="administrador@tuempresa.com" spellcheck="false">
+        <button id="btn-admin" class="btn btn-primario" type="button" style="margin-top:14px">Enviarle los pasos</button>
+        <button id="btn-otro" class="btn btn-sec" type="button">Probar con otro correo</button>
       </div>
-      <div id="dns-donde" class="nota" style="margin-bottom:10px"></div>
-      <div id="registros"></div>
-      <button id="btn-verificar" class="btn btn-primario" style="margin-top:12px">Ya los agregué → Verificar</button>
-      <div id="envio-estado" class="resultado"></div>
-      <div style="background:rgba(60,200,120,.10);border:1px solid rgba(60,200,120,.35);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:.9rem">
-        <strong>¿No sabes dónde está tu DNS?</strong> Es lo más normal del mundo — casi nadie lo sabe.
-        Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> y te ayudamos. Si estás bloqueado y necesitas resolverlo ya, <a href="https://wa.me/50672045991?text=Quiero%20ayuda%20con%20los%20registros%20DNS%20de%20mi%20dominio" target="_blank" rel="noopener">escríbenos por WhatsApp</a>.
-      </div>
+      <div id="bloqueo-esperando" class="resultado ok"></div>
     </div>
-
-    <div id="buzon-progreso" class="detalle oculto" style="margin-top:16px"></div>
   </div>
 </section>
 
@@ -217,9 +200,15 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="final" class="oculto">
   <div class="final">
     <div class="cohete">🚀</div>
-    <h1>Tu agente entra <em>en órbita</em></h1>
-    <p id="final-msg"></p>
-    <p id="final-nota" class="nota"></p>
+    <h1>Tu agente está <em>listo</em></h1>
+    <p id="final-msg">Conectamos y probamos tu correo. Tu agente ya tiene todo lo que necesita.</p>
+    <p id="final-nota" class="nota">Te avisamos por correo apenas empiece a escribir en tu nombre y cuando alguien te responda.</p>
+  </div>
+  <div id="dns" class="tarjeta oculto" style="text-align:left">
+    <h3>Para que tus mensajes lleguen mejor <span style="opacity:.65;font-weight:400">(opcional)</span></h3>
+    <p class="nota" id="dns-msg"></p>
+    <div id="dns-registros"></div>
+    <button id="btn-dns" class="btn btn-sec" type="button">Ya lo hice, revisar de nuevo</button>
   </div>
 </section>
 
@@ -281,8 +270,8 @@ const CARDS=[
 const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detectando tu tono…','Buscando tus señales de credibilidad…'];
 
 function ver(sec){['cargando','step1','step2','step3','final','reissue'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
-  $('pasos').classList.toggle('oculto',!['step1','step2','step3'].includes(sec));}
-function marcarPaso(n){document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
+  $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
+function marcarPaso(n){if(n<=2)n=2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
 function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 // Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
 // el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
@@ -307,20 +296,17 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
-    if(d.paso==='final'){ if(d.buzon){domVerificado=!!d.buzon.dominio_ok;imapOk=!!d.buzon.imap_ok;} mostrarFinal();return;}
+    if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
     ver('step1');marcarPaso(1);
   }catch(e){ver('reissue');}
 })();
 
-function mostrarFinal(nota){
-  // Caso principal: plataforma (sin dominio). Si conectó dominio, lo nombra. En ambos dice QUÉ pasa AHORA.
-  $('final-msg').innerHTML = domVerificado
-    ? 'Tu dominio quedó verificado: tus correos saldrán desde tu propia dirección, con tu marca. Tu agente ya empezó a buscar empresas de tu mercado y a escribir en tu nombre. Te avisamos apenas alguien te responda.'
-    : 'Tu agente ya empezó a buscar empresas de tu mercado, y va a escribir y enviar en tu nombre desde inntuitivo.com. Te avisamos apenas alguien te responda. Conectar tu dominio para enviar desde tu propia dirección es opcional: puedes hacerlo cuando quieras.';
-  if(nota)$('final-nota').textContent=nota;
-  ver('final');
+function mostrarFinal(){
+  clearInterval(sondeo);
+  marcarPaso(4);ver('final');window.scrollTo(0,0);
+  revisarDns();repetirDns();
 }
 
 // --- PASO 1: analizar (asíncrono, loaders rotativos) ---
@@ -393,7 +379,7 @@ function renderPerfil(p){
         control='<select id="f-'+id+'"><option value="usted"'+(r==='usted'?' selected':'')+'>Usted (formal)</option><option value="tu"'+(r==='tu'?' selected':'')+'>Tú (cercano)</option><option value="vos"'+(r==='vos'?' selected':'')+'>Vos (voseo)</option></select>';}
       else if(tipo==='geo')control=geoControl(id,v);
       else control='<input id="f-'+id+'" type="text" value="'+escapa(v||'')+'">';
-      return '<div class="'+(baja?'baja':'')+'"><label>'+escapa(label)+badge+(hint?'<span class="hint">'+escapa(hint)+'</span>':'')+'</label>'+control+'</div>';
+      return '<div class="'+(baja?'baja':'')+'"><label for="f-'+id+'">'+escapa(label)+badge+(hint?'<span class="hint">'+escapa(hint)+'</span>':'')+'</label>'+control+'</div>';
     }).join('');
     return '<div class="tarjeta"><h3>'+escapa(titulo)+'</h3>'+filas+'</div>';
   }).join('');
@@ -454,149 +440,104 @@ async function confirmar(advertido){
   $('btn-confirmar').disabled=false;
 }
 
-// --- PASO 3: buzón (envío = dominio verificado en Resend · lectura = IMAP) ---
-let domVerificado=false, imapOk=false;
-
-function progreso(){
-  const box=$('buzon-progreso');box.classList.remove('oculto');
-  // El BUZÓN (imapOk) es lo obligatorio: con eso el agente ya opera (backend -> ONB_PLATAFORMA).
-  // El dominio es opcional -> NO bloquea el final, y se muestra como "opcional", no como pendiente (⏳).
-  box.innerHTML='<span>Buzón (lectura): '+(imapOk?'✓':'⏳')+'</span><span>Dominio propio (envío): '+(domVerificado?'✓':'opcional — cuando quieras')+'</span>';
-  if(imapOk){marcarPaso(4);mostrarFinal();}
+// --- PASO 3: conectar tu correo (un solo paso; el sistema descubre el resto y prueba de verdad) ---
+let modo='clave', temporizador=null, sondeo=null;
+const llamar=async(ruta,cuerpo)=>{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return r.json().catch(()=>({ok:false,mensaje:'Algo salió mal. Vuelve a intentar.'}));};
+function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
+function pintarGuia(d){
+  const ms=!!d.es_microsoft;
+  $('aviso-ms').classList.toggle('oculto',!ms);
+  $('guia').classList.toggle('oculto',ms);
+  $('pass-wrap').classList.toggle('oculto',ms);
+  $('manual').classList.toggle('oculto',!d.necesita_manual);
+  modo=ms?'microsoft':'clave';
+  $('btn').textContent=ms?'Avísame cuando esté lista':'Conectar mi correo';
+  if(ms)return;
+  $('guia-nombre').textContent=d.nombre||'';
+  $('guia-pasos').innerHTML=(d.pasos||[]).map(p=>'<li>'+escapa(p)+'</li>').join('');
+  const e=$('guia-enlace'); e.classList.toggle('oculto',!d.enlace); if(d.enlace){e.href=d.enlace;e.textContent=d.enlace_texto||'Abrir';}
+  const im=$('guia-imagen'); im.classList.toggle('oculto',!d.imagen); if(d.imagen)im.src=d.imagen;
+  $('pass-label').textContent=d.clave_label||'Contraseña';
 }
-function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent=t,1200);});}
-function regFila(valor){
-  return '<div style="display:flex;gap:8px;align-items:center;margin:4px 0">'
-    +'<code style="flex:1;overflow-wrap:anywhere;background:rgba(0,0,0,.25);padding:4px 8px;border-radius:6px;font-size:.82rem">'+escapa(valor)+'</code>'
-    +'<button type="button" data-copiar="'+escapa(valor)+'" style="flex:none;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#FF6E92;cursor:pointer">Copiar</button></div>';
-}
-function pintarRegistros(regs){
-  $('registros').innerHTML=(regs||[]).map(r=>{
-    const ok=(r.estado||'').toLowerCase()==='verified';
-    return '<div style="border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;margin-bottom:8px">'
-      +'<div style="font-weight:600;margin-bottom:6px">'+escapa(r.para||r.tipo)+' · '+escapa(r.tipo)+(ok?' ✓':'')+'</div>'
-      +'<div class="nota">Nombre</div>'+regFila(r.nombre)
-      +'<div class="nota" style="margin-top:6px">Valor</div>'+regFila(r.valor)
-      +(r.prioridad!=null?'<div class="nota" style="margin-top:6px">Prioridad: '+escapa(''+r.prioridad)+'</div>':'')
-      +'</div>';
-  }).join('');
-  document.querySelectorAll('#registros [data-copiar]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.copiar)));
-}
-async function cargarDominio(){
-  const email=$('email').value.trim();if(!esEmailValido(email))return;
-  $('envio').classList.remove('oculto');
-  try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/dominio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
-    const d=await r.json();
-    if(!r.ok){res($('envio-estado'),'error','',escapa(d.error||'No pudimos preparar tu dominio.'));$('btn-verificar').classList.add('oculto');return;}
-    if(d.dns&&d.dns.donde){
-      let h='Tu DNS parece estar en '+escapa(d.dns.dns_nombre)+'. '+escapa(d.dns.donde);
-      if(d.dns.doc)h+=' <a href="'+d.dns.doc+'" target="_blank" rel="noopener" style="color:var(--rosa-claro)">📖 Doc oficial: cómo agregar un registro →</a>';
-      if(d.dns.host_note)h+='<br><span style="color:var(--alerta)">💡 '+escapa(d.dns.host_note)+'</span>';
-      $('dns-donde').innerHTML=h;
-    }
-    pintarRegistros(d.registros);
-    const hayReg=d.registros&&d.registros.length;
-    $('btn-verificar').classList.toggle('oculto', !!d.verificado || !hayReg);
-    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','');progreso();}
-  }catch(e){}
-}
-$('btn-verificar').addEventListener('click',async()=>{
-  $('btn-verificar').disabled=true;
-  res($('envio-estado'),'alerta','<span class="spin"></span>Verificando…','Los DNS pueden tardar hasta 30 min.');
-  try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/verificar-dominio',{method:'POST'});
-    const d=await r.json();
-    if(d.registros)pintarRegistros(d.registros);
-    if(d.verificado){domVerificado=true;res($('envio-estado'),'ok','✓ Dominio verificado','Tu agente ya puede enviar como tú.');$('btn-verificar').classList.add('oculto');progreso();}
-    else{
-      // Resend NO distingue un typo de una propagación (ambos quedan 'pending'), pero SÍ
-      // da el estado POR registro: nombramos cuál falta y ofrecemos revisar ese, sin
-      // afirmar una causa que no podemos saber.
-      const regs=d.registros||[];
-      const pend=regs.filter(x=>(x.estado||'').toLowerCase()!=='verified');
-      const ver=regs.length-pend.length;
-      if(regs.length&&ver>0&&pend.length){
-        const nombres=pend.map(x=>escapa(x.para||x.tipo)).join(', ');
-        res($('envio-estado'),'alerta','Verificamos '+ver+' de '+regs.length,'Falta: <strong>'+nombres+'</strong>. Puede seguir propagando (hasta ~30 min). Si ya pasó ese rato, revisa que el <strong>Nombre</strong> y el <strong>Valor</strong> de ese registro estén exactos, sin espacios de más. Cierra tranquilo — te avisamos por correo cuando quede verde.');
-      }else{
-        res($('envio-estado'),'alerta','Todavía no aparecen','Aún no vemos los registros. Puede estar propagando (hasta ~30 min). Si ya pasó ese rato, revisa que el Nombre y el Valor de cada registro estén exactos, sin espacios. Cierra tranquilo — guardamos el progreso y te avisamos por correo cuando esté verde.');
-      }
-    }
-    // Traer el resultado a la vista: el aviso cae DEBAJO del botón y en pantallas chicas
-    // se corta -> sin esto, el usuario apretaba de nuevo creyendo que no pasó nada. Si ya
-    // pasó a "final", #envio-estado queda en un display:none y scrollIntoView es no-op.
-    $('envio-estado').scrollIntoView({behavior:'smooth',block:'nearest'});
-  }catch(e){res($('envio-estado'),'error','Error','Prueba de nuevo en un momento.');}
-  $('btn-verificar').disabled=false;
-});
-
-let altModo=false;
-function pintarProveedor(d){
-  prov=d;$('prov').classList.remove('oculto');
-  $('prov-nombre').textContent='Proveedor detectado: '+d.nombre;
-  $('prov-inst').innerHTML=(d.instrucciones||[]).map(t=>'<li>'+escapa(t)+'</li>').join('');
-  $('prov-nota').textContent=d.nota||'';
-  const manual=d.proveedor==='otro';$('manual').classList.toggle('oculto',!manual);
-  if(manual){$('imap_host').value=d.imap_host||'';$('imap_port').value=d.imap_port||993;}
-  const micro=d.proveedor==='microsoft';$('pass-wrap').classList.toggle('oculto',micro);
-  $('prov-contacto').classList.toggle('oculto',!micro);
-  // 20-sep-2026: M365 ya no deja todo deshabilitado -- ofrece el toggle de buzón
-  // alternativo (self-service, ver instrucciones de redirección arriba).
-  $('alt-toggle').classList.toggle('oculto',!micro);
-  if(!micro){altModo=false;$('alt-mailbox').classList.add('oculto');}
-  if(!micro&&d.campo_password)$('pass-label').textContent=d.campo_password;
-  $('btn').disabled=micro&&!altModo;
-  $('btn').textContent=micro&&!altModo?'Microsoft 365 — usá el buzón alternativo abajo':'Conectar lectura';
-}
-async function detectar(){const email=$('email').value.trim();if(!esEmailValido(email))return;
-  $('lectura').classList.remove('oculto');
-  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/detectar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(r.ok)pintarProveedor(await r.json());}catch(e){}}
-$('sitio').addEventListener('blur',()=>{const v=$('sitio').value.trim();if(v&&!/^https?:\/\//i.test(v))$('sitio').value='https://'+v;});
-$('email').addEventListener('blur',()=>{cargarDominio();detectar();});
-$('email').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{cargarDominio();detectar();},800);});
-$('alt-toggle').addEventListener('click',()=>{
-  altModo=true;
-  $('alt-mailbox').classList.remove('oculto');
+async function descubrir(){
+  const email=$('email').value.trim();
+  if(!esEmailValido(email)){$('btn').disabled=true;return;}
   $('btn').disabled=false;
-  $('btn').textContent='Conectar lectura';
-});
+  try{const d=await llamar('descubrir',{email});if(d&&d.proveedor)pintarGuia(d);}catch(e){}
+}
+$('email').addEventListener('input',()=>{clearTimeout(temporizador);$('btn').disabled=!esEmailValido($('email').value.trim());temporizador=setTimeout(descubrir,600);});
+$('email').addEventListener('blur',descubrir);
+
+function mostrarBloqueo(msg,pedido){
+  $('bloque-conectar').classList.add('oculto');$('bloqueo').classList.remove('oculto');
+  $('bloqueo-msg').textContent=msg||'';
+  $('bloqueo-form').classList.toggle('oculto',!!pedido);
+  const w=$('bloqueo-esperando');
+  if(pedido){w.className='resultado ok';w.innerHTML='<span class="titulo">Esperando a tu administrador</span>Le mandamos los pasos. Probamos solos y te avisamos por correo apenas puedas enviar; también puedes dejar esta página abierta.';iniciarSondeo();}
+  else w.className='resultado';
+}
+function iniciarSondeo(){
+  clearInterval(sondeo);let n=0;
+  sondeo=setInterval(async()=>{
+    if(++n>90){clearInterval(sondeo);return;}
+    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');const d=await r.json();if(d.paso==='final'){clearInterval(sondeo);mostrarFinal();}}catch(e){}
+  },20000);
+}
 $('btn').addEventListener('click',async()=>{
-  if(!prov)return;
-  // 20-sep-2026: en modo buzón alternativo (M365 -> redirigido a Gmail/Zoho), el
-  // payload usa proveedor='otro' con los datos del buzón ALTERNATIVO (el que se
-  // LEE), nunca el correo de Microsoft 365 -- probar_y_guardar() conecta ese buzón
-  // directo, sin exigir que coincida con el dominio de envío.
-  // 20-sep-2026 (code review, corregido el mismo día): email_envio SIEMPRE manda
-  // la dirección real de envío (el dominio M365 verificado, $('email').value) --
-  // sin esto, el backend pisaba email_envio con el buzón alternativo y Resend
-  // habría rechazado cada correo (From ya no coincidía con ningún dominio
-  // verificado). En modo normal es redundante (coincide con `email`), pero se
-  // manda igual: una sola fuente de verdad para el backend, no dos comportamientos.
-  const payload=altModo?{
-    proveedor:'otro',email:$('alt_email').value.trim(),password:$('alt_password').value,
-    imap_host:$('alt_imap_host').value.trim(),imap_port:$('alt_imap_port').value.trim(),
-    email_envio:$('email').value.trim(),
-  }:{proveedor:prov.proveedor,email:$('email').value.trim(),password:$('password').value,
-    imap_host:prov.proveedor==='otro'?$('imap_host').value.trim():prov.imap_host,
-    imap_port:prov.proveedor==='otro'?$('imap_port').value.trim():prov.imap_port,
-    email_envio:$('email').value.trim()};
+  const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
-  res($('resultado'),'alerta','<span class="spin"></span>Conectando…','Verificando la lectura de tu buzón…');
-  try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/probar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const d=await r.json();
-    if(d.imap_ok){imapOk=true;res($('resultado'),'ok','✓ Lectura conectada','');progreso();}
-    else res($('resultado'),'error','No pudimos conectar',escapa(d.mensaje||d.error||'Revisa el correo y la contraseña.'));
-  }catch(e){res($('resultado'),'error','Error','No pudimos completar la prueba. Intenta de nuevo.');}
+  if(modo==='microsoft'){
+    const d=await llamar('avisarme');res($('resultado'),'ok','✓ Anotado',escapa(d.mensaje||''));$('btn').disabled=false;return;
+  }
+  const password=$('password').value;
+  if(!password){res($('resultado'),'alerta','','Pega la contraseña en el cuadro de arriba. Si no la tienes aún, sigue los pasos que te mostramos.');$('btn').disabled=false;return;}
+  const cuerpo={email,password};
+  if(!$('manual').classList.contains('oculto')&&$('host_envio').value.trim()&&$('host_recibo').value.trim())
+    cuerpo.config={smtp_host:$('host_envio').value.trim(),smtp_port:587,imap_host:$('host_recibo').value.trim(),imap_port:993};
+  res($('resultado'),'alerta','<span class="spin"></span>Probando tu correo…','Entramos, nos mandamos un mensaje de prueba y lo leemos. Puede tardar hasta un minuto.');
+  const d=await llamar('probar',cuerpo);
   $('btn').disabled=false;
+  if(d.ok){$('resultado').className='resultado';mostrarFinal();return;}
+  res($('resultado'),'error','No pudimos conectarlo',escapa(d.mensaje||'Vuelve a intentar.'));
+  if(d.necesita_manual||d.codigo==='servidor')$('manual').classList.remove('oculto');
+  if(d.siguiente==='administrador')mostrarBloqueo(d.mensaje,false);
+  if(d.siguiente==='soporte')$('resultado').insertAdjacentHTML('beforeend','<div class="detalle">Escríbenos a <a href="mailto:info@inntuitivo.com">info@inntuitivo.com</a> y lo resolvemos contigo.</div>');
 });
+$('btn-despues').addEventListener('click',async()=>{
+  $('btn-despues').disabled=true;
+  const d=await llamar('despues');res($('resultado'),'ok','✓ Avance guardado',escapa(d.mensaje||''));$('btn-despues').disabled=false;
+});
+$('btn-admin').addEventListener('click',async()=>{
+  const admin=$('admin_email').value.trim(); if(!esEmailValido(admin)){res($('bloqueo-esperando'),'alerta','','Escribe el correo completo de tu administrador.');return;}
+  $('btn-admin').disabled=true;
+  const d=await llamar('administrador',{email:admin});
+  $('btn-admin').disabled=false;
+  if(d.ok)mostrarBloqueo('',true); else res($('bloqueo-esperando'),'error','',escapa(d.mensaje||'No pudimos enviarlo. Vuelve a intentar.'));
+});
+$('btn-otro').addEventListener('click',()=>{$('bloqueo').classList.add('oculto');$('bloque-conectar').classList.remove('oculto');$('email').value='';$('password').value='';$('resultado').className='resultado';$('email').focus();});
+
 function reanudarBuzon(b){
   if(!b)return;
-  domVerificado=!!b.dominio_ok;imapOk=!!b.imap_ok;
-  if(b.email_envio){$('email').value=b.email_envio;cargarDominio();detectar();}
-  progreso();
+  if(b.email_envio)$('email').value=b.email_envio;
+  if(b.bloqueo){mostrarBloqueo('La empresa que administra tu correo tiene que habilitar esta conexión.',!!b.admin_pedido);return;}
+  if(b.email_envio)descubrir();
 }
+
+// --- Tarjeta de entrega (SPF, DKIM, DMARC) en palabras simples, con el registro exacto para copiar ---
+let revisiones=0;
+function pintarDns(d){
+  const c=$('dns');
+  if(d.inconcluso){c.classList.add('oculto');return;}
+  c.classList.remove('oculto');
+  if(d.ok){$('dns-msg').textContent='Todo en orden: tu dominio ya está preparado para que tus mensajes lleguen a la bandeja principal.';$('dns-registros').innerHTML='';$('btn-dns').classList.add('oculto');return;}
+  $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+(d.faltan||[]).length+' cosa(s) en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
+  $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
+    (r.valor?'<p class="nota">Tipo <b>'+escapa(r.tipo)+'</b> · Nombre <b>'+escapa(r.host)+'</b></p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
+  document.querySelectorAll('#dns-registros button[data-v]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.v)));
+}
+async function revisarDns(){try{pintarDns(await llamar('dns'));}catch(e){}}
+$('btn-dns').addEventListener('click',revisarDns);
+function repetirDns(){if(++revisiones>10)return;setTimeout(async()=>{await revisarDns();if(!$('dns').classList.contains('oculto')&&$('btn-dns').classList.contains('oculto'))return;repetirDns();},60000);}
 
 // --- reemisión ---
 $('rbtn').addEventListener('click',async()=>{
