@@ -64,7 +64,7 @@ textarea{min-height:70px;resize:vertical;line-height:1.5}
 input:focus,textarea:focus,select:focus{border-color:var(--rosa-claro);outline:none}
 input::placeholder,textarea::placeholder{color:#8E80B3}
 .fila2{display:grid;grid-template-columns:1fr 120px;gap:12px}
-.oculto{display:none}
+.oculto,.btn.oculto{display:none}
 .btn{display:inline-block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;margin-top:22px;position:relative;overflow:hidden}
 .btn:hover{transform:translateY(-2px)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
@@ -171,15 +171,13 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <input id="password" type="password" autocomplete="off" placeholder="••••••••">
       </div>
       <div id="manual" class="oculto">
-        <div class="nota">No pudimos reconocer tu proveedor solos. Escribe estas dos direcciones; las encuentras en la ayuda de tu proveedor.</div>
-        <label for="host_envio">Dirección para enviar</label>
-        <input id="host_envio" placeholder="envio.tuproveedor.com" autocomplete="off" spellcheck="false">
-        <label for="host_recibo">Dirección para recibir</label>
-        <input id="host_recibo" placeholder="recibo.tuproveedor.com" autocomplete="off" spellcheck="false">
+        <div class="nota">No pudimos reconocer tu proveedor solos. Escribe la dirección del servidor de tu correo; la encuentras en la ayuda de tu proveedor.</div>
+        <label for="host_servidor">Dirección del servidor</label>
+        <input id="host_servidor" placeholder="mail.tuproveedor.com" autocomplete="off" spellcheck="false">
       </div>
       <button id="btn" class="btn btn-primario" disabled style="margin-top:16px">Conectar mi correo</button>
       <button id="btn-despues" class="btn btn-sec" type="button">Lo termino después</button>
-      <div id="resultado" class="resultado"></div>
+      <div id="resultado" class="resultado" role="status" aria-live="polite"></div>
     </div>
 
     <div id="bloqueo" class="oculto">
@@ -191,7 +189,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <button id="btn-admin" class="btn btn-primario" type="button" style="margin-top:14px">Enviarle los pasos</button>
         <button id="btn-otro" class="btn btn-sec" type="button">Probar con otro correo</button>
       </div>
-      <div id="bloqueo-esperando" class="resultado ok"></div>
+      <div id="bloqueo-esperando" class="resultado ok" role="status" aria-live="polite"></div>
     </div>
   </div>
 </section>
@@ -202,7 +200,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <div class="cohete">🚀</div>
     <h1>Tu agente está <em>listo</em></h1>
     <p id="final-msg">Conectamos y probamos tu correo. Tu agente ya tiene todo lo que necesita.</p>
-    <p id="final-nota" class="nota">Te avisamos por correo apenas empiece a escribir en tu nombre y cuando alguien te responda.</p>
+    <p id="final-nota" class="nota">Tu agente ya está conectado a tu correo. Te avisamos por correo cuando haya algo que necesite de ti.</p>
   </div>
   <div id="dns" class="tarjeta oculto" style="text-align:left">
     <h3>Para que tus mensajes lleguen mejor <span style="opacity:.65;font-weight:400">(opcional)</span></h3>
@@ -216,7 +214,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="reissue" class="oculto">
   <span class="eyebrow">Configuración</span>
   <h1>Necesitas un <em>enlace nuevo</em></h1>
-  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.</p>
+  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.</p>
   <div class="panel">
     <label for="remail">Tu correo de pago</label>
     <input id="remail" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" placeholder="el correo con el que te suscribiste" spellcheck="false">
@@ -294,7 +292,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
-    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció (duran 7 días). Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
@@ -442,7 +440,7 @@ async function confirmar(advertido){
 
 // --- PASO 3: conectar tu correo (un solo paso; el sistema descubre el resto y prueba de verdad) ---
 let modo='clave', temporizador=null, sondeo=null;
-const llamar=async(ruta,cuerpo)=>{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return r.json().catch(()=>({ok:false,mensaje:'Algo salió mal. Vuelve a intentar.'}));};
+const llamar=async(ruta,cuerpo)=>{try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
 function pintarGuia(d){
   const ms=!!d.es_microsoft;
@@ -473,7 +471,7 @@ function mostrarBloqueo(msg,pedido){
   $('bloqueo-msg').textContent=msg||'';
   $('bloqueo-form').classList.toggle('oculto',!!pedido);
   const w=$('bloqueo-esperando');
-  if(pedido){w.className='resultado ok';w.innerHTML='<span class="titulo">Esperando a tu administrador</span>Le mandamos los pasos. Probamos solos y te avisamos por correo apenas puedas enviar; también puedes dejar esta página abierta.';iniciarSondeo();}
+  if(pedido){w.className='resultado ok';w.innerHTML='<span class="titulo">Esperando a tu administrador</span>Le mandamos los pasos. Probamos solos y te avisamos por correo cuando tu correo quede conectado; también puedes dejar esta página abierta.';iniciarSondeo();}
   else w.className='resultado';
 }
 function iniciarSondeo(){
@@ -492,8 +490,7 @@ $('btn').addEventListener('click',async()=>{
   const password=$('password').value;
   if(!password){res($('resultado'),'alerta','','Pega la contraseña en el cuadro de arriba. Si no la tienes aún, sigue los pasos que te mostramos.');$('btn').disabled=false;return;}
   const cuerpo={email,password};
-  if(!$('manual').classList.contains('oculto')&&$('host_envio').value.trim()&&$('host_recibo').value.trim())
-    cuerpo.config={smtp_host:$('host_envio').value.trim(),smtp_port:587,imap_host:$('host_recibo').value.trim(),imap_port:993};
+  if(!$('manual').classList.contains('oculto')&&$('host_servidor').value.trim())cuerpo.servidor=$('host_servidor').value.trim();
   res($('resultado'),'alerta','<span class="spin"></span>Probando tu correo…','Entramos, nos mandamos un mensaje de prueba y lo leemos. Puede tardar hasta un minuto.');
   const d=await llamar('probar',cuerpo);
   $('btn').disabled=false;
@@ -527,10 +524,10 @@ function reanudarBuzon(b){
 let revisiones=0;
 function pintarDns(d){
   const c=$('dns');
-  if(d.inconcluso){c.classList.add('oculto');return;}
+  if(d.inconcluso||d.no_aplica){c.classList.add('oculto');return;}
   c.classList.remove('oculto');
   if(d.ok){$('dns-msg').textContent='Todo en orden: tu dominio ya está preparado para que tus mensajes lleguen a la bandeja principal.';$('dns-registros').innerHTML='';$('btn-dns').classList.add('oculto');return;}
-  $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+(d.faltan||[]).length+' cosa(s) en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
+  $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+((d.faltan||[]).length===1?'1 cosa':(d.faltan||[]).length+' cosas')+' en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
   $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
     (r.valor?'<p class="nota">Tipo <b>'+escapa(r.tipo)+'</b> · Nombre <b>'+escapa(r.host)+'</b></p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
   document.querySelectorAll('#dns-registros button[data-v]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.v)));
