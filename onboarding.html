@@ -618,6 +618,7 @@ function reanudarBuzon(b){
 // --- Tarjeta de protección contra suplantación, en palabras simples, con el registro exacto para copiar ---
 let revisiones=0;
 function pintarDns(d){
+  if(!d||!Array.isArray(d.faltan))return;   // una falla de red o un límite de pedidos no trae `faltan`: la tarjeta queda como estaba, nunca dice «falta confirmar 0 cosas»
   const c=$('dns');
   if(d.inconcluso||d.no_aplica){c.classList.add('oculto');return;}
   c.classList.remove('oculto');
