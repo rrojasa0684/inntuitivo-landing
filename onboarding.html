@@ -256,11 +256,11 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 const API='https://api.inntuitivo.com';
 // Un 429 (demasiados pedidos a la vez) no es un error del cliente: se avisa sin jerga y se reintenta solo respetando Retry-After (la API lo expone con CORS).
 // Después de varios intentos se entrega una respuesta con mensaje legible, nunca una excepción de red.
-function avisoEspera(on){let a=document.getElementById('aviso-espera');if(!a){if(!on)return;a=document.createElement('div');a.id='aviso-espera';a.setAttribute('role','status');a.setAttribute('aria-live','polite');a.style.cssText='position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#1b1b1f;color:#fff;padding:10px 16px;border-radius:10px;z-index:50;max-width:90vw;text-align:center';a.textContent='Un momento, ya seguimos.';document.body.appendChild(a);}a.style.display=on?'block':'none';}
+function avisoEspera(on){var a=document.getElementById('aviso-espera');if(!a){if(!on)return;a=document.createElement('div');a.id='aviso-espera';a.setAttribute('role','status');a.setAttribute('aria-live','polite');a.style.cssText='position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#1b1b1f;color:#fff;padding:10px 16px;border-radius:10px;z-index:50;max-width:90vw;text-align:center';a.textContent='';document.body.appendChild(a);}if(on){a.style.display='block';setTimeout(function(){a.textContent='Un momento, ya seguimos.';},60);}else{a.style.display='none';a.textContent='';}}
 async function pedir(url,op){
   for(let i=0;;i++){
     const r=await fetch(url,op);
-    if(r.status!==429){if(i>0)avisoEspera(false);return r;}
+    if(r.status!==429||r.headers.get('X-Limite')!=='nginx'){if(i>0)avisoEspera(false);return r;}   // solo el 429 de nginx se reintenta; el de la app trae su propio mensaje
     if(i>=7){avisoEspera(false);return new Response(JSON.stringify({ok:false,mensaje:'Un momento, ya seguimos. Vuelve a intentarlo en unos segundos.'}),{status:429,headers:{'Content-Type':'application/json'}});}
     avisoEspera(true);
     const s=Math.min(Math.max(parseInt(r.headers.get('Retry-After'),10)||2,1),10);
@@ -330,7 +330,8 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     ver('reissue');return;}
   await terminarMs();
   try{
-    const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
+    let r;for(let k=0;k<6;k++){r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');if(r.status!==429)break;}
+    if(r.status===429){$('reissue-txt').textContent='Estamos recibiendo muchos pedidos. Espera un momento y recarga esta página: tu enlace sigue siendo válido.';ver('reissue');return;}
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     msDisponible=!!(d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.disponible);   // desde el primer paso: quien llega al correo sin recargar también ve el botón
