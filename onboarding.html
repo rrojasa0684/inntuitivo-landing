@@ -160,6 +160,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
       <label for="email">Tu correo de trabajo</label>
       <input id="email" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" autocomplete="email" placeholder="tucorreo@tuempresa.com" spellcheck="false">
       <div id="aviso-ms" class="provaviso oculto">Tu correo es de Microsoft. Esa conexión la estamos terminando: déjanos avisarte por correo apenas esté lista, y vuelves aquí con un solo toque.</div>
+      <div id="aviso-ms-clic" class="provaviso oculto">Tu correo es de Microsoft: se conecta con un solo toque, sin contraseña. Microsoft va a mostrar «sin verificar» porque somos una empresa nueva en su lista; es normal y tus datos están protegidos.</div>
       <div id="guia" class="provaviso oculto">
         <span class="nombre-prov" id="guia-nombre"></span>
         <ol class="instrucciones" id="guia-pasos"></ol>
@@ -453,17 +454,19 @@ async function confirmar(advertido){
 }
 
 // --- PASO 3: conectar tu correo (un solo paso; el sistema descubre el resto y prueba de verdad) ---
-let modo='clave', temporizador=null, sondeo=null;
+let modo='clave', temporizador=null, sondeo=null, msDisponible=false;
+const MS_VUELTA={cancelado:'No se completó la conexión. Cuando quieras, toca «Conectar con Microsoft» y vuelve a intentar.',enlace_vencido:'Este paso venció. Vuelve a tocar «Conectar con Microsoft» y empezamos de nuevo.',correo_distinto:'Entraste con un correo distinto al que escribiste. Vuelve a intentar con el mismo correo.',desconocido:'No pudimos conectar tu correo de Microsoft. Vuelve a intentar; si sigue igual, escríbenos a info@inntuitivo.com y lo resolvemos contigo.',aprobado:'Tu administrador aprobó la conexión. Toca «Conectar con Microsoft» para terminar.',revocada:'Tu conexión con Microsoft ya no vale. Toca «Conectar con Microsoft» para volver a conectar.'};
 const llamar=async(ruta,cuerpo)=>{try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
 function pintarGuia(d){
   const ms=!!d.es_microsoft;
-  $('aviso-ms').classList.toggle('oculto',!ms);
+  $('aviso-ms').classList.toggle('oculto',!ms||msDisponible);
+  $('aviso-ms-clic').classList.toggle('oculto',!(ms&&msDisponible));
   $('guia').classList.toggle('oculto',ms);
   $('pass-wrap').classList.toggle('oculto',ms);
   $('manual').classList.toggle('oculto',!d.necesita_manual);
   modo=ms?'microsoft':'clave';
-  $('btn').textContent=ms?'Avísame cuando esté lista':'Conectar mi correo';
+  $('btn').textContent=ms?(msDisponible?'Conectar con Microsoft':'Avísame cuando esté lista'):'Conectar mi correo';
   if(ms)return;
   $('guia-nombre').textContent=d.nombre||'';
   $('guia-pasos').innerHTML=(d.pasos||[]).map(p=>'<li>'+escapa(p)+'</li>').join('');
@@ -499,6 +502,13 @@ function iniciarSondeo(){
 $('btn').addEventListener('click',async()=>{
   const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
+  if(modo==='microsoft'&&msDisponible){
+    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();
+      if(d.ok&&d.url){location.href=d.url;return;}
+      res($('resultado'),'error','No pudimos empezar',escapa(d.mensaje||'Vuelve a intentar.'));
+    }catch(e){res($('resultado'),'error','No pudimos empezar','Revisa tu conexión a internet y vuelve a intentar.');}
+    $('btn').disabled=false;return;
+  }
   if(modo==='microsoft'){
     const d=await llamar('avisarme');res($('resultado'),'ok','✓ Anotado',escapa(d.mensaje||''));$('btn').disabled=false;return;
   }
@@ -531,7 +541,13 @@ $('btn-otro').addEventListener('click',()=>{$('bloqueo').classList.add('oculto')
 
 function reanudarBuzon(b){
   if(!b)return;
+  msDisponible=!!(b.microsoft&&b.microsoft.disponible);
+  const vuelta=new URLSearchParams(location.search).get('ms');
   if(b.email_envio)$('email').value=b.email_envio;
+  if(msDisponible&&b.microsoft.revocada&&!vuelta){res($('resultado'),'alerta','',escapa(MS_VUELTA.revocada));}
+  if(vuelta&&MS_VUELTA[vuelta])res($('resultado'),vuelta==='aprobado'?'ok':'alerta','',escapa(MS_VUELTA[vuelta]));
+  if(msDisponible&&b.microsoft.bloqueo){mostrarBloqueo(b.microsoft.mensaje||'La empresa que administra tu correo tiene que habilitar esta conexión.',!!b.admin_pedido);return;}
+  if(vuelta&&['aprobacion_admin','smtp_apagado','imap_apagado','seguridad'].indexOf(vuelta)>=0){mostrarBloqueo(b.microsoft&&b.microsoft.mensaje,!!b.admin_pedido);return;}
   if(b.bloqueo){mostrarBloqueo('La empresa que administra tu correo tiene que habilitar esta conexión.',!!b.admin_pedido);return;}
   if(b.email_envio)descubrir();
 }
