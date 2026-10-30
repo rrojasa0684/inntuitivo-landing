@@ -187,6 +187,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
         <label for="admin_email">Correo de tu administrador<span class="hint">Le mandamos los pasos oficiales y probamos solos cuando los haga.</span></label>
         <input id="admin_email" type="email" autocomplete="off" placeholder="administrador@tuempresa.com" spellcheck="false">
         <button id="btn-admin" class="btn btn-primario" type="button" style="margin-top:14px">Enviarle los pasos</button>
+        <button id="btn-volver" class="btn btn-sec oculto" type="button">Escribir mi contraseña otra vez</button>
         <button id="btn-otro" class="btn btn-sec" type="button">Probar con otro correo</button>
       </div>
       <div id="bloqueo-esperando" class="resultado ok" role="status" aria-live="polite"></div>
@@ -466,12 +467,13 @@ async function descubrir(){
 $('email').addEventListener('input',()=>{clearTimeout(temporizador);$('btn').disabled=!esEmailValido($('email').value.trim());temporizador=setTimeout(descubrir,600);});
 $('email').addEventListener('blur',descubrir);
 
-function mostrarBloqueo(msg,pedido){
+function mostrarBloqueo(msg,pedido,espera){
   $('bloque-conectar').classList.add('oculto');$('bloqueo').classList.remove('oculto');
   $('bloqueo-msg').textContent=msg||'';
-  $('bloqueo-form').classList.toggle('oculto',!!pedido);
+  $('btn-admin').textContent=pedido?'Enviarle los pasos otra vez (o a otra persona)':'Enviarle los pasos';
+  $('btn-volver').classList.toggle('oculto',!pedido);
   const w=$('bloqueo-esperando');
-  if(pedido){w.className='resultado ok';w.innerHTML='<span class="titulo">Esperando a tu administrador</span>Le mandamos los pasos. Probamos solos y te avisamos por correo cuando tu correo quede conectado; también puedes dejar esta página abierta.';iniciarSondeo();}
+  if(pedido){w.className='resultado ok';w.innerHTML='<span class="titulo">Listo, le mandamos los pasos</span>'+escapa(espera||'Probamos solos y te avisamos por correo cuando tu correo quede conectado.')+' También puedes dejar esta página abierta.';iniciarSondeo();}
   else w.className='resultado';
 }
 function iniciarSondeo(){
@@ -509,8 +511,9 @@ $('btn-admin').addEventListener('click',async()=>{
   $('btn-admin').disabled=true;
   const d=await llamar('administrador',{email:admin});
   $('btn-admin').disabled=false;
-  if(d.ok)mostrarBloqueo('',true); else res($('bloqueo-esperando'),'error','',escapa(d.mensaje||'No pudimos enviarlo. Vuelve a intentar.'));
+  if(d.ok)mostrarBloqueo('',true,d.mensaje); else res($('bloqueo-esperando'),'error','',escapa(d.mensaje||'No pudimos enviarlo. Vuelve a intentar.'));
 });
+$('btn-volver').addEventListener('click',()=>{$('bloqueo').classList.add('oculto');$('bloque-conectar').classList.remove('oculto');$('password').value='';$('resultado').className='resultado';$('password').focus();});
 $('btn-otro').addEventListener('click',()=>{$('bloqueo').classList.add('oculto');$('bloque-conectar').classList.remove('oculto');$('email').value='';$('password').value='';$('resultado').className='resultado';$('email').focus();});
 
 function reanudarBuzon(b){
