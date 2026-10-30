@@ -212,6 +212,13 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   </div>
 </section>
 
+<!-- GRACIAS AL ADMINISTRADOR (sin datos del cliente) -->
+<section id="admin-gracias" class="oculto">
+  <span class="eyebrow">Configuración</span>
+  <h1 id="admin-gracias-h">Gracias, <em>ya quedó</em></h1>
+  <p class="sub" id="admin-gracias-txt">Tu respuesta quedó registrada. Ya puedes cerrar esta página: nosotros se lo avisamos a la persona.</p>
+</section>
+
 <!-- REISSUE -->
 <section id="reissue" class="oculto">
   <span class="eyebrow">Configuración</span>
@@ -269,7 +276,7 @@ const CARDS=[
 ];
 const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detectando tu tono…','Buscando tus señales de credibilidad…'];
 
-function ver(sec){['cargando','step1','step2','step3','final','reissue'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
+function ver(sec){['cargando','step1','step2','step3','final','reissue','admin-gracias'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
   $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
 function marcarPaso(n){n=n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
 function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
@@ -290,13 +297,18 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
 
 // --- arranque: lee el estado y reanuda donde iba ---
 (async()=>{
-  if(!token){ver('reissue');return;}
+  if(!token){
+    const adm=new URLSearchParams(location.search).get('ms_admin');
+    if(adm){if(adm!=='ok'){$('admin-gracias-h').innerHTML='Casi, <em>falta un paso</em>';$('admin-gracias-txt').textContent='La aprobación no se completó. Puedes volver a abrir el enlace del correo cuando quieras.';}ver('admin-gracias');return;}
+    ver('reissue');return;}
+  await terminarMs();
   try{
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
+    if(d.paso==='final'&&d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.revocada){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}   // volver a conectar con un clic
     if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
@@ -454,7 +466,19 @@ async function confirmar(advertido){
 }
 
 // --- PASO 3: conectar tu correo (un solo paso; el sistema descubre el resto y prueba de verdad) ---
-let modo='clave', temporizador=null, sondeo=null, msDisponible=false;
+let modo='clave', temporizador=null, sondeo=null, msDisponible=false, vueltaMs=new URLSearchParams(location.search).get('ms')||'';
+// Un secreto que solo conoce este navegador: Microsoft devuelve a la persona aquí y solo este navegador puede terminar la conexión que empezó (otro, con un enlace ajeno, no).
+function nonceMs(){let n='';try{n=localStorage.getItem('ms_nonce')||'';}catch(e){}
+  if(n.length<32){const b=new Uint8Array(16);crypto.getRandomValues(b);n=Array.from(b,x=>('0'+x.toString(16)).slice(-2)).join('');try{localStorage.setItem('ms_nonce',n);}catch(e){}}
+  return n;}
+async function terminarMs(){
+  const h=new URLSearchParams(location.hash.replace(/^#/,''));
+  if(!h.get('ms_state')||!token)return;
+  history.replaceState(null,'',location.pathname+'?token='+encodeURIComponent(token));
+  let nonce='';try{nonce=localStorage.getItem('ms_nonce')||'';}catch(e){}
+  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/completar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:h.get('ms_code')||'',state:h.get('ms_state'),error:h.get('ms_error')||'',error_description:h.get('ms_desc')||'',admin_consent:h.get('ms_consent')||'',nonce})});
+    const d=await r.json();vueltaMs=d.codigo||'desconocido';}catch(e){vueltaMs='desconocido';}
+}
 const MS_VUELTA={cancelado:'No se completó la conexión. Cuando quieras, toca «Conectar con Microsoft» y vuelve a intentar.',enlace_vencido:'Este paso venció. Vuelve a tocar «Conectar con Microsoft» y empezamos de nuevo.',correo_distinto:'Entraste con un correo distinto al que escribiste. Vuelve a intentar con el mismo correo.',desconocido:'No pudimos conectar tu correo de Microsoft. Vuelve a intentar; si sigue igual, escríbenos a info@inntuitivo.com y lo resolvemos contigo.',aprobado:'Tu administrador aprobó la conexión. Toca «Conectar con Microsoft» para terminar.',revocada:'Tu conexión con Microsoft ya no vale. Toca «Conectar con Microsoft» para volver a conectar.'};
 const llamar=async(ruta,cuerpo)=>{try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
@@ -503,7 +527,7 @@ $('btn').addEventListener('click',async()=>{
   const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
   if(modo==='microsoft'&&msDisponible){
-    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();
+    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
       if(d.ok&&d.url){location.href=d.url;return;}
       res($('resultado'),'error','No pudimos empezar',escapa(d.mensaje||'Vuelve a intentar.'));
     }catch(e){res($('resultado'),'error','No pudimos empezar','Revisa tu conexión a internet y vuelve a intentar.');}
@@ -542,7 +566,7 @@ $('btn-otro').addEventListener('click',()=>{$('bloqueo').classList.add('oculto')
 function reanudarBuzon(b){
   if(!b)return;
   msDisponible=!!(b.microsoft&&b.microsoft.disponible);
-  const vuelta=new URLSearchParams(location.search).get('ms');
+  const vuelta=vueltaMs;
   if(b.email_envio)$('email').value=b.email_envio;
   if(msDisponible&&b.microsoft.revocada&&!vuelta){res($('resultado'),'alerta','',escapa(MS_VUELTA.revocada));}
   if(vuelta&&MS_VUELTA[vuelta])res($('resultado'),vuelta==='aprobado'?'ok':'alerta','',escapa(MS_VUELTA[vuelta]));
