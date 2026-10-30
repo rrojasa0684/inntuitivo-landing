@@ -268,6 +268,8 @@ async function pedir(url,op){
   }
 }
 const $=id=>document.getElementById(id);
+// Un límite de pedidos o un reinicio de la app no es un enlace vencido: se pide esperar y recargar, sin ofrecer un enlace nuevo (reemitirlo dejaría sin efecto el que sí sirve).
+function esperaYRecarga(){const h=document.querySelector('#reissue h1');if(h)h.innerHTML='Un momento, <em>ya seguimos</em>';$('reissue-txt').textContent='Estamos recibiendo muchos pedidos. Espera un momento y recarga esta página: tu enlace sigue siendo válido.';const panel=document.querySelector('#reissue .panel');if(panel)panel.style.display='none';ver('reissue');}
 const token=new URLSearchParams(location.search).get('token')||(location.hash.indexOf('ms_state=')>=0?(function(){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}})():'');
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
 // dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
@@ -330,8 +332,8 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     ver('reissue');return;}
   await terminarMs();
   try{
-    let r;for(let k=0;k<6;k++){r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');if(r.status!==429)break;}
-    if(r.status===429){$('reissue-txt').textContent='Estamos recibiendo muchos pedidos. Espera un momento y recarga esta página: tu enlace sigue siendo válido.';ver('reissue');return;}
+    const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
+    if(r.status===429||r.status>=500){esperaYRecarga();return;}
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     msDisponible=!!(d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.disponible);   // desde el primer paso: quien llega al correo sin recargar también ve el botón
@@ -342,7 +344,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
     ver('step1');marcarPaso(1);
-  }catch(e){ver('reissue');}
+  }catch(e){esperaYRecarga();}
 })();
 
 const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)'],['color_principal','Color principal (por ejemplo #1f6feb)'],['color_secundario','Color de la línea (por ejemplo #e0a030)']];
