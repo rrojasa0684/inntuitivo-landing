@@ -294,7 +294,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
-    if(d.sitio_sugerido&&!$('sitio').value){$('sitio').value=d.sitio_sugerido;validarSitio();}
+    if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
@@ -311,14 +311,16 @@ function mostrarFinal(){
 
 // Validación en vivo del sitio: dice qué falta mientras escribe, con un ejemplo.
 function validarSitio(){
-  const v=$('sitio').value.trim().replace(/^https?:\/\//i,'').replace(/\/.*$/,'');
+  const v=$('sitio').value.trim();
   const h=$('sitio-hint');
-  if(!v){h.textContent='Ejemplo: tuempresa.com';h.className='nota';return false;}
-  const ok=/^([a-z0-9-]+\.)+[a-z]{2,}$/i.test(v);
-  h.textContent=ok?'✓ Se ve bien.':'Escribe la dirección completa, por ejemplo tuempresa.com';
-  h.className='nota';return ok;
+  if(!v){h.textContent='Ejemplo: tuempresa.com';return false;}
+  let ok=false;
+  try{const host=new URL(/^https?:\/\//i.test(v)?v:'http://'+v).hostname;ok=host.includes('.')&&!host.endsWith('.')&&!/\s/.test(v);}catch(e){}
+  h.textContent=ok?(origenSitio==='pago'?'✓ Lo tomamos de tu correo de pago; cámbialo si tu sitio es otro.':'✓ Se ve bien.'):'Escribe la dirección completa, por ejemplo tuempresa.com';
+  return ok;
 }
-$('sitio').addEventListener('input',validarSitio);
+let origenSitio='';
+$('sitio').addEventListener('input',()=>{origenSitio='';validarSitio();});
 // --- Conectar · Tu negocio: analizar (asíncrono, loaders rotativos) ---
 let loaderTimer=null;
 $('btn-analizar').addEventListener('click',async()=>{
@@ -543,7 +545,7 @@ function pintarDns(d){
   if(d.ok){$('dns-msg').textContent='Todo en orden: tu dominio ya está preparado para que tus mensajes lleguen a la bandeja principal.';$('dns-registros').innerHTML='';$('btn-dns').classList.add('oculto');return;}
   $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+((d.faltan||[]).length===1?'1 cosa':(d.faltan||[]).length+' cosas')+' en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
   $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.etiqueta||r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
-    (r.valor?'<p class="nota">Tipo <b>'+escapa(r.tipo)+'</b> · Nombre <b>'+escapa(r.host)+'</b></p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
+    (r.valor?'<p class="nota">Cópialo en el panel de tu proveedor de dominio, en un registro <b>'+escapa(r.tipo)+'</b> con el nombre <b>'+escapa(r.host)+'</b>.</p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
   document.querySelectorAll('#dns-registros button[data-v]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.v)));
 }
 async function revisarDns(){try{pintarDns(await llamar('dns'));}catch(e){}}
