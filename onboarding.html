@@ -254,6 +254,19 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <script src="geo-chips.js"></script>
 <script>
 const API='https://api.inntuitivo.com';
+// Un 429 (demasiados pedidos a la vez) no es un error del cliente: se avisa sin jerga y se reintenta solo respetando Retry-After (la API lo expone con CORS).
+// Después de varios intentos se entrega una respuesta con mensaje legible, nunca una excepción de red.
+function avisoEspera(on){let a=document.getElementById('aviso-espera');if(!a){if(!on)return;a=document.createElement('div');a.id='aviso-espera';a.setAttribute('role','status');a.setAttribute('aria-live','polite');a.style.cssText='position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#1b1b1f;color:#fff;padding:10px 16px;border-radius:10px;z-index:50;max-width:90vw;text-align:center';a.textContent='Un momento, ya seguimos.';document.body.appendChild(a);}a.style.display=on?'block':'none';}
+async function pedir(url,op){
+  for(let i=0;;i++){
+    const r=await fetch(url,op);
+    if(r.status!==429){if(i>0)avisoEspera(false);return r;}
+    if(i>=7){avisoEspera(false);return new Response(JSON.stringify({ok:false,mensaje:'Un momento, ya seguimos. Vuelve a intentarlo en unos segundos.'}),{status:429,headers:{'Content-Type':'application/json'}});}
+    avisoEspera(true);
+    const s=Math.min(Math.max(parseInt(r.headers.get('Retry-After'),10)||2,1),10);
+    await new Promise(x=>setTimeout(x,s*1000+300*i));
+  }
+}
 const $=id=>document.getElementById(id);
 const token=new URLSearchParams(location.search).get('token')||(location.hash.indexOf('ms_state=')>=0?(function(){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}})():'');
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
@@ -317,7 +330,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     ver('reissue');return;}
   await terminarMs();
   try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
+    const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     msDisponible=!!(d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.disponible);   // desde el primer paso: quien llega al correo sin recargar también ve el botón
@@ -332,7 +345,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
 })();
 
 const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)'],['color_principal','Color principal (por ejemplo #1f6feb)'],['color_secundario','Color de la línea (por ejemplo #e0a030)']];
-async function firmaLlamar(ruta,cuerpo){try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
+async function firmaLlamar(ruta,cuerpo){try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
 function firmaPintar(d){
   $('firma').classList.remove('oculto');
   firmaEjemplos=d.ejemplos||{};firmaVer(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
@@ -377,7 +390,7 @@ $('btn-analizar').addEventListener('click',async()=>{
   let li=0; const pintar=()=>res($('r1'),'alerta','<span class="spin"></span>'+LOADERS[li%LOADERS.length],'Puede tardar un par de minutos. No cierres esta página.');
   pintar(); loaderTimer=setInterval(()=>{li++;pintar();},4000);
   try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sitio_web:sitio})});
+    const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/analizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sitio_web:sitio})});
     const d=await r.json();
     if(!r.ok){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intenta de nuevo.'));$('btn-analizar').disabled=false;return;}
     pollAnalisis();
@@ -387,7 +400,7 @@ async function pollAnalisis(){
   for(let i=0;i<60;i++){
     await new Promise(r=>setTimeout(r,3000));
     try{
-      const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/analizar-estado');
+      const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/analizar-estado');
       const d=await r.json();
       if(d.estado==='listo'){clearInterval(loaderTimer);perfil=d.perfil;
         // Reusa lo que la persona YA escribió en su muestra (el target + las industrias que
@@ -478,7 +491,7 @@ async function confirmar(advertido){
   $('btn-confirmar').disabled=true;
   res($('r2'),'alerta','<span class="spin"></span>Guardando…','');
   try{
-    const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil,confirmar_advertido:advertido})});
+    const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/confirmar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({perfil,confirmar_advertido:advertido})});
     const d=await r.json();
     if(r.ok&&d.ok){$('r2').className='resultado';ver('step3');marcarPaso(3);window.scrollTo(0,0);return;}
     if(r.status===409&&d.advertencia){
@@ -511,11 +524,11 @@ async function terminarMs(){
   if(!h.get('ms_state')||!token)return;
   history.replaceState(null,'',location.pathname+'?token='+encodeURIComponent(token));try{localStorage.removeItem('ms_tk');}catch(e){}
   let nonce='';try{nonce=localStorage.getItem('ms_nonce')||'';}catch(e){}
-  try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/completar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:h.get('ms_code')||'',state:h.get('ms_state'),error:h.get('ms_error')||'',error_description:h.get('ms_desc')||'',admin_consent:h.get('ms_consent')||'',nonce})});
+  try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/completar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:h.get('ms_code')||'',state:h.get('ms_state'),error:h.get('ms_error')||'',error_description:h.get('ms_desc')||'',admin_consent:h.get('ms_consent')||'',nonce})});
     const d=await r.json();vueltaMs=d.codigo||'desconocido';}catch(e){vueltaMs='desconocido';}
 }
 const MS_VUELTA={cancelado:'No se completó la conexión. Cuando quieras, toca «Conectar con Microsoft» y vuelve a intentar.',ocupado:'Ya estamos probando tu correo desde otra pestaña. Espera un momento y vuelve a tocar «Conectar con Microsoft».',servidor:'No pudimos terminar la conexión por un problema nuestro. Vuelve a tocar «Conectar con Microsoft» en unos minutos.',enlace_vencido:'Este paso venció. Vuelve a tocar «Conectar con Microsoft» y empezamos de nuevo.',correo_distinto:'Entraste con un correo distinto al que escribiste. Vuelve a intentar con el mismo correo.',desconocido:'No pudimos conectar tu correo de Microsoft. Vuelve a intentar; si sigue igual, escríbenos a info@inntuitivo.com y lo resolvemos contigo.',aprobado:'Tu administrador aprobó la conexión. Toca «Conectar con Microsoft» para terminar.',revocada:'Tu conexión con Microsoft ya no vale. Toca «Conectar con Microsoft» para volver a conectar.'};
-const llamar=async(ruta,cuerpo)=>{try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
+const llamar=async(ruta,cuerpo)=>{try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
 function pintarGuia(d){
   const ms=!!d.es_microsoft&&!d.personal;
@@ -557,7 +570,7 @@ function iniciarSondeo(){
   clearInterval(sondeo);let n=0;
   sondeo=setInterval(async()=>{
     if(++n>90){clearInterval(sondeo);return;}
-    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');const d=await r.json();if(d.paso==='final'){clearInterval(sondeo);mostrarFinal();}}catch(e){}
+    try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');const d=await r.json();if(d.paso==='final'){clearInterval(sondeo);mostrarFinal();}}catch(e){}
   },20000);
 }
 $('btn').addEventListener('click',async()=>{
@@ -565,7 +578,7 @@ $('btn').addEventListener('click',async()=>{
   const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
   if(modo==='microsoft'&&msDisponible){
-    try{guardarTokenMs();const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
+    try{guardarTokenMs();const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
       if(d.ok&&d.url){location.href=d.url;return;}
       if(d.ok&&d.codigo==='listo'){mostrarFinal();return;}   // modo recorrido: la conexión simulada termina aquí, sin salir a Microsoft
       res($('resultado'),'error','No pudimos empezar',escapa(d.mensaje||'Vuelve a intentar.'));
@@ -636,7 +649,7 @@ function repetirDns(){if(++revisiones>10)return;setTimeout(async()=>{await revis
 $('rbtn').addEventListener('click',async()=>{
   const email=$('remail').value.trim();if(!esEmailValido(email))return;$('rbtn').disabled=true;
   try{
-    const r=await fetch(API+'/onboarding/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    const r=await pedir(API+'/onboarding/reenviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
     const d=await r.json();
     if(d.ok)res($('rresultado'),'ok','✓ Enlace generado',escapa(d.mensaje||''),d.link?'<div class="detalle"><a href="'+d.link+'">Abrir mi configuración →</a></div>':'');
     else res($('rresultado'),'alerta','',escapa(d.mensaje||'No encontramos ese correo.'));
