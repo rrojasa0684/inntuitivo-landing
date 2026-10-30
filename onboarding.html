@@ -118,19 +118,19 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 
 <div id="pasos" class="pasos oculto">
   <span class="p" data-p="1"><span class="n">1</span> Pagar</span>
-  <span class="p" data-p="2"><span class="n">2</span> Tu negocio</span>
-  <span class="p" data-p="3"><span class="n">3</span> Conectar</span>
-  <span class="p" data-p="4"><span class="n">4</span> Confirmar</span>
+  <span class="p" data-p="2"><span class="n">2</span> Conectar</span>
+  <span class="p" data-p="3"><span class="n">3</span> Confirmar</span>
 </div>
 
 <!-- PASO 1 -->
 <section id="step1" class="oculto">
-  <span class="eyebrow">Paso 1 · Tu sitio</span>
+  <span class="eyebrow">Conectar · Tu negocio</span>
   <h1 id="titulo">Empecemos por <em>tu sitio web</em></h1>
-  <p class="sub">Analizamos tu sitio para entender qué ofreces y a quién. Lo revisas y ajustas en el paso siguiente.</p>
+  <p class="sub">Analizamos tu sitio para entender qué ofreces y a quién. Lo revisas y ajustas enseguida; después conectas tu correo y listo.</p>
   <div class="panel">
     <label for="sitio">¿Cuál es el sitio de tu negocio?</label>
-    <input id="sitio" type="url" placeholder="tuempresa.com" spellcheck="false">
+    <input id="sitio" type="url" placeholder="Ejemplo: tuempresa.com" spellcheck="false" autocomplete="url">
+    <div id="sitio-hint" class="nota" role="status" aria-live="polite"></div>
     <button id="btn-analizar" class="btn btn-primario">Analizar mi negocio</button>
     <div id="r1" class="resultado"></div>
   </div>
@@ -138,7 +138,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 
 <!-- PASO 2 -->
 <section id="step2" class="oculto">
-  <span class="eyebrow">Paso 2 · Tu perfil</span>
+  <span class="eyebrow">Conectar · Tu perfil</span>
   <h1>Esto <em>entendí</em> de tu negocio</h1>
   <p class="sub">Corrige lo que haga falta — tu agente escribirá con esto. Marcamos en <span style="color:var(--alerta)">amarillo</span> lo que inferimos con poca certeza.</p>
   <div id="cards" class="panel"></div>
@@ -152,7 +152,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 
 <!-- PASO 3 -->
 <section id="step3" class="oculto">
-  <span class="eyebrow">Paso 3 · Tu correo</span>
+  <span class="eyebrow">Conectar · Tu correo</span>
   <h1>Conecta <em>tu correo</em></h1>
   <p class="sub">Escribe tu correo y sigue las indicaciones. Nosotros probamos todo por ti: toma unos minutos.</p>
   <div class="panel">
@@ -204,7 +204,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <p id="final-nota" class="nota">Tu agente ya está conectado a tu correo. Te avisamos por correo cuando haya algo que necesite de ti.</p>
   </div>
   <div id="dns" class="tarjeta oculto" style="text-align:left">
-    <h3>Para que tus mensajes lleguen mejor <span style="opacity:.65;font-weight:400">(opcional)</span></h3>
+    <h3>Protección contra suplantación <span style="opacity:.65;font-weight:400">(opcional)</span></h3>
     <p class="nota" id="dns-msg"></p>
     <div id="dns-registros"></div>
     <button id="btn-dns" class="btn btn-sec" type="button">Ya lo hice, revisar de nuevo</button>
@@ -270,7 +270,7 @@ const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detect
 
 function ver(sec){['cargando','step1','step2','step3','final','reissue'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
   $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
-function marcarPaso(n){if(n<=2)n=2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
+function marcarPaso(n){n=n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
 function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 // Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
 // el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
@@ -294,6 +294,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'){mostrarFinal();return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
@@ -308,11 +309,23 @@ function mostrarFinal(){
   revisarDns();repetirDns();
 }
 
-// --- PASO 1: analizar (asíncrono, loaders rotativos) ---
+// Validación en vivo del sitio: dice qué falta mientras escribe, con un ejemplo.
+function validarSitio(){
+  const v=$('sitio').value.trim();
+  const h=$('sitio-hint');
+  if(!v){h.textContent='Ejemplo: tuempresa.com';return false;}
+  let ok=false;
+  try{const host=new URL(/^https?:\/\//i.test(v)?v:'http://'+v).hostname;ok=host.includes('.')&&!host.endsWith('.')&&!/\s/.test(v);}catch(e){}
+  h.textContent=ok?(origenSitio==='pago'?'✓ Lo tomamos de tu correo de pago; cámbialo si tu sitio es otro.':'✓ Se ve bien.'):'Escribe la dirección completa, por ejemplo tuempresa.com';
+  return ok;
+}
+let origenSitio='';
+$('sitio').addEventListener('input',()=>{origenSitio='';validarSitio();});
+// --- Conectar · Tu negocio: analizar (asíncrono, loaders rotativos) ---
 let loaderTimer=null;
 $('btn-analizar').addEventListener('click',async()=>{
   const sitio=$('sitio').value.trim();
-  if(!sitio.includes('.')){res($('r1'),'error','','Ingresa una dirección web válida.');return;}
+  if(!validarSitio()){res($('r1'),'error','','Escribe la dirección completa de tu sitio, por ejemplo tuempresa.com.');return;}
   $('btn-analizar').disabled=true;
   let li=0; const pintar=()=>res($('r1'),'alerta','<span class="spin"></span>'+LOADERS[li%LOADERS.length],'Puede tardar un par de minutos. No cierres esta página.');
   pintar(); loaderTimer=setInterval(()=>{li++;pintar();},4000);
@@ -523,7 +536,7 @@ function reanudarBuzon(b){
   if(b.email_envio)descubrir();
 }
 
-// --- Tarjeta de entrega (SPF, DKIM, DMARC) en palabras simples, con el registro exacto para copiar ---
+// --- Tarjeta de protección contra suplantación, en palabras simples, con el registro exacto para copiar ---
 let revisiones=0;
 function pintarDns(d){
   const c=$('dns');
@@ -531,8 +544,8 @@ function pintarDns(d){
   c.classList.remove('oculto');
   if(d.ok){$('dns-msg').textContent='Todo en orden: tu dominio ya está preparado para que tus mensajes lleguen a la bandeja principal.';$('dns-registros').innerHTML='';$('btn-dns').classList.add('oculto');return;}
   $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+((d.faltan||[]).length===1?'1 cosa':(d.faltan||[]).length+' cosas')+' en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
-  $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
-    (r.valor?'<p class="nota">Tipo <b>'+escapa(r.tipo)+'</b> · Nombre <b>'+escapa(r.host)+'</b></p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
+  $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.etiqueta||r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
+    (r.valor?'<p class="nota">Cópialo en el panel de tu proveedor de dominio, en un registro <b>'+escapa(r.tipo)+'</b> con el nombre <b>'+escapa(r.host)+'</b>.</p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
   document.querySelectorAll('#dns-registros button[data-v]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.v)));
 }
 async function revisarDns(){try{pintarDns(await llamar('dns'));}catch(e){}}
