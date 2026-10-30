@@ -241,7 +241,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <script>
 const API='https://api.inntuitivo.com';
 const $=id=>document.getElementById(id);
-const token=new URLSearchParams(location.search).get('token')||'';
+const token=new URLSearchParams(location.search).get('token')||(location.hash.indexOf('ms_state=')>=0?(function(){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}})():'');
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
 // dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
 // pattern nuevo de los inputs type=email de index.html: exige un punto en el dominio.
@@ -468,13 +468,14 @@ async function confirmar(advertido){
 // --- PASO 3: conectar tu correo (un solo paso; el sistema descubre el resto y prueba de verdad) ---
 let modo='clave', temporizador=null, sondeo=null, msDisponible=false, vueltaMs=new URLSearchParams(location.search).get('ms')||'';
 // Un secreto que solo conoce este navegador: Microsoft devuelve a la persona aquí y solo este navegador puede terminar la conexión que empezó (otro, con un enlace ajeno, no).
+function guardarTokenMs(){try{localStorage.setItem('ms_tk',token);}catch(e){}}
 function nonceMs(){let n='';try{n=localStorage.getItem('ms_nonce')||'';}catch(e){}
   if(n.length<32){const b=new Uint8Array(16);crypto.getRandomValues(b);n=Array.from(b,x=>('0'+x.toString(16)).slice(-2)).join('');try{localStorage.setItem('ms_nonce',n);}catch(e){}}
   return n;}
 async function terminarMs(){
   const h=new URLSearchParams(location.hash.replace(/^#/,''));
   if(!h.get('ms_state')||!token)return;
-  history.replaceState(null,'',location.pathname+'?token='+encodeURIComponent(token));
+  history.replaceState(null,'',location.pathname+'?token='+encodeURIComponent(token));try{localStorage.removeItem('ms_tk');}catch(e){}
   let nonce='';try{nonce=localStorage.getItem('ms_nonce')||'';}catch(e){}
   try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/completar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:h.get('ms_code')||'',state:h.get('ms_state'),error:h.get('ms_error')||'',error_description:h.get('ms_desc')||'',admin_consent:h.get('ms_consent')||'',nonce})});
     const d=await r.json();vueltaMs=d.codigo||'desconocido';}catch(e){vueltaMs='desconocido';}
@@ -527,7 +528,7 @@ $('btn').addEventListener('click',async()=>{
   const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
   if(modo==='microsoft'&&msDisponible){
-    try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
+    try{guardarTokenMs();const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
       if(d.ok&&d.url){location.href=d.url;return;}
       res($('resultado'),'error','No pudimos empezar',escapa(d.mensaje||'Vuelve a intentar.'));
     }catch(e){res($('resultado'),'error','No pudimos empezar','Revisa tu conexión a internet y vuelve a intentar.');}
