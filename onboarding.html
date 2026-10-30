@@ -516,7 +516,8 @@ const MS_VUELTA={cancelado:'No se completó la conexión. Cuando quieras, toca �
 const llamar=async(ruta,cuerpo)=>{try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}};
 function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const t=btn.textContent;btn.textContent='¡Copiado!';setTimeout(()=>{btn.textContent=t;},1500);});}
 function pintarGuia(d){
-  const ms=!!d.es_microsoft;
+  const ms=!!d.es_microsoft&&!d.personal;
+  if(d.personal){res($('resultado'),'alerta','',escapa(d.mensaje));$('guia').classList.add('oculto');$('pass-wrap').classList.add('oculto');$('aviso-ms').classList.add('oculto');$('aviso-ms-clic').classList.add('oculto');$('manual').classList.add('oculto');modo='personal';$('btn').textContent='Usar otro correo';return;}
   $('aviso-ms').classList.toggle('oculto',!ms||msDisponible);
   $('aviso-ms-clic').classList.toggle('oculto',!(ms&&msDisponible));
   $('guia').classList.toggle('oculto',ms);
@@ -557,6 +558,7 @@ function iniciarSondeo(){
   },20000);
 }
 $('btn').addEventListener('click',async()=>{
+  if(modo==='personal'){$('email').value='';$('resultado').className='resultado';$('email').focus();return;}
   const email=$('email').value.trim(); if(!esEmailValido(email))return;
   $('btn').disabled=true;
   if(modo==='microsoft'&&msDisponible){
