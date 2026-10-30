@@ -217,6 +217,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <div class="nota" role="group" aria-label="Cómo se ve"><button id="firma-claro" class="btn btn-sec" type="button" style="width:auto">Fondo claro</button> <button id="firma-oscuro" class="btn btn-sec" type="button" style="width:auto">Fondo oscuro</button></div>
     <iframe id="firma-vista" title="Así se verá un correo con tu firma" sandbox="" style="width:100%;height:340px;border:1px solid var(--borde,#ccc);border-radius:8px;background:#fff"></iframe>
     <div id="firma-campos" style="display:grid;gap:8px;margin:12px 0"></div>
+    <p id="firma-sin-logo" class="nota oculto">No encontramos un logo que podamos usar, así que tu firma sale solo con texto. Toca aquí y sube tu logo en PNG o JPG:</p>
     <label for="firma-logo-archivo" class="nota">¿Tienes otro logo? Súbelo aquí (imagen PNG o JPG)</label>
     <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg">
     <label class="nota"><input id="fc-sin_logo" type="checkbox"> Prefiero mi firma sin logo</label>
@@ -339,6 +340,7 @@ function firmaPintar(d){
   if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1];l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);cont.appendChild(i);});}
   FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
   if(d.estado==='confirmada')$('firma-msg').textContent='Tu firma quedó confirmada. Puedes cambiarla cuando quieras.';
+  $('firma-sin-logo').classList.toggle('oculto',!!d.saldra_con_logo||$('fc-sin_logo').checked);
 }
 let firmaEjemplos={};
 function firmaVer(tema){$('firma-vista').srcdoc=firmaEjemplos[tema]||'';}
