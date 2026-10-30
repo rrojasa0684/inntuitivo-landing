@@ -210,6 +210,17 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <div id="dns-registros"></div>
     <button id="btn-dns" class="btn btn-sec" type="button">Ya lo hice, revisar de nuevo</button>
   </div>
+  <div id="firma" class="tarjeta oculto" style="text-align:left">
+    <h3>Así firmarán tus correos</h3>
+    <p class="nota" id="firma-msg">Armamos tu firma con tu logo y tus colores. Si te gusta, toca «Así está bien». Si no la cambias, la dejamos así en tres días.</p>
+    <div id="firma-vista" style="background:#fff;color:#111;border-radius:8px;padding:12px;overflow-x:auto"></div>
+    <div id="firma-campos" style="display:grid;gap:8px;margin:12px 0"></div>
+    <label for="firma-logo-archivo" class="nota">¿Tienes otro logo? Súbelo aquí (imagen PNG o JPG)</label>
+    <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg">
+    <button id="btn-firma-ok" class="btn btn-primario" type="button">Así está bien</button>
+    <button id="btn-firma-guardar" class="btn btn-sec" type="button">Guardar mis cambios</button>
+    <div id="firma-r" class="resultado" role="status" aria-live="polite"></div>
+  </div>
 </section>
 
 <!-- GRACIAS AL ADMINISTRADOR (sin datos del cliente) -->
@@ -316,10 +327,26 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
   }catch(e){ver('reissue');}
 })();
 
+const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)']];
+async function firmaLlamar(ruta,cuerpo){try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
+function firmaPintar(d){
+  $('firma').classList.remove('oculto');
+  $('firma-vista').innerHTML=d.vista_previa_html||'';
+  const cont=$('firma-campos');
+  if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1];l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);cont.appendChild(i);});}
+  FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
+  if(d.estado==='confirmada')$('firma-msg').textContent='Tu firma quedó confirmada. Puedes cambiarla cuando quieras.';
+}
+function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});return o;}
+async function cargarFirma(){const d=await firmaLlamar('');if(d&&d.ok)firmaPintar(d);}
+$('btn-firma-ok').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Listo, tu firma quedó confirmada.':(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
+$('btn-firma-guardar').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Guardamos tus cambios.':(d.mensaje||'No pudimos guardar tus cambios. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
+$('firma-logo-archivo').addEventListener('change',function(){const f=this.files[0];if(!f)return;if(f.size>2000000){res($('firma-r'),'alerta','',escapa('Esa imagen es muy grande. Sube una de menos de 2 MB.'));return;}const rd=new FileReader();rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||''});res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Cambiamos tu logo.':(d.mensaje||'No pudimos usar esa imagen.')));if(d.ok)firmaPintar(d);};rd.readAsDataURL(f);});
+
 function mostrarFinal(){
   clearInterval(sondeo);
   marcarPaso(4);ver('final');window.scrollTo(0,0);
-  revisarDns();repetirDns();
+  revisarDns();repetirDns();cargarFirma();
 }
 
 // Validación en vivo del sitio: dice qué falta mientras escribe, con un ejemplo.
