@@ -237,6 +237,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <h1>Tu agente está <em>listo</em></h1>
     <p id="final-msg">Tu agente ya está conectado a tu correo y empieza a buscar clientes por ti. Te avisamos por correo cuando alguien responda.</p>
     <p><a id="ir-panel" class="btn btn-primario" href="https://api.inntuitivo.com/panel/" style="display:inline-block;text-decoration:none">Entrar a mi panel</a></p>
+    <p id="ir-panel-r" class="nota" role="status" aria-live="polite"></p>
   </div>
 </section>
 
@@ -285,6 +286,14 @@ const $=id=>document.getElementById(id);
 // Un límite de pedidos o un reinicio de la app no es un enlace vencido: se pide esperar y recargar, sin ofrecer un enlace nuevo (reemitirlo dejaría sin efecto el que sí sirve).
 function esperaYRecarga(){const h=document.querySelector('#reissue h1');if(h)h.innerHTML='Un momento, <em>ya seguimos</em>';$('reissue-txt').textContent='Estamos recibiendo muchos pedidos. Espera un momento y recarga esta página: tu enlace sigue siendo válido.';const panel=document.querySelector('#reissue .panel');if(panel)panel.style.display='none';ver('reissue');}
 const token=new URLSearchParams(location.search).get('token')||(location.hash.indexOf('ms_state=')>=0?(function(){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}})():'');
+
+// #104: «Entrar a mi panel» abre la sesión directo, sin pedir ningún enlace por correo (el botón sirve una vez; el correo queda para volver otro día).
+$('ir-panel').addEventListener('click',async function(ev){ev.preventDefault();const r0=$('ir-panel-r');r0.textContent='';
+  if(!token){location.href=this.href;return;}
+  try{const r=await pedir(API+'/onboarding/entrar-panel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});const d=await r.json();
+    if(d&&d.ok&&d.url){location.href=d.url;return;}
+    r0.innerHTML=escapa((d&&d.mensaje)||'No pudimos abrir tu panel desde aquí.')+' <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';
+  }catch(e){r0.innerHTML='No pudimos abrir tu panel ahora. <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';}});
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
 // dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
 // pattern nuevo de los inputs type=email de index.html: exige un punto en el dominio.
