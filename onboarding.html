@@ -213,7 +213,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <div id="firma" class="tarjeta oculto" style="text-align:left">
     <h3>Así firmarán tus correos</h3>
     <p class="nota" id="firma-msg">Armamos tu firma con tu logo y tus colores. Si te gusta, toca «Así está bien». Si no la cambias, la dejamos así en tres días.</p>
-    <div id="firma-vista" style="background:#fff;color:#111;border-radius:8px;padding:12px;overflow-x:auto"></div>
+    <div class="nota" role="group" aria-label="Cómo se ve"><button id="firma-claro" class="btn btn-sec" type="button" style="width:auto">Fondo claro</button> <button id="firma-oscuro" class="btn btn-sec" type="button" style="width:auto">Fondo oscuro</button></div>
+    <iframe id="firma-vista" title="Así se verá un correo con tu firma" sandbox="" style="width:100%;height:340px;border:1px solid var(--borde,#ccc);border-radius:8px;background:#fff"></iframe>
     <div id="firma-campos" style="display:grid;gap:8px;margin:12px 0"></div>
     <label for="firma-logo-archivo" class="nota">¿Tienes otro logo? Súbelo aquí (imagen PNG o JPG)</label>
     <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg">
@@ -331,12 +332,15 @@ const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu e
 async function firmaLlamar(ruta,cuerpo){try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
 function firmaPintar(d){
   $('firma').classList.remove('oculto');
-  $('firma-vista').innerHTML=d.vista_previa_html||'';
+  firmaEjemplos=d.ejemplos||{};firmaVer(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
   const cont=$('firma-campos');
   if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1];l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);cont.appendChild(i);});}
   FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
   if(d.estado==='confirmada')$('firma-msg').textContent='Tu firma quedó confirmada. Puedes cambiarla cuando quieras.';
 }
+let firmaEjemplos={};
+function firmaVer(tema){$('firma-vista').srcdoc=firmaEjemplos[tema]||'';}
+$('firma-claro').addEventListener('click',function(){firmaVer('claro');});$('firma-oscuro').addEventListener('click',function(){firmaVer('oscuro');});
 function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});return o;}
 async function cargarFirma(){const d=await firmaLlamar('');if(d&&d.ok)firmaPintar(d);}
 $('btn-firma-ok').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Listo, tu firma quedó confirmada.':(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
