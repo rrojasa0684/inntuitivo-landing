@@ -212,14 +212,14 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   </div>
   <div id="firma" class="tarjeta oculto" style="text-align:left">
     <h3>Así firmarán tus correos</h3>
-    <p class="nota" id="firma-msg">Armamos tu firma con tu logo y tus colores. Si te gusta, toca «Así está bien». Si no la cambias, la dejamos así en tres días.</p>
+    <p class="nota" id="firma-msg">Armamos tu firma con los datos de tu negocio. Si te gusta, toca «Confirmar mi firma». Si no la cambias, la dejamos así a los tres días.</p>
     <div class="nota" role="group" aria-label="Cómo se ve"><button id="firma-claro" class="btn btn-sec" type="button" style="width:auto">Fondo claro</button> <button id="firma-oscuro" class="btn btn-sec" type="button" style="width:auto">Fondo oscuro</button></div>
     <iframe id="firma-vista" title="Así se verá un correo con tu firma" sandbox="" style="width:100%;height:340px;border:1px solid var(--borde,#ccc);border-radius:8px;background:#fff"></iframe>
     <div id="firma-campos" style="display:grid;gap:8px;margin:12px 0"></div>
     <label for="firma-logo-archivo" class="nota">¿Tienes otro logo? Súbelo aquí (imagen PNG o JPG)</label>
     <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg">
-    <button id="btn-firma-ok" class="btn btn-primario" type="button">Así está bien</button>
-    <button id="btn-firma-guardar" class="btn btn-sec" type="button">Guardar mis cambios</button>
+    <label class="nota"><input id="fc-sin_logo" type="checkbox"> Prefiero mi firma sin logo</label>
+    <button id="btn-firma-ok" class="btn btn-primario" type="button">Confirmar mi firma</button>
     <div id="firma-r" class="resultado" role="status" aria-live="polite"></div>
   </div>
 </section>
@@ -328,7 +328,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
   }catch(e){ver('reissue');}
 })();
 
-const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)']];
+const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)'],['color_principal','Color principal (por ejemplo #1f6feb)'],['color_secundario','Color de la línea (por ejemplo #e0a030)']];
 async function firmaLlamar(ruta,cuerpo){try{const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
 function firmaPintar(d){
   $('firma').classList.remove('oculto');
@@ -341,11 +341,10 @@ function firmaPintar(d){
 let firmaEjemplos={};
 function firmaVer(tema){$('firma-vista').srcdoc=firmaEjemplos[tema]||'';}
 $('firma-claro').addEventListener('click',function(){firmaVer('claro');});$('firma-oscuro').addEventListener('click',function(){firmaVer('oscuro');});
-function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});return o;}
-async function cargarFirma(){const d=await firmaLlamar('');if(d&&d.ok)firmaPintar(d);}
-$('btn-firma-ok').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Listo, tu firma quedó confirmada.':(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
-$('btn-firma-guardar').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Guardamos tus cambios.':(d.mensaje||'No pudimos guardar tus cambios. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
-$('firma-logo-archivo').addEventListener('change',function(){const f=this.files[0];if(!f)return;if(f.size>2000000){res($('firma-r'),'alerta','',escapa('Esa imagen es muy grande. Sube una de menos de 2 MB.'));return;}const rd=new FileReader();rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||''});res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Cambiamos tu logo.':(d.mensaje||'No pudimos usar esa imagen.')));if(d.ok)firmaPintar(d);};rd.readAsDataURL(f);});
+function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});o.sin_logo=$('fc-sin_logo').checked;return o;}
+async function cargarFirma(){let d=await firmaLlamar('');if(!(d&&d.ok))d=await firmaLlamar('');if(d&&d.ok)firmaPintar(d);}
+$('btn-firma-ok').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Listo, tu firma quedó confirmada'+(d.saldra_con_logo?'.':' y saldrá solo con texto.'):(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
+$('firma-logo-archivo').addEventListener('change',function(){const f=this.files[0];if(!f)return;if(f.size>2000000){res($('firma-r'),'alerta','',escapa('Esa imagen es muy grande. Sube una de menos de 2 MB.'));return;}const rd=new FileReader();rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||''});res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Cambiamos tu logo.':(d.mensaje||'No pudimos usar esa imagen. Prueba con otra.')));if(d.ok)firmaPintar(d);};rd.readAsDataURL(f);});
 
 function mostrarFinal(){
   clearInterval(sondeo);
