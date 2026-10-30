@@ -561,6 +561,7 @@ $('btn').addEventListener('click',async()=>{
   if(modo==='microsoft'&&msDisponible){
     try{guardarTokenMs();const r=await fetch(API+'/onboarding/'+encodeURIComponent(token)+'/microsoft/inicio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nonce:nonceMs()})});const d=await r.json();
       if(d.ok&&d.url){location.href=d.url;return;}
+      if(d.ok&&d.codigo==='listo'){mostrarFinal();return;}   // modo recorrido: la conexión simulada termina aquí, sin salir a Microsoft
       res($('resultado'),'error','No pudimos empezar',escapa(d.mensaje||'Vuelve a intentar.'));
     }catch(e){res($('resultado'),'error','No pudimos empezar','Revisa tu conexión a internet y vuelve a intentar.');}
     $('btn').disabled=false;return;
