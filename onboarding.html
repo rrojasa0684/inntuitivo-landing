@@ -119,7 +119,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <div id="pasos" class="pasos oculto">
   <span class="p" data-p="1"><span class="n">1</span> Pagar</span>
   <span class="p" data-p="2"><span class="n">2</span> Conectar</span>
-  <span class="p" data-p="3"><span class="n">3</span> Confirmar</span>
+  <span class="p" data-p="3"><span class="n">3</span> Firma</span>
+  <span class="p" data-p="4"><span class="n">4</span> Listo</span>
 </div>
 
 <!-- PASO 1 -->
@@ -196,33 +197,45 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   </div>
 </section>
 
-<!-- FINAL -->
+<!-- FINAL: tres pantallas, una por vez (firma, protección del dominio si hace falta, listo) -->
 <section id="final" class="oculto">
-  <div class="final">
-    <div class="cohete">🚀</div>
-    <h1>Tu agente está <em>listo</em></h1>
-    <p id="final-msg">Conectamos y probamos tu correo. Tu agente ya tiene todo lo que necesita.</p>
-    <p id="final-nota" class="nota">Tu agente ya está conectado a tu correo. Te avisamos por correo cuando haya algo que necesite de ti.</p>
-    <p><a id="ir-panel" class="btn btn-sec" href="https://api.inntuitivo.com/panel/" style="display:inline-block;text-decoration:none">Entrar a mi panel</a></p>
-  </div>
-  <div id="dns" class="tarjeta oculto" style="text-align:left">
-    <h3>Protección contra suplantación <span style="opacity:.65;font-weight:400">(opcional)</span></h3>
-    <p class="nota" id="dns-msg"></p>
-    <div id="dns-registros"></div>
-    <button id="btn-dns" class="btn btn-sec" type="button">Ya lo hice, revisar de nuevo</button>
-  </div>
-  <div id="firma" class="tarjeta oculto" style="text-align:left">
-    <h3>Así firmarán tus correos</h3>
-    <p class="nota" id="firma-msg">Armamos tu firma con los datos de tu negocio. Si te gusta, toca «Confirmar mi firma». Si no la cambias, la dejamos así a los tres días.</p>
+  <div id="p-firma" class="tarjeta oculto" style="text-align:left">
+    <h1>Así firmarán <em>tus correos</em></h1>
+    <p class="nota" id="firma-msg">Revisa cómo se ve y confirma. Si no la cambias, la dejamos así a los tres días.</p>
     <div class="nota" role="group" aria-label="Cómo se ve"><button id="firma-claro" class="btn btn-sec" type="button" style="width:auto">Fondo claro</button> <button id="firma-oscuro" class="btn btn-sec" type="button" style="width:auto">Fondo oscuro</button></div>
     <iframe id="firma-vista" title="Así se verá un correo con tu firma" sandbox="" style="width:100%;height:340px;border:1px solid var(--borde,#ccc);border-radius:8px;background:#fff"></iframe>
     <div id="firma-campos" style="display:grid;gap:8px;margin:12px 0"></div>
-    <p id="firma-sin-logo" class="nota oculto">No encontramos un logo que podamos usar, así que tu firma sale solo con texto. Toca aquí y sube tu logo en PNG o JPG:</p>
-    <label for="firma-logo-archivo" class="nota">¿Tienes otro logo? Súbelo aquí (imagen PNG o JPG)</label>
-    <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg">
-    <label class="nota"><input id="fc-sin_logo" type="checkbox"> Prefiero mi firma sin logo</label>
+    <div id="firma-colores" style="margin:8px 0"></div>
+    <div style="margin:8px 0">
+      <p id="firma-sin-logo" class="nota oculto">No encontramos un logo que podamos usar, así que tu firma sale solo con texto.</p>
+      <label for="firma-logo-archivo" id="firma-logo-boton" class="btn btn-sec" style="display:inline-block;width:auto;cursor:pointer">Subir logo</label>
+      <input id="firma-logo-archivo" type="file" accept="image/png,image/jpeg" style="position:absolute;left:-9999px" aria-label="Subir logo">
+      <span class="nota"> PNG o JPG, opcional</span>
+      <label class="nota" style="display:block;margin-top:8px"><input id="fc-sin_logo" type="checkbox"> Prefiero mi firma sin logo</label>
+    </div>
     <button id="btn-firma-ok" class="btn btn-primario" type="button">Confirmar mi firma</button>
     <div id="firma-r" class="resultado" role="status" aria-live="polite"></div>
+  </div>
+  <div id="p-dns" class="tarjeta oculto" style="text-align:left">
+    <h1>Protege tu <em>dominio</em></h1>
+    <p class="nota" id="dns-msg"></p>
+    <button id="btn-dns-enviar" class="btn btn-primario" type="button">Mandárselo a quien maneja mi dominio</button>
+    <div id="dns-enviar-caja" class="oculto" style="margin:10px 0">
+      <label for="dns-enviar-email">Correo de esa persona</label>
+      <input id="dns-enviar-email" type="email" autocomplete="off">
+      <button id="btn-dns-enviar-ok" class="btn btn-sec" type="button">Enviar instrucciones</button>
+    </div>
+    <button id="btn-dns-yo" class="btn btn-sec" type="button">Lo hago yo</button>
+    <div id="dns-registros" class="oculto"></div>
+    <button id="btn-dns" class="btn btn-sec oculto" type="button">Ya lo hice, revisar de nuevo</button>
+    <button id="btn-dns-saltar" class="btn btn-sec" type="button">Saltar por ahora</button>
+    <div id="dns-r" class="resultado" role="status" aria-live="polite"></div>
+  </div>
+  <div id="p-listo" class="final oculto">
+    <div class="cohete">🚀</div>
+    <h1>Tu agente está <em>listo</em></h1>
+    <p id="final-msg">Tu agente ya está conectado a tu correo y empieza a buscar clientes por ti. Te avisamos por correo cuando alguien responda.</p>
+    <p><a id="ir-panel" class="btn btn-primario" href="https://api.inntuitivo.com/panel/" style="display:inline-block;text-decoration:none">Entrar a mi panel</a></p>
   </div>
 </section>
 
@@ -307,7 +320,7 @@ const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detect
 
 function ver(sec){['cargando','step1','step2','step3','final','reissue','admin-gracias'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
   $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
-function marcarPaso(n){n=n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
+function marcarPaso(n){n=n>=6?4:n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
 function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 // Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
 // el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
@@ -340,36 +353,52 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
     if(d.paso==='final'&&d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.revocada){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}   // volver a conectar con un clic
-    if(d.paso==='final'){mostrarFinal();return;}
+    if(d.paso==='final'){mostrarFinal(d.firma_estado);return;}
     if(d.paso===3){ver('step3');marcarPaso(3);reanudarBuzon(d.buzon);return;}
     if(d.paso===2&&d.perfil){perfil=d.perfil;renderPerfil(perfil);ver('step2');marcarPaso(2);return;}
     ver('step1');marcarPaso(1);
   }catch(e){esperaYRecarga();}
 })();
 
-const FIRMA_CAMPOS=[['nombre','Tu nombre'],['cargo','Tu cargo'],['empresa','Tu empresa'],['sitio','Tu sitio web'],['telefono','Tu teléfono (opcional)'],['color_principal','Color principal (por ejemplo #1f6feb)'],['color_secundario','Color de la línea (por ejemplo #e0a030)']];
+const FIRMA_CAMPOS=[['nombre','Tu nombre','obligatorio','Aparece al final de cada correo, para que quien lo reciba sepa quién escribe.'],['cargo','Tu cargo','obligatorio','Le da confianza a quien recibe el correo. Por ejemplo: Gerente comercial.'],['empresa','Tu empresa','obligatorio',''],['sitio','Tu sitio web','obligatorio',''],['telefono','Tu teléfono','opcional','']];
+const FIRMA_COLORES=[['color_principal','Color principal'],['color_secundario','Color de la línea']];
+let firmaColores={};
 async function firmaLlamar(ruta,cuerpo){try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
+function firmaMuestras(){const cont=$('firma-colores');cont.innerHTML='';FIRMA_COLORES.forEach(function(c){const w=document.createElement('div');w.style.margin='6px 0';const l=document.createElement('span');l.className='nota';l.textContent=c[1]+' (opcional): ';w.appendChild(l);const i=document.createElement('input');i.type='color';i.value=firmaColores[c[0]]||'#1f6feb';i.setAttribute('aria-label',c[1]);i.addEventListener('input',function(){firmaColores[c[0]]=i.value;});w.appendChild(i);cont.appendChild(w);});}
 function firmaPintar(d){
-  $('firma').classList.remove('oculto');
   firmaEjemplos=d.ejemplos||{};firmaVer(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
   const cont=$('firma-campos');
-  if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1];l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);cont.appendChild(i);});}
+  if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1]+' ('+c[2]+')';l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);if(c[3]){const n=document.createElement('span');n.className='nota';n.textContent=c[3];cont.appendChild(n);}cont.appendChild(i);});}
   FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
-  if(d.estado==='confirmada')$('firma-msg').textContent='Tu firma quedó confirmada. Puedes cambiarla cuando quieras.';
+  FIRMA_COLORES.forEach(function(c){if(d[c[0]]&&/^#[0-9a-fA-F]{6}$/.test(d[c[0]]))firmaColores[c[0]]=d[c[0]];});firmaMuestras();
   $('firma-sin-logo').classList.toggle('oculto',!!d.con_logo||$('fc-sin_logo').checked);
 }
 let firmaEjemplos={};
 function firmaVer(tema){$('firma-vista').srcdoc=firmaEjemplos[tema]||'';}
 $('firma-claro').addEventListener('click',function(){firmaVer('claro');});$('firma-oscuro').addEventListener('click',function(){firmaVer('oscuro');});
-function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});o.sin_logo=$('fc-sin_logo').checked;return o;}
-async function cargarFirma(){let d=await firmaLlamar('');if(!(d&&d.ok))d=await firmaLlamar('');if(d&&d.ok)firmaPintar(d);}
-$('btn-firma-ok').addEventListener('click',async function(){const d=await firmaLlamar('/confirmar',firmaCambios());res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Listo, tu firma quedó confirmada'+(d.saldra_con_logo?'.':' y saldrá solo con texto.'):(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.')));if(d.ok)firmaPintar(d);});
+function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});FIRMA_COLORES.forEach(function(c){if(firmaColores[c[0]])o[c[0]]=firmaColores[c[0]];});o.sin_logo=$('fc-sin_logo').checked;return o;}
+function firmaFalta(o){for(const c of FIRMA_CAMPOS){if(c[2]==='obligatorio'&&!String(o[c[0]]||'').trim())return 'Falta tu dato: '+c[1].toLowerCase()+'.'+(c[3]?' '+c[3]:'');}return '';}
+async function cargarFirma(){let d=await firmaLlamar('');if(!(d&&d.ok))d=await firmaLlamar('');return d&&d.ok?d:null;}
+$('btn-firma-ok').addEventListener('click',async function(){const o=firmaCambios(),falta=firmaFalta(o);if(falta){res($('firma-r'),'alerta','',escapa(falta));return;}
+  this.disabled=true;const d=await firmaLlamar('/confirmar',o);this.disabled=false;
+  if(d.ok){firmaPintar(d);siguienteTrasFirma();}else res($('firma-r'),'alerta','',escapa(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.'));});
 $('firma-logo-archivo').addEventListener('change',function(){const f=this.files[0];if(!f)return;if(f.size>2000000){res($('firma-r'),'alerta','',escapa('Esa imagen es muy grande. Sube una de menos de 2 MB.'));return;}const rd=new FileReader();rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||''});res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Cambiamos tu logo.':(d.mensaje||'No pudimos usar esa imagen. Prueba con otra.')));if(d.ok)firmaPintar(d);};rd.readAsDataURL(f);});
 
-function mostrarFinal(){
-  clearInterval(sondeo);
-  marcarPaso(4);ver('final');window.scrollTo(0,0);
-  revisarDns();repetirDns();cargarFirma();
+function pantalla(p){['p-firma','p-dns','p-listo'].forEach(function(x){$(x).classList.toggle('oculto',x!==p);});marcarPaso(p==='p-listo'?6:4);window.scrollTo(0,0);}
+async function mostrarFinal(firmaEstado){
+  clearInterval(sondeo);ver('final');
+  if(firmaEstado==='confirmada'){await siguienteTrasFirma();return;}
+  const d=await cargarFirma();
+  if(!d){await siguienteTrasFirma();return;}   // sin poder armar la firma no se frena a la persona: se autoconfirma a las 72 h
+  if(d.estado==='confirmada'){await siguienteTrasFirma();return;}
+  firmaPintar(d);pantalla('p-firma');
+}
+// Después de la firma: la protección del dominio solo aparece si falta algo y no se saltó; si no, directo a «listo».
+async function siguienteTrasFirma(){
+  let d=null;try{d=await llamar('dns');}catch(e){}
+  let saltado=false;try{saltado=localStorage.getItem('dns-saltado-'+token)==='1';}catch(e){}
+  if(!d||!Array.isArray(d.faltan)||d.ok||d.inconcluso||d.no_aplica||saltado){pantalla('p-listo');return;}
+  pintarDns(d);pantalla('p-dns');
 }
 
 // Validación en vivo del sitio: dice qué falta mientras escribe, con un ejemplo.
@@ -631,22 +660,23 @@ function reanudarBuzon(b){
   if(b.email_envio)descubrir();
 }
 
-// --- Tarjeta de protección contra suplantación, en palabras simples, con el registro exacto para copiar ---
-let revisiones=0;
+// --- Protección del dominio (opcional): una línea simple, tres salidas. Los nombres técnicos solo aparecen detrás de «Lo hago yo». ---
 function pintarDns(d){
-  if(!d||!Array.isArray(d.faltan))return;   // una falla de red o un límite de pedidos no trae `faltan`: la tarjeta queda como estaba, nunca dice «falta confirmar 0 cosas»
-  const c=$('dns');
-  if(d.inconcluso||d.no_aplica){c.classList.add('oculto');return;}
-  c.classList.remove('oculto');
-  if(d.ok){$('dns-msg').textContent='Todo en orden: tu dominio ya está preparado para que tus mensajes lleguen a la bandeja principal.';$('dns-registros').innerHTML='';$('btn-dns').classList.add('oculto');return;}
-  $('dns-msg').textContent='Para mejorar que tus mensajes no caigan en spam, falta confirmar '+((d.faltan||[]).length===1?'1 cosa':(d.faltan||[]).length+' cosas')+' en tu dominio'+(d.donde?' (se hace en '+d.donde+')':'')+'. Es opcional y no afecta tu correo actual.';
-  $('dns-registros').innerHTML=(d.registros||[]).map((r,i)=>'<div class="tarjeta"><strong>'+escapa(r.etiqueta||r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
-    (r.valor?'<p class="nota">Cópialo en el panel de tu proveedor de dominio, en un registro <b>'+escapa(r.tipo)+'</b> con el nombre <b>'+escapa(r.host)+'</b>.</p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
+  if(!d||!Array.isArray(d.faltan))return;   // una falla de red o un límite de pedidos no trae `faltan`: la pantalla queda como estaba
+  if(d.ok){$('dns-msg').textContent='Tu dominio ya está protegido.';return;}
+  $('dns-msg').textContent='Para que tus correos lleguen a la bandeja principal y nadie pueda hacerse pasar por tu empresa, hay que hacer un pequeño ajuste en tu dominio. Es opcional y tu correo sigue funcionando igual.';
+  $('dns-registros').innerHTML=(d.registros||[]).map(r=>'<div class="tarjeta"><strong>'+escapa(r.etiqueta||r.nombre)+'</strong><p class="nota">'+escapa(r.explicacion)+'</p>'+
+    (r.valor?'<p class="nota">En el panel de tu proveedor de dominio'+(d.donde?' ('+escapa(d.donde)+')':'')+', agrega un registro <b>'+escapa(r.tipo)+'</b> con el nombre <b>'+escapa(r.host)+'</b> y este valor:</p><code style="display:block;word-break:break-all;margin:6px 0">'+escapa(r.valor)+'</code><button class="btn btn-sec" type="button" data-v="'+escapa(r.valor)+'">Copiar</button>':'<p class="nota">Actívala desde el panel de tu proveedor de correo.</p>')+'</div>').join('');
   document.querySelectorAll('#dns-registros button[data-v]').forEach(b=>b.addEventListener('click',()=>copiar(b,b.dataset.v)));
 }
-async function revisarDns(){try{pintarDns(await llamar('dns'));}catch(e){}}
+async function revisarDns(){try{const d=await llamar('dns');if(d&&Array.isArray(d.faltan)){if(d.ok||d.no_aplica){pantalla('p-listo');return;}pintarDns(d);res($('dns-r'),'alerta','',escapa('Todavía no vemos el cambio. Puede tardar un rato en notarse; si prefieres, sáltalo y lo revisamos en tu panel.'));}}catch(e){}}
 $('btn-dns').addEventListener('click',revisarDns);
-function repetirDns(){if(++revisiones>10)return;setTimeout(async()=>{await revisarDns();if(!$('dns').classList.contains('oculto')&&$('btn-dns').classList.contains('oculto'))return;repetirDns();},60000);}
+$('btn-dns-yo').addEventListener('click',function(){$('dns-registros').classList.remove('oculto');$('btn-dns').classList.remove('oculto');this.classList.add('oculto');});
+$('btn-dns-enviar').addEventListener('click',function(){$('dns-enviar-caja').classList.remove('oculto');this.classList.add('oculto');$('dns-enviar-email').focus();});
+$('btn-dns-enviar-ok').addEventListener('click',async function(){const email=$('dns-enviar-email').value.trim();if(!esEmailValido(email)){res($('dns-r'),'alerta','',escapa('Escribe un correo válido.'));return;}
+  this.disabled=true;try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/dns/enviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();
+    if(d.ok){res($('dns-r'),'ok','',escapa(d.mensaje||'Listo, le mandamos las instrucciones.')+' Se verifica solo en segundo plano y lo verás en tu panel.');setTimeout(function(){pantalla('p-listo');},2500);}else res($('dns-r'),'alerta','',escapa(d.mensaje||'No pudimos mandarlo. Vuelve a intentar.'));}catch(e){res($('dns-r'),'alerta','',escapa('No pudimos comunicarnos. Vuelve a intentar.'));}this.disabled=false;});
+$('btn-dns-saltar').addEventListener('click',function(){try{localStorage.setItem('dns-saltado-'+token,'1');}catch(e){}pantalla('p-listo');});
 
 // --- reemisión ---
 $('rbtn').addEventListener('click',async()=>{
