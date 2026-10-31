@@ -1,181 +1,218 @@
 # Ciclo de desarrollo de Inntuitivo
 
-Fecha: 5 de octubre de 2026 (actualizado el 8 de octubre: "You should know") · Para Claude Code en los dos repos (outreach-engine e inntuitivo-landing) · Basado en el "Ciclo de desarrollo agéntico" y adaptado a cómo funciona Inntuitivo
+Fecha: 5 de octubre de 2026 · **Versión liviana del 31 de octubre de 2026 (decisiones #121 a #123)** · Para Claude Code en los dos repos (outreach-engine e inntuitivo-landing)
 
-**Todo trabajo en los repos pasa por el mismo ciclo: se planifica, se construye en una rama con un test por criterio, lo revisa un agente de otro modelo que intenta romperlo, se publica y se prueba como lo usaría un cliente antes de darlo por terminado.** Cuánto del ciclo se recorre depende del tipo de trabajo y de su nivel de riesgo (secciones 1 y 2). Las únicas aprobaciones que dependen de Ricardo son las decisiones de producto: un defecto se corrige y se publica sin esperar a nadie.
+**Todo trabajo pasa por el mismo ciclo:**
+
+1. Se planifica, con todas las decisiones de producto juntas al empezar.
+2. Se construye en una rama, con un test por criterio.
+3. Lo revisa un agente de otro modelo que intenta romperlo.
+4. Se publica y se prueba como lo usaría un cliente.
+
+**El esfuerzo de cada etapa se ajusta al riesgo y al tamaño del cambio.** Lo pesado corre solo de noche o una vez por semana, no en cada corrida. Las únicas aprobaciones de Ricardo son las decisiones de producto. Un defecto se corrige y se publica sin esperar a nadie.
+
+> **Por qué la versión liviana (31-oct):** la semana del 27 al 31 de octubre, cada funcionalidad tardó cerca de 24 horas. Esto fue lo que más tiempo se llevó:
+> - el Ready to Release completo en cada cambio (de 25 a 60 minutos cada vez);
+> - de 2 a 3 rondas de revisión con Opus, y hasta 15 agentes en paralelo;
+> - el cierre pesado (contexto y Graphify semántico) en cada mini-corrida;
+> - el UX descubierto después de construir;
+> - decisiones que aparecían a mitad de la corrida;
+> - alcance que se sumaba de madrugada.
+>
+> El ciclo se mantiene. Cambia cuánto se hace en cada etapa.
 
 ## 0. Punto de partida
 
-El equivalente del PRD de Inntuitivo ya existe y se relee desde disco al empezar cada sesión:
+Se relee desde disco al empezar cada sesión:
 
 | Qué | Dónde |
 | --- | --- |
 | Visión, problema y estado del producto | `INNTUITIVO-CONTEXTO-<N>.md` en la raíz del repo del motor |
 | Decisiones vigentes, pendientes y programado | `docs/ABIERTO-ENTRE-SESIONES.md` |
+| Observaciones menores de la semana | `docs/LOTE-SEMANAL.md` |
 | Historia, decisiones y notas | La bóveda de Obsidian, editada solo con `ops/boveda_escribir.py` |
 | Mapa del código | Graphify |
 
-Ninguna etapa contradice una decisión vigente. Si una parece mal, se propone el cambio a Ricardo; no se cambia.
+Ninguna etapa contradice una decisión vigente. Si una parece mal, se le propone el cambio a Ricardo, pero no se cambia.
 
-## 1. Qué camino sigue cada tipo de trabajo
+## 1. Tamaño, riesgo y camino
 
-| Tipo de trabajo | Etapas | Quién aprueba |
+### Tamaño de la corrida
+
+| Tamaño | Ejemplos | Meta de duración |
 | --- | --- | --- |
-| **Funcionalidad nueva o cambio de producto** | Todas, de la 1 a Go live | Ricardo aprueba la spec (Ready to Build) |
-| **Defecto** (algo no hace lo que ya se decidió) | 2 breve, 3, 4 si el riesgo es medio o alto, 5, Ready to Release, Go live | Nadie: se corrige ahora |
-| **Code review o cierre de etapa** | 4 sobre el rango de commits; si aparece un DEFECTO, el camino de defecto | Nadie |
-| **Auditoría** (por ejemplo, antes de un viaje) | Ready to Release sobre todo el producto | Nadie; lo que pida decisión va a ESPERANDO DECISION |
+| **Chico** | Un texto, un defecto acotado, un ajuste de un correo | 20 a 40 minutos |
+| **Mediano** | Una pantalla, un correo nuevo, un control nuevo | 60 a 90 minutos |
+| **Grande** | Una funcionalidad con varias partes | **Se parte en piezas medianas**, cada una con su despliegue. Nunca una cadena de toda la noche |
+
+### Riesgo
+
+| Nivel | Qué toca | Revisión adversarial | Prueba como cliente en la corrida |
+| --- | --- | --- | --- |
+| **Alto** | Envíos, a quién se le escribe, cobros, datos personales, borrado, infraestructura de producción, seguridad | 1 ronda, Opus | Recorrido focal de lo tocado y verificación en producción |
+| **Medio** | Reportes, alertas, avisos, métricas, pantallas del cliente | 1 ronda, Sonnet | Recorrido focal o vista previa de lo tocado |
+| **Bajo** | Textos internos, documentación, refactor sin cambio de comportamiento | No hace falta | La suite en verde alcanza |
+
+Ante la duda, se sube un nivel de riesgo, no de tamaño.
+
+### Camino por tipo de trabajo
+
+| Tipo | Etapas | Quién aprueba |
+| --- | --- | --- |
+| **Funcionalidad o cambio de producto** | Todas | Ricardo aprueba la spec y, si es visible para el cliente, las pantallas |
+| **Defecto** | Spec breve, desarrollo, revisión si el riesgo es medio o alto, publicación y recorrido focal | Nadie: se corrige ahora |
+| **Code review de la etapa** | En el cierre semanal (sección 3) | Nadie |
 | **Solo documentación** | Un commit de documentación | Nadie |
 
-La etapa 1 (Design System) solo aplica cuando cambia algo visual.
+## 2. Las etapas
 
-## 2. Niveles de riesgo
+### 1 · Diseño antes de construir (si cambia algo visible para el cliente)
 
-Se asignan en la planificación y deciden cuánta revisión hace falta.
+- Se usan los tokens de la landing: colores, Audiowide y Jost, espaciado. Nada nuevo sin decisión de Ricardo.
+- **Copy bloqueado:** los 5 textos del hero y del banner, y los partners, no cambian.
+- **Antes de escribir código, Ricardo ve las pantallas o el correo:** un mock, capturas de un prototipo o vistas previas, en celular y en computadora. Las aprueba o las corrige. Esto evita reconstruir después de grabar.
+- **Sale:** pantallas aprobadas, o "sin cambio visible".
 
-| Nivel | Qué toca | Revisión adversarial | Ready to Release |
-| --- | --- | --- | --- |
-| **Alto** | Lo que decide solo frente a un cliente o un prospecto: envíos, a quién se le escribe, cobros, datos personales, borrado, infraestructura de producción (Docker, crons, nginx), seguridad | Obligatoria, con dos focos mínimo | Recorrido completo en navegadores reales y verificación en producción |
-| **Medio** | Lo que decide si alguien se entera: reportes, alertas, avisos, métricas | Obligatoria | Vista previa del reporte o del aviso en los casos que importan |
-| **Bajo** | Textos internos, comentarios, documentación, refactor sin cambio de comportamiento | Opcional | La suite en verde alcanza |
-
-Ante la duda, se sube un nivel.
-
-## 3. Las etapas
-
-### 1 · Design System — solo si cambia algo visual
-
-- Se usan los tokens existentes de la landing (colores, tipografías Audiowide y Jost, espaciado). Nada de colores ni fuentes nuevas sin decisión de Ricardo.
-- **Copy bloqueado (decisión de Ricardo, 3-oct):** el hero, la sección de partners y el banner "Tu plataforma de agentes de IA más innovadora e inntuitiva" no cambian ni en texto ni en estructura.
-- Para diseños nuevos: un mock (Claude Design o el tipo Design de artefactos) que Ricardo aprueba antes de construir.
-- **Sale:** el mock aprobado, o "sin cambio visual".
-
-### 2 · Planificación
-
-La spec es corta y concreta. Para un defecto alcanza con la causa, el arreglo y sus criterios.
+### 2 · Planificación, con todas las decisiones juntas
 
 ```
 SPEC: <titulo>
-TIPO: funcionalidad | defecto            RIESGO: alto | medio | bajo
-PROBLEMA: que pasa hoy, con evidencia (reporte, log, dato)
+TIPO: funcionalidad | defecto      RIESGO: alto | medio | bajo      TAMANO: chico | mediano
+PROBLEMA: que pasa hoy, con evidencia
 DECISIONES VIGENTES QUE TOCA: cuales, y como se respetan
-CRITERIOS DE ACEPTACION (numerados, cada uno verificable):
-  1. ...
-  2. ...
+DECISIONES DE RICARDO QUE HACEN FALTA: todas, juntas, con opciones y recomendada
+CRITERIOS DE ACEPTACION (numerados, verificables)
 ARCHIVOS: cuales cambian
 PRUEBA: como se verifica cada criterio, sin cobrar ni enviar a nadie real
+RECORRIDO FOCAL: que flujos del Ready to Release toca
 RED DE SEGURIDAD: que pasa si vuelve a fallar sin nadie mirando
 VUELTA ATRAS: como se revierte en un paso
-COSTO: llamadas pagadas que agrega en produccion (0 si ninguna)
+COSTO: llamadas pagadas que agrega en produccion
 FUERA DE ALCANCE: lo que no se toca
 ```
 
-- La arquitectura sigue a la existente; si hay que cambiarla, la spec lo dice y lo justifica.
-- La spec nunca toma decisiones de producto (fechas, prioridades, precios, qué se construye o se descarta): las propone como opciones con recomendación.
+- **Las decisiones se responden todas antes de construir.** La corrida no se frena en el medio.
+- Si al construir aparece una decisión nueva, se presenta y queda en ESPERANDO. La corrida sigue con lo que no depende de ella.
+- La spec nunca toma decisiones de producto.
+- Para un defecto alcanza con la causa, el arreglo y los criterios.
+- **El alcance no crece a mitad de corrida.** Lo nuevo va a la corrida siguiente.
 
 ### ✓ Ready to Build
 
-- **Funcionalidad nueva:** Ricardo aprueba la spec.
-- **Defecto:** pasa solo, si la spec no toca ninguna decisión de producto.
-- Si al construir aparece algo que cambia la spec, se vuelve aquí.
+- **Funcionalidad:** Ricardo aprueba la spec y las pantallas.
+- **Defecto:** pasa solo si no toca decisiones de producto.
 
 ### 3 · Desarrollo y tests
 
-- **Rama aparte:** `feat/<tema>` o `fix/<tema>`, desde `main` actualizado. Nunca se trabaja directo sobre `main`.
-- **Un test por criterio de aceptación**, más el test del caso exacto que originó el trabajo.
-- Los tests no hacen llamadas pagadas ni envían nada a nadie real: los servicios externos se simulan.
-- Se cumplen las reglas del producto: "la verdad mata, el encaje ordena", nada sin respaldo llega a un correo, nunca correos deducidos por patrón, nada de nombres de herramientas internas a la vista.
-- La suite completa corre una sola vez, al final, en 0 fallos.
+- Una rama aparte, `feat/<tema>` o `fix/<tema>`, desde `main` actualizado.
+- Un test por criterio, más el test del caso exacto que originó el trabajo. Los tests recorren la lista real, nunca cuentan, para que no haya falsos positivos.
+- Durante el desarrollo, **solo tests dirigidos**.
+- **La suite completa corre una sola vez, al final.** Si falla, se arregla la causa y se repite una vez.
+- Sin llamadas pagadas ni envíos reales en los tests.
 
-### 4 · Revisión adversarial
+### 4 · Revisión adversarial: una ronda
 
-- **Un agente de otro modelo revisa el diff**, en solo lectura. Su encargo no es aprobar: es intentar romperlo.
-- Preguntas obligatorias del revisor:
-  - ¿Qué pasa si esto corre sin nadie mirando durante 17 días?
+- Un agente de otro modelo revisa el diff en solo lectura, con el encargo de romperlo:
+  - Opus para riesgo alto.
+  - Sonnet para riesgo medio.
+  - Nada para riesgo bajo.
+- Preguntas obligatorias:
+  - ¿Qué pasa si corre sin nadie mirando?
   - ¿Qué decide solo, y qué pasa si decide mal?
   - ¿Puede enviar, cobrar, borrar o mostrar algo que no debe?
   - ¿Hay un control que diga "OK" sin datos?
-  - ¿Se cumple cada criterio de la spec, o solo el test?
-- Reporte en tabla: clasificación (DEFECTO u observación), severidad, archivo:línea y propuesta.
-- **Todo DEFECTO se arregla y toda observación se arregla con test** antes del merge. Si arreglar una observación exige una decisión de producto, va a ESPERANDO DECISION con recomendación.
-- Después de los arreglos, el revisor mira solo el diff nuevo, una vez.
+  - ¿Se cumple cada criterio, o solo el test?
+- **Qué se arregla en la corrida:**
+  - todo DEFECTO;
+  - toda observación de impacto medio o alto;
+  - toda observación menor que se resuelva en menos de 15 minutos.
+- **Lote semanal (#121):** las observaciones menores que llevan más tiempo se anotan en `docs/LOTE-SEMANAL.md`, con archivo, propuesta y tiempo estimado, y se cierran en la sesión semanal. Nunca quedan abiertas más de una semana.
+- **Segunda ronda, solo si se corrigió un defecto de severidad alta**, y solo sobre ese diff.
+- Una observación que exige una decisión de producto va a ESPERANDO, con su recomendación.
 
 ### ✓ Ready to Merge
 
 - Suite completa en 0 fallos.
-- Reporte del revisor sin nada abierto.
-- Diff limpio: sin código muerto, sin secretos, sin archivos temporales.
-- ABIERTO actualizado (releído desde disco antes de editarlo).
-- **Merge a `main`** con un mensaje que nombra la spec.
+- Nada abierto del revisor, salvo lo que fue al lote semanal.
+- Diff limpio: sin código muerto, sin secretos, sin temporales.
+- Merge a `main` con `--no-ff`.
 
 ### 5 · Publicación
 
-| | Motor (outreach-engine) | Landing (inntuitivo-landing) |
+| | Motor | Landing |
 | --- | --- | --- |
-| Dónde | Droplet de DigitalOcean, en Docker | GitHub Pages |
-| Cómo | Un solo deploy desde `main`; después, droplet igual a `origin/main` | Merge a `main` (GitHub Pages publica solo) |
-| Entorno de prueba | Verificación en seco en producción (sin enviar ni cobrar) y tráfico interno marcado con el encabezado de prueba | Vista previa local y tráfico marcado con el encabezado de prueba |
+| Cómo | Un solo deploy por `ops/deploy.sh`, con la verificación de producción incluida y nginx aplicado solo | Merge a `main` (GitHub Pages publica solo) |
+| Después | El droplet igual a `origin/main` | `www.inntuitivo.com` responde 200 con lo nuevo |
 
 - La limpieza de Docker del droplet se hace solo con `ops/docker-builder-prune.sh`.
-- Nada de actualizaciones del sistema en el droplet sin decisión de Ricardo.
+- Nada de actualizaciones del sistema sin decisión de Ricardo.
+- Las lecturas de producción solo pasan por la verificación del deploy y por el cron. Nunca se le piden comandos a Ricardo.
 
-### ✓ Ready to Release — probado como lo usaría un cliente
+### ✓ Ready to Release: recorrido focal (#122)
 
-En Inntuitivo esta prueba se automatiza para que no dependa de Ricardo:
+- **En cada corrida de riesgo medio o alto:**
+  - solo los flujos que tocó el cambio;
+  - en Chromium, en celular y en computadora;
+  - de 3 a 5 minutos.
+  - Si es un correo o un reporte, la vista previa en los casos que importan.
+- **El Ready to Release completo** (27 recorridos en Chromium, Firefox y WebKit) **no corre en cada cambio.**
+  - Corre solo cada noche contra producción y apaga solo lo afectado si falla.
+  - Corre también en el cierre semanal.
+  - Si la corrida nocturna falla después de un cambio, el arreglo es un defecto y sigue el camino de defecto.
+- Ricardo prueba a mano solo cuando el cambio es visible para los clientes y él lo pide.
 
-- **Recorridos de punta a punta en navegadores reales** (Chromium, WebKit y Firefox) hasta el último paso seguro: sin cobrar, cancelar ni enviar a nadie real, con datos internos que se limpian después.
-- **Vista previa** de cada correo, reporte o aviso que cambió, en los casos que importan (día hábil, fin de semana, sin datos, con datos).
-- **Verificación en producción** de cada criterio de la spec.
-- Ricardo prueba a mano solo cuando el cambio es visible para los clientes y él lo pide; si no, este paso pasa solo.
+### 🚀 Go live y cierre de la corrida (liviano)
 
-### 🚀 Go live
+- Se observa el primer ciclo real: el próximo cron, el próximo envío, el próximo reporte.
+- **Cierre de la corrida, solo esto:**
+  - commit de documentación;
+  - ABIERTO releído y actualizado;
+  - la nota del día en la bóveda;
+  - limpieza de los dos entornos (Mac y droplet).
+- **No van en cada corrida:**
+  - el documento de contexto;
+  - Graphify semántico;
+  - el code review de toda la etapa;
+  - el Ready to Release completo.
 
-- Se observa el **primer ciclo real** (el próximo cron, el próximo envío, el próximo reporte) y se confirma que coincide con la prueba en seco.
-- Si algo falla, la red de seguridad de la spec avisa una sola vez con la causa, y la vuelta atrás está escrita.
-- **Cierre de sesión:** commit de documentación, bóveda al día (con `ops/boveda_escribir.py`), Graphify con `ops/graphify_cierre.sh`, limpieza de los dos entornos (Mac y droplet) y las categorías de ABIERTO copiadas del archivo releído.
+Todo eso va al cierre semanal.
+
+## 3. Cierre semanal (#123)
+
+Una sesión por semana, o al terminar una funcionalidad grande:
+
+1. **Lote semanal:** se cierran todas las observaciones de `docs/LOTE-SEMANAL.md`. Al terminar queda vacío.
+2. **Code review de la semana:**
+   - una revisión adversarial con Opus sobre las costuras entre lo que cambió;
+   - por área, solo en las áreas de riesgo alto que cambiaron;
+   - un revisor por área tocada, no uno por área del producto.
+3. **Ready to Release completo** contra producción.
+4. **Documento de contexto** nuevo (se copia de `~/Downloads`, nunca se mueve). La bóveda queda al día.
+5. **Graphify semántico** sobre los documentos de la semana.
+6. **Limpieza profunda** de la Mac y del droplet, incluida la caché de Docker, para que el snapshot no crezca.
 
 ## 4. Reglas que aplican siempre
 
-- **Decisiones de producto:** son de Ricardo. Claude recomienda; Ricardo decide. "Sin depender de Ricardo" significa que el producto funciona solo, no que Claude decide por él.
-- **Corridas cortas:** una suite, un deploy, sin re-escaneos innecesarios, sin loops ni despertares.
+- **Decisiones de producto:** son de Ricardo. Claude recomienda y Ricardo decide. "Sin depender de Ricardo" significa que el producto funciona solo.
+- **Corridas cortas:** una funcionalidad por corrida, una suite, un deploy. Nada de cadenas de toda la noche.
+- **Paralelismo con criterio:** subagentes en paralelo solo cuando el trabajo es grande e independiente. Una sola espera por proceso, nunca monitores duplicados.
 - **Una sesión de Claude Code por repo.**
-- **Secretos:** ninguna contraseña, token ni correo de persona en pantalla, argumentos, logs, commits ni bóveda.
-- **Llamadas pagadas:** cero en tests y verificaciones. En producción, solo las que la spec declara.
-- **Releer desde disco** ABIERTO y la bóveda antes de editarlos, aunque parezcan conocidos.
+- **Secretos:** ningún secreto, token ni correo de una persona en pantalla, argumentos, logs, commits ni bóveda.
+- **Llamadas pagadas:** cero en tests y verificaciones.
+- **Releer desde disco** ABIERTO y la bóveda antes de editarlos.
 - **Documento de contexto:** se copia de `~/Downloads` a la raíz del repo, nunca se mueve.
-- **Cero pendientes:** lo que se encuentra se arregla en la misma sesión o queda en ABIERTO con su categoría.
+- **Cero pendientes reales:** lo que se encuentra se arregla en la corrida, va al lote semanal (solo observaciones menores) o queda en ABIERTO con su categoría.
+- **Una decisión sin resolver siempre figura en ESPERANDO.** Nunca se saca de la categoría para que dé cero.
 
-## 5. Qué cambia respecto de cómo se trabaja hoy
+## 5. Decisiones vigentes de este proceso
 
-| Hoy | Con este ciclo |
-| --- | --- |
-| Commits directos a `main` | Rama aparte y merge después de Ready to Merge |
-| Prompt directo a Claude Code | Spec escrita con criterios numerados antes de construir |
-| Revisores del mismo modelo | Un revisor de otro modelo, con encargo adversarial |
-| Algunas observaciones quedaban "sin arreglo" | Toda observación se arregla con test antes del merge |
-| La prueba como cliente, solo en auditorías | Ready to Release en cada cambio de riesgo medio o alto |
+- **#44:** ciclo adoptado en los dos repos.
+- **#121:** observaciones menores al lote semanal, cerradas en una semana como máximo.
+- **#122:** recorrido focal en cada corrida; el Ready to Release completo, cada noche y en el cierre semanal.
+- **#123:** el cierre pesado (contexto, Graphify semántico, code review de la etapa), una vez por semana.
 
-Ya se hace igual: un test por caso exacto, la suite completa en 0 fallos, la verificación en seco, el tráfico marcado, la red de seguridad y el cierre con limpieza.
+## 6. Dónde vive este documento
 
-## 6. Decisiones de Ricardo
-
-**Resultado (27-oct-2026):** 1. Se adopta el 27-oct, en los dos repos (#44). 2. El revisor es otro modelo de Claude como subagente de Claude Code, sin proveedores externos (#44). 3. Entorno de prueba: en seco en producción con tráfico marcado, sin droplet de prueba hasta que haya clientes de pago (#44). 4. «You should know»: una semana de prueba, del 27-oct al 3-nov; lo activa Ricardo y el 3-nov decide si se queda comparando el uso del plan (#45).
-
-1. **Cuándo se adopta.** Recomendación: a partir del 27-oct. Esta semana es de simulacro y auditoría antes del viaje; cambiar la forma de trabajar ahora suma riesgo. Lo que ya coincide sigue igual.
-2. **Qué es "otro modelo" para el revisor.** Opciones: otro modelo de Claude como subagente de Claude Code (sin costo extra fuera del plan), o un modelo de otro proveedor (otra mirada, pero con costo por llamada y una clave más que cuidar). Recomendación: otro modelo de Claude, y de otro proveedor solo para riesgo alto si el costo lo justifica.
-3. **Entorno de prueba separado.** Opciones: seguir con verificación en seco en producción y tráfico marcado (sin costo), o un droplet de prueba (costo mensual y otra máquina que mantener). Recomendación: seguir en seco hasta que haya clientes de pago que lo justifiquen.
-
-4. **Activar "You should know" en Claude Code** (`/plugin enable cc-plugin-you-should-know@builtin`). Es un plugin oficial de Anthropic que viene dentro de Claude Code desde la versión 2.1.287 y está apagado por defecto. Mientras Claude Code trabaja en tareas largas, un agente lateral lee la conversación y, solo si encuentra algo importante que se te pudo pasar, muestra una nota corta arriba del prompt:
-    - **Heads up:** una decisión que Claude tomó sin destacarla, o un resultado que puede estar mal. Es el caso del borrado del ancla antispam o del Estado.md que se vació.
-    - **You should know:** algo que conviene entender porque afecta el trabajo.
-    - Opciones de cada nota: 1 explica más, 2 hace una página de aprendizaje (un artefacto privado), 0 la descarta. "Turn off suggestions" la apaga.
-    - **Qué puede y qué no:** el agente lateral no tiene herramientas; no lee archivos, no ejecuta comandos y no cambia nada. Solo ve la conversación de la sesión y tiene la orden de no repetir secretos, credenciales ni datos personales.
-    - **Costo y requisitos:** cada revisión es una llamada extra al modelo que sale del plan de Claude ($20), sin precio publicado. Solo aparece en sesiones con la telemetría encendida. Requiere Claude Code 2.1.287 o más nuevo (`claude --version`).
-    - **No reemplaza la revisión adversarial (etapa 4):** avisa durante la sesión; no revisa el diff.
-    - Recomendación: activarlo desde el 27-oct en las sesiones abiertas con `claude-repo`, una semana de prueba, comparar el uso del plan con y sin el plugin, y apagarlo si las notas no ayudan. Se apaga con `/plugin disable cc-plugin-you-should-know@builtin`.
-
-## 7. Dónde vive este documento
-
-- `docs/PROCESO-DESARROLLO.md` en los dos repos, referenciado desde las instrucciones de cada uno (`CLAUDE.md`) y desde ABIERTO.
+- `docs/PROCESO-DESARROLLO.md` en los dos repos, referenciado desde `CLAUDE.md` y desde ABIERTO.
 - Copia en la bóveda, en `30 Recursos/`.
-- Toda sesión de Claude Code lo lee al empezar, junto con el contexto y ABIERTO.
+- Toda sesión de Claude Code lo lee al empezar.
