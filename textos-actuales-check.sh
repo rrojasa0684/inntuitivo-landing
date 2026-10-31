@@ -4,7 +4,7 @@
 # (3) todo JSON-LD parsea y cada pregunta del FAQ coincide con su <details> visible.
 set -euo pipefail
 python3 - <<'PY'
-import glob, html, json, re, sys
+import glob, hashlib, html, json, re, sys
 mal = []
 idx = open("index.html", encoding="utf-8").read()
 BLOQUEADOS = [
@@ -20,8 +20,18 @@ BLOQUEADOS = [
 ]
 for b in BLOQUEADOS:
     if b not in idx: mal.append(f"texto bloqueado ausente o cambiado: {b}")
-if "Conecta tu correo y tu agente arranca solo: prospecta, escribe y envía en tu nombre. Lo haces una vez — no tienes que volver a tocarlo." not in idx:
-    mal.append("el párrafo del hero cambió fuera de su última frase")
+if "Conecta tu correo y tu agente arranca solo: prospecta, escribe y envía en tu nombre. Lo haces una vez — no tienes que volver a tocarlo. Todo sale desde tu propio correo, con tu firma y tu marca.</p>" not in idx:
+    mal.append("el párrafo del hero cambió (frase completa aprobada, #107/#115)")
+# huella del bloque bloqueado completo (sin comentarios HTML ni espacios): hero con su panel y carrusel de partners
+def huella(ini, fin):
+    i = idx.find(ini); j = idx.find(fin, i)
+    if i < 0 or j < 0: return None
+    b = re.sub(r"\s+", " ", re.sub(r"<!--.*?-->", "", idx[i:j + len(fin)], flags=re.S)).strip()
+    return hashlib.sha256(b.encode()).hexdigest()
+HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "f6e96916fe62ed91591e0a11a2c39ef5dafe657d5668cb9c9fdb2823f28216aa"),
+           "partners (con su carrusel)": ('<section class="partners"', "</section>", "a07c325bd4250cfa66d832490d9ff7d85eba4a6f564c9c2fc8f9211a247f239d")}
+for nombre, (ini, fin, esperada) in HUELLAS.items():
+    if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
 PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic", "un solo toque", "con un toque"]
 # usos legítimos de "a mano" que no hablan del agente (no se tocan: fuera de lo aprobado)
 PERMITIDAS = ["Prospectar a mano", "selector armado a mano", "te ayudamos a mano", "Te escribo porque trabajo con despachos"]
@@ -47,7 +57,9 @@ norm = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).s
 det = {norm(m.group(1)): norm(m.group(2)) for m in re.finditer(r"<details>\s*<summary>(.*?)</summary>(.*?)</details>", idx, re.S)}
 for q, a in faq:
     if q not in det: mal.append(f"pregunta del JSON-LD sin su <details>: {q}")
-    elif det[q] != norm(a) and not det[q].startswith(norm(a)): mal.append(f"respuesta distinta entre JSON-LD y HTML: {q}")
+    elif det[q] != norm(a): mal.append(f"respuesta distinta entre JSON-LD y HTML: {q}")
+for q in det:
+    if q not in {x for x, _ in faq}: mal.append(f"pregunta visible sin su entrada en el JSON-LD: {q}")
 if not any(q == "¿Qué es un agente SDR y qué hace el mío?" for q, _ in faq): mal.append("falta la pregunta del SDR")
 if any("a mano" in a for _, a in faq): mal.append("el FAQ dice 'a mano'")
 print("TEXTOS_ACTUALES_OK" if not mal else "\n".join(mal))
