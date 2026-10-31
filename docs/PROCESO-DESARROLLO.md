@@ -179,7 +179,14 @@ Todo eso va al cierre semanal.
 
 ## 3. Cierre semanal (#123)
 
-Una sesión por semana, o al terminar una funcionalidad grande:
+**Lo inicia Claude Code, nunca Ricardo (#127, 31-oct-2026).** Al empezar cualquier sesión, antes del pedido de Ricardo, Claude Code revisa en ABIERTO la fecha del último cierre semanal registrado y si hubo commits en el motor o en la landing desde entonces:
+
+- si pasaron 7 días o más y hubo cambios, hace primero el cierre completo de abajo, sin preguntar, y después sigue con el pedido;
+- si no hubo cambios, no hace nada y lo anota en una línea;
+- respeta las reglas de siempre: una sola suite, un solo deploy si hace falta, y toda decisión de producto que aparezca va a ESPERANDO;
+- también se hace al terminar una funcionalidad grande.
+
+Contenido del cierre:
 
 1. **Lote semanal:** se cierran todas las observaciones de `docs/LOTE-SEMANAL.md`. Al terminar queda vacío.
 2. **Code review de la semana:**
@@ -187,7 +194,7 @@ Una sesión por semana, o al terminar una funcionalidad grande:
    - por área, solo en las áreas de riesgo alto que cambiaron;
    - un revisor por área tocada, no uno por área del producto.
 3. **Ready to Release completo** contra producción.
-4. **Documento de contexto** nuevo (se copia de `~/Downloads`, nunca se mueve). La bóveda queda al día.
+4. **Documento de contexto** nuevo: lo arma Claude Code a partir del último, en la raíz del repo, y se copia a la bóveda y a `~/Downloads` con el mismo SHA-256. La bóveda queda al día.
 5. **Graphify semántico** sobre los documentos de la semana.
 6. **Limpieza profunda** de la Mac y del droplet, incluida la caché de Docker, para que el snapshot no crezca.
 
@@ -208,6 +215,7 @@ Una sesión por semana, o al terminar una funcionalidad grande:
 
 - **#44:** ciclo adoptado en los dos repos.
 - **#121:** observaciones menores al lote semanal, cerradas en una semana como máximo.
+- **#127:** el cierre semanal lo inicia Claude Code solo, al empezar una sesión con 7 días o más desde el último y cambios en medio; Ricardo no lo pide.
 - **#122:** recorrido focal en cada corrida; el Ready to Release completo, cada noche y en el cierre semanal.
 - **#123:** el cierre pesado (contexto, Graphify semántico, code review de la etapa), una vez por semana.
 
