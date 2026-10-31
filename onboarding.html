@@ -372,27 +372,33 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
 
 const FIRMA_CAMPOS=[['nombre','Tu nombre','obligatorio','Aparece al final de cada correo, para que quien lo reciba sepa quién escribe.'],['cargo','Tu cargo','obligatorio','Le da confianza a quien recibe el correo. Por ejemplo: Gerente comercial.'],['empresa','Tu empresa','obligatorio',''],['sitio','Tu sitio web','obligatorio',''],['telefono','Tu teléfono','opcional','']];
 const FIRMA_COLORES=[['color_principal','Color principal'],['color_secundario','Color de la línea']];
-let firmaColores={};
+let firmaColores={},firmaElegidos={};
 async function firmaLlamar(ruta,cuerpo){try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/firma'+ruta,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cuerpo||{})});return await r.json();}catch(e){return {ok:false,mensaje:'No pudimos comunicarnos. Revisa tu conexión a internet y vuelve a intentar.'};}}
-function firmaMuestras(){const cont=$('firma-colores');cont.innerHTML='';FIRMA_COLORES.forEach(function(c){const w=document.createElement('div');w.style.margin='6px 0';const l=document.createElement('span');l.className='nota';l.textContent=c[1]+' (opcional): ';w.appendChild(l);const i=document.createElement('input');i.type='color';i.value=firmaColores[c[0]]||'#1f6feb';i.setAttribute('aria-label',c[1]);i.addEventListener('input',function(){firmaColores[c[0]]=i.value;});w.appendChild(i);cont.appendChild(w);});}
-function firmaPintar(d){
+function firmaMuestras(){const cont=$('firma-colores');cont.innerHTML='';FIRMA_COLORES.forEach(function(c){const w=document.createElement('div');w.style.margin='6px 0';const l=document.createElement('span');l.className='nota';l.textContent=c[1]+' (opcional): ';w.appendChild(l);const i=document.createElement('input');i.type='color';i.value=firmaColores[c[0]]||'#1f6feb';i.setAttribute('aria-label',c[1]);i.addEventListener('input',function(){firmaColores[c[0]]=i.value;firmaElegidos[c[0]]=i.value;});w.appendChild(i);cont.appendChild(w);});}
+function firmaPintar(d,conservar){
   firmaEjemplos=d.ejemplos||{};firmaVer(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
   const cont=$('firma-campos');
   if(!cont.children.length){FIRMA_CAMPOS.forEach(function(c){const l=document.createElement('label');l.textContent=c[1]+' ('+c[2]+')';l.setAttribute('for','fc-'+c[0]);const i=document.createElement('input');i.id='fc-'+c[0];i.type='text';i.maxLength=160;cont.appendChild(l);if(c[3]){const n=document.createElement('span');n.className='nota';n.textContent=c[3];cont.appendChild(n);}cont.appendChild(i);});}
-  FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
-  FIRMA_COLORES.forEach(function(c){if(d[c[0]]&&/^#[0-9a-fA-F]{6}$/.test(d[c[0]]))firmaColores[c[0]]=d[c[0]];});firmaMuestras();
+  if(!conservar){FIRMA_CAMPOS.forEach(function(c){const i=$('fc-'+c[0]);if(document.activeElement!==i)i.value=d[c[0]]||'';});
+  FIRMA_COLORES.forEach(function(c){if(d[c[0]]&&/^#[0-9a-fA-F]{6}$/.test(d[c[0]]))firmaColores[c[0]]=d[c[0]];});firmaMuestras();}
+  else{FIRMA_COLORES.forEach(function(c){if(!firmaElegidos[c[0]]&&d[c[0]]&&/^#[0-9a-fA-F]{6}$/.test(d[c[0]]))firmaColores[c[0]]=d[c[0]];});firmaMuestras();}   // lo escrito no se toca; el color que ella no eligió sigue al logo nuevo
   $('firma-sin-logo').classList.toggle('oculto',!!d.con_logo||$('fc-sin_logo').checked);
 }
 let firmaEjemplos={};
 function firmaVer(tema){$('firma-vista').srcdoc=firmaEjemplos[tema]||'';}
 $('firma-claro').addEventListener('click',function(){firmaVer('claro');});$('firma-oscuro').addEventListener('click',function(){firmaVer('oscuro');});
 function firmaCambios(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});FIRMA_COLORES.forEach(function(c){if(firmaColores[c[0]])o[c[0]]=firmaColores[c[0]];});o.sin_logo=$('fc-sin_logo').checked;return o;}
+function firmaDatosEscritos(){const o={};FIRMA_CAMPOS.forEach(function(c){o[c[0]]=$('fc-'+c[0]).value;});Object.keys(firmaElegidos).forEach(function(k){o[k]=firmaElegidos[k];});return o;}
 function firmaFalta(o){for(const c of FIRMA_CAMPOS){if(c[2]==='obligatorio'&&!String(o[c[0]]||'').trim())return 'Falta tu dato: '+c[1].toLowerCase()+'.'+(c[3]?' '+c[3]:'');}return '';}
 async function cargarFirma(){let d=await firmaLlamar('');if(!(d&&d.ok))d=await firmaLlamar('');return d&&d.ok?d:null;}
 $('btn-firma-ok').addEventListener('click',async function(){const o=firmaCambios(),falta=firmaFalta(o);if(falta){res($('firma-r'),'alerta','',escapa(falta));return;}
   this.disabled=true;const d=await firmaLlamar('/confirmar',o);this.disabled=false;
   if(d.ok){firmaPintar(d);siguienteTrasFirma();}else res($('firma-r'),'alerta','',escapa(d.mensaje||'No pudimos guardar tu firma. Vuelve a intentar.'));});
-$('firma-logo-archivo').addEventListener('change',function(){const f=this.files[0];if(!f)return;if(f.size>2000000){res($('firma-r'),'alerta','',escapa('Esa imagen es muy grande. Sube una de menos de 2 MB.'));return;}const rd=new FileReader();rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||''});res($('firma-r'),d.ok?'ok':'alerta','',escapa(d.ok?'Cambiamos tu logo.':(d.mensaje||'No pudimos usar esa imagen. Prueba con otra.')));if(d.ok)firmaPintar(d);};rd.readAsDataURL(f);});
+$('firma-logo-archivo').addEventListener('change',function(){const inp=this,f=inp.files[0];if(!f)return;const fallo=function(m){res($('firma-r'),'alerta','',escapa(m+' Tus datos siguen aquí; elige otra imagen para intentar de nuevo.'));};
+  if(f.size>2000000){fallo('Esa imagen es muy grande. Sube una de menos de 2 MB.');inp.value='';return;}
+  const rd=new FileReader();rd.onerror=function(){fallo('No pudimos leer esa imagen.');inp.value='';};
+  rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||'',datos:firmaDatosEscritos()});inp.value='';
+    if(d.ok){res($('firma-r'),'ok','',escapa('Cambiamos tu logo.'));firmaPintar(d,true);}else fallo(d.mensaje||'No pudimos usar esa imagen.');};rd.readAsDataURL(f);});
 
 function pantalla(p){['p-firma','p-dns','p-listo'].forEach(function(x){$(x).classList.toggle('oculto',x!==p);});marcarPaso(p==='p-listo'?6:4);window.scrollTo(0,0);}
 async function mostrarFinal(firmaEstado){
