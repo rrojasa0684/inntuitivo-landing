@@ -1,0 +1,195 @@
+{
+ "index.html": [
+  [
+   "Arranca en cuanto conectas tu correo; el dominio propio es opcional.",
+   "Arranca en cuanto conectas tu correo; proteger tu dominio es opcional.",
+   1
+  ],
+  [
+   "Tu agente arranca en cuanto confirmas tu perfil y conectas tu correo —con la guía de tu proveedor, sin tocar tu dominio—, enviando en tu nombre desde inntuitivo.com. Conectar tu dominio para enviar con tu marca es opcional y puedes hacerlo cuando quieras.",
+   "Tu agente arranca en cuanto confirmas tu perfil y conectas tu correo en un paso (con Microsoft, un clic), enviando desde tu propia dirección. Proteger tu dominio es opcional y puedes hacerlo cuando quieras.",
+   2
+  ],
+  [
+   "Casi nada: defines tu perfil y conectas tu correo con la guía de tu proveedor —un paso, sin tocar tu dominio— y tu agente arranca, enviando en tu nombre. Conectar tu dominio para enviar con tu marca es un paso más, <strong>opcional</strong>,",
+   "Casi nada: defines tu perfil, conectas tu correo en un paso (con Microsoft, un clic) y tu agente arranca, enviando desde tu propia dirección. Proteger tu dominio es un paso más, <strong>opcional</strong>,",
+   2
+  ],
+  [
+   "Desde tu propio dominio, sin límite de correos; desde inntuitivo.com el tope es de 300 al mes. Sin costos ocultos.",
+   "No pagas por correo enviado: el precio es fijo y el agente envía a un ritmo que sube poco a poco para cuidar tu reputación. Sin costos ocultos.",
+   2
+  ],
+  [
+   "Sí. Por defecto el agente envía desde la infraestructura de Inntuitivo y las respuestas llegan directo a tu bandeja. Si conectas tu dominio, usamos un acceso autorizado que puedes revocar cuando quieras.",
+   "Sí. El agente envía desde tu propio correo, con un acceso autorizado que puedes revocar cuando quieras, y las respuestas llegan directo a tu bandeja.",
+   2
+  ],
+  [
+   "Cuando quieras, suma tu dominio para enviar con tu marca.",
+   "Todo sale desde tu propio correo, con tu firma y tu marca.",
+   1
+  ],
+  [
+   "Tu agente empieza a trabajar desde inntuitivo.com en cuanto conectas tu correo, sin tocar tu dominio: encuentra prospectos y escribe el outreach personalizado.",
+   "Tu agente empieza a trabajar en cuanto conectas tu correo: encuentra prospectos y escribe el outreach personalizado, que sale desde tu propia dirección.",
+   1
+  ],
+  [
+   "<h3>Conecta tu dominio 🌐</h3>",
+   "<h3>Protege tu dominio 🌐</h3>",
+   1
+  ],
+  [
+   "Envía desde tu propia dirección, con tu marca. Un upgrade de dos pasos guiados, con botón de copiar — no un requisito para arrancar.",
+   "Protege tu dominio (opcional). Un paso guiado, con botón de copiar, que ayuda a que tus correos lleguen mejor — no es un requisito para arrancar.",
+   1
+  ],
+  [
+   "El envío sale en tu nombre, escalonado, a ritmo humano — como lo mandarías tú. Y si conectas tu dominio, desde tu propia dirección.",
+   "El envío sale en tu nombre, desde tu propia dirección, escalonado, a ritmo humano — como lo mandarías tú.",
+   1
+  ],
+  [
+   "<strong>No pagas por correo</strong> — precio fijo. Arrancas con 300 al mes sin necesitar tu propio dominio; conecta el tuyo cuando quieras y ese límite desaparece.",
+   "<strong>No pagas por correo</strong> — precio fijo. Tu agente envía desde tu propia dirección, a un ritmo que sube poco a poco para cuidar tu reputación.",
+   1
+  ],
+  [
+   "— y cuando quieras, conecta tu dominio para enviar desde tu propia dirección",
+   "— y cuando quieras, protege tu dominio para que tus correos lleguen mejor",
+   1
+  ],
+  [
+   "Llenas un formulario corto de onboarding: a quién vendes, qué problema resuelves y cómo suenas. Sin reuniones. Con eso queda configurado tu agente.",
+   "Llenas un formulario corto: a quién vendes, qué problema resuelves y cómo suenas; conectas tu correo y confirmas tu firma. Sin reuniones. Con eso queda configurado tu agente.",
+   1
+  ],
+  [
+   "        {\n          \"@type\": \"Question\",\n          \"name\": \"¿Los mensajes suenan a robot?\",",
+   "        {\n          \"@type\": \"Question\",\n          \"name\": \"¿Qué es un agente SDR y qué hace el mío?\",\n          \"acceptedAnswer\": {\n            \"@type\": \"Answer\",\n            \"text\": \"Un SDR es la persona de ventas que busca clientes nuevos: encuentra empresas que podrían comprarte, las investiga y les escribe para abrir una conversación. Tu agente de IA hace ese trabajo por ti: busca empresas que encajan con tu cliente ideal, revisa cada dato, escribe cada correo personalizado para esa empresa y lo envía desde tu propio correo, a un ritmo humano. Cuando alguien responde con interés real, te avisa para que tú cierres la venta. No cierra ventas, no negocia precios ni promete lo que tú no ofreces, y si alguien pide que no le escriban más, no vuelve a hacerlo.\"\n          }\n        },\n        {\n          \"@type\": \"Question\",\n          \"name\": \"¿Los mensajes suenan a robot?\",",
+   1
+  ],
+  [
+   "    <details>\n      <summary>¿Los mensajes suenan a robot?</summary>",
+   "    <details>\n      <summary>¿Qué es un agente SDR y qué hace el mío?</summary>\n      <p>Un SDR es la persona de ventas que busca clientes nuevos: encuentra empresas que podrían comprarte, las investiga y les escribe para abrir una conversación. Tu agente de IA hace ese trabajo por ti: busca empresas que encajan con tu cliente ideal, revisa cada dato, escribe cada correo personalizado para esa empresa y lo envía desde tu propio correo, a un ritmo humano. Cuando alguien responde con interés real, te avisa para que tú cierres la venta. No cierra ventas, no negocia precios ni promete lo que tú no ofreces, y si alguien pide que no le escriban más, no vuelve a hacerlo.</p>\n    </details>\n    <details>\n      <summary>¿Los mensajes suenan a robot?</summary>",
+   1
+  ],
+  [
+   "tope 300/mes en plataforma, sin límite con dominio propio",
+   "el tope de 300/mes ya no existe",
+   1
+  ]
+ ],
+ "privacidad.html": [
+  [
+   "Por defecto salen desde la infraestructura de Inntuitivo (inntuitivo.com), con las respuestas dirigidas a tu bandeja; si conectas tu dominio, salen desde tu propia dirección.",
+   "Salen desde tu propio correo, con tu firma, y las respuestas llegan directo a tu bandeja.",
+   1
+  ],
+  [
+   "<li><strong>Credenciales de tu buzón:</strong> nos das una contraseña de aplicación de tu correo, que usamos para leer las respuestas de tus prospectos y frenar los seguimientos cuando alguien ya te respondió. Se guarda cifrada en el servidor y se usa exclusivamente para eso. Es necesaria para operar —tanto en modo plataforma como con tu dominio propio—: sin leer las respuestas, el agente seguiría escribiéndole a quien ya te contestó.</li>",
+   "<li><strong>Acceso a tu buzón:</strong> con Microsoft, un permiso que autorizas con un clic; con otros proveedores, una contraseña de aplicación de tu correo. Lo usamos solo para enviar tus correos y para leer las respuestas de tus prospectos, los avisos de «no entregado» y los pedidos de baja de esos mensajes, y así frenar los seguimientos cuando alguien ya te respondió. Se guarda cifrado en el servidor y se usa exclusivamente para eso. Es necesario para operar: sin leer las respuestas, el agente seguiría escribiéndole a quien ya te contestó.</li>",
+   1
+  ],
+  [
+   "enviarlos en tu nombre (desde Inntuitivo por defecto, o desde tu dominio si lo conectas).",
+   "enviarlos en tu nombre (desde tu propio correo).",
+   1
+  ],
+  [
+   "<li><strong>Un proveedor de correo saliente</strong> — la infraestructura que entrega los correos que el agente envía en tu nombre.</li>",
+   "<li><strong>Un proveedor de correo transaccional</strong> — entrega los avisos, reportes y correos de cuenta que te enviamos a ti. Los correos de tu agente salen desde tu propio buzón.</li>",
+   1
+  ],
+  [
+   "<p>Hoy los datos se conservan mientras la cuenta esté activa y no se eliminan automáticamente. Si quieres que borremos los tuyos, escríbenos a <a href=\"mailto:info@inntuitivo.com\">info@inntuitivo.com</a> y lo hacemos.</p>",
+   "<p>Conservamos lo mínimo necesario mientras tu cuenta esté activa. Si cancelas, tus credenciales se borran de inmediato al confirmar la baja y el resto como máximo 30 días después. Si quieres que borremos algo antes, escríbenos a <a href=\"mailto:info@inntuitivo.com\">info@inntuitivo.com</a> y lo hacemos.</p>",
+   1
+  ],
+  [
+   "conservamos tus datos mientras tengas cuenta con nosotros. Si cancelas, se conservan hasta que solicites su eliminación, salvo los registros de facturación que la ley nos obligue a guardar.",
+   "conservamos tus datos mientras tengas cuenta con nosotros. Si cancelas, se borran como máximo 30 días después de la baja, salvo los registros de facturación que la ley nos obligue a guardar.",
+   1
+  ],
+  [
+   "<li><strong>Credenciales de buzón:</strong> se eliminan al cancelar el servicio. También puedes revocarlas tú en cualquier momento desde tu proveedor de correo, sin avisarnos.</li>",
+   "<li><strong>Credenciales de buzón:</strong> se eliminan de inmediato al confirmar la baja. También puedes revocarlas tú en cualquier momento desde tu proveedor de correo, sin avisarnos.</li>",
+   1
+  ],
+  [
+   "<h3>Tu buzón conectado</h3>",
+   "<h3>Si subes tus propios contactos</h3>\n<p>En el panel puedes sumar tu propia lista de contactos. Es opcional. Antes de guardarla confirmas que tienes derecho a escribirles (Ley 8968); descartamos los repetidos, los mal escritos y quienes ya pidieron que no les escribamos, nunca completamos un correo que falte, y esos contactos se usan solo para los envíos de tu cuenta.</p>\n\n<h3>Tu buzón conectado</h3>",
+   1
+  ],
+  [
+   "para que eliminemos por completo los datos de tu empresa.</p>",
+   "para pedir que eliminemos tus datos. Si lo pides desde la misma dirección a la que escribimos, eliminamos esa dirección exacta de nuestros registros de prospección, nunca el dominio completo de tu empresa; cualquier otra solicitud la atendemos en 5 días hábiles.</p>",
+   1
+  ],
+  [
+   "solo para enviar los mensajes que tú apruebas y para leer",
+   "solo para enviar los mensajes que tu agente redacta para tu cuenta y para leer",
+   1
+  ],
+  [
+   "el sistema se conecta para leer las respuestas de tus prospectos.",
+   "el sistema se conecta para enviar tus correos y leer las respuestas de tus prospectos.",
+   1
+  ]
+ ],
+ "terminos.html": [
+  [
+   "(desde la infraestructura de Inntuitivo por defecto, o desde tu dominio si lo conectas).</li>",
+   "(desde tu propio correo).</li>",
+   1
+  ],
+  [
+   "que Inntuitivo usa para leer las respuestas de tus prospectos. Los correos salen en tu nombre desde la infraestructura de Inntuitivo. Conectar tu propio dominio, para enviar desde tu dirección, es opcional.",
+   "que Inntuitivo usa para enviar tus correos y leer las respuestas de tus prospectos. Los correos salen en tu nombre desde tu propio correo. Proteger tu dominio es opcional.",
+   1
+  ],
+  [
+   "puedes <strong>conectar tu propio dominio</strong> para enviar desde tu dirección y con tu marca. Son dos pasos guiados, con botón de copiar:",
+   "puedes <strong>proteger tu dominio</strong> para que tus correos lleguen mejor. Es un paso guiado, con botón de copiar:",
+   1
+  ],
+  [
+   "  <li>Añadir tres registros DNS en tu proveedor de dominio (te damos los valores con botón de copiar).</li>\n  <li>Conectar tu buzón mediante una contraseña de aplicación.</li>\n",
+   "  <li>Añadir los registros de protección en tu proveedor de dominio (te damos los valores con botón de copiar).</li>\n",
+   1
+  ],
+  [
+   "Conectar el dominio no es requisito para empezar: es una mejora de entregabilidad y marca que puedes hacer en cualquier momento.",
+   "Proteger el dominio no es requisito para empezar: es una mejora de entregabilidad que puedes hacer en cualquier momento.",
+   1
+  ],
+  [
+   "y en modo plataforma los correos salen desde la infraestructura de Inntuitivo, de cuya operación técnica respondemos nosotros.",
+   "y los correos salen desde tu propio buzón; nosotros respondemos de la operación técnica del servicio.",
+   1
+  ],
+  [
+   "(la de Inntuitivo por defecto, o la de tu propio dominio si lo conectas)",
+   "(la de tu propio correo y dominio)",
+   1
+  ],
+  [
+   "(desde la infraestructura de Inntuitivo por defecto, o desde tu dominio si lo conectas): eres responsable",
+   "(desde tu propio correo): eres responsable",
+   1
+  ]
+ ],
+ "cancelar.html": [
+  [
+   "<b>Borramos la contraseña de tu buzón.</b> Se elimina de nuestros sistemas activos.",
+   "<b>Borramos el acceso a tu buzón.</b> Se elimina de inmediato, sea un permiso o una contraseña.",
+   1
+  ],
+  [
+   " y borra la contraseña de mi buzón</span>",
+   " y borra el acceso a mi buzón</span>",
+   1
+  ]
+ ]
+}

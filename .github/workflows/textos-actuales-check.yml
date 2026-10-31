@@ -1,0 +1,18 @@
+name: textos-actuales-check
+
+# 30-oct-2026 (#107): los textos bloqueados siguen literales y el sitio no dice que el agente envía desde inntuitivo.com.
+# Mismo límite honesto que los demás chequeos: corre después del push, avisa en rojo, no impide.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.html"
+      - "textos-actuales-check.sh"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash textos-actuales-check.sh
