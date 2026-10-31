@@ -62,6 +62,10 @@ for q in det:
     if q not in {x for x, _ in faq}: mal.append(f"pregunta visible sin su entrada en el JSON-LD: {q}")
 if not any(q == "¿Qué es un agente SDR y qué hace el mío?" for q, _ in faq): mal.append("falta la pregunta del SDR")
 if any("a mano" in a for _, a in faq): mal.append("el FAQ dice 'a mano'")
+# #124: la pregunta de Microsoft 365, con su respuesta exacta, en el JSON-LD (y, por la igualdad de arriba, en el <details> visible)
+MS_P = "¿Funciona con Microsoft 365?"
+MS_R = "Sí. Solo inicias sesión. En algunas empresas el administrador aprueba la conexión una vez: te guiamos y le escribimos por ti."
+if (MS_P, MS_R) not in faq: mal.append("falta la pregunta «¿Funciona con Microsoft 365?» con su respuesta aprobada (#124)")
 print("TEXTOS_ACTUALES_OK" if not mal else "\n".join(mal))
 sys.exit(1 if mal else 0)
 PY
