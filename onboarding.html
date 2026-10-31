@@ -163,7 +163,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
       <label for="email">Tu correo de trabajo</label>
       <input id="email" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" autocomplete="email" placeholder="tucorreo@tuempresa.com" spellcheck="false">
       <div id="aviso-ms" class="provaviso oculto">Tu correo es de Microsoft. Esa conexión la estamos terminando: déjanos avisarte por correo apenas esté lista, y vuelves aquí a iniciar sesión.</div>
-      <div id="aviso-ms-clic" class="provaviso oculto">Conectas tu correo en un paso: con Microsoft, solo inicias sesión. Si tu empresa pide aprobación, le avisamos a tu administrador por ti. Microsoft va a mostrar «sin verificar» porque somos una empresa nueva en su lista; es normal y tus datos están protegidos.</div>
+      <div id="aviso-ms-clic" class="provaviso oculto">Con Microsoft, solo inicias sesión con tu cuenta. Si tu empresa pide que un administrador apruebe la conexión, le escribimos por ti y te avisamos cuando esté lista.</div>
+      <div id="aviso-ms-editor" class="provaviso oculto">Microsoft te va a mostrar el aviso «editor no verificado». Es normal mientras completamos la verificación con Microsoft. Solo pedimos enviar correos desde tu cuenta y leer las respuestas de tus prospectos; puedes quitar el permiso cuando quieras.</div>
       <div id="guia" class="provaviso oculto">
         <span class="nombre-prov" id="guia-nombre"></span>
         <ol class="instrucciones" id="guia-pasos"></ol>
@@ -584,9 +585,10 @@ function copiar(btn,valor){navigator.clipboard.writeText(valor).then(()=>{const 
 function pintarGuia(d){
   const ms=!!d.es_microsoft&&!d.personal;
   if(!d.personal&&modo==='personal'){modo='clave';$('resultado').className='resultado';}
-  if(d.personal){res($('resultado'),'alerta','',escapa(d.mensaje));$('guia').classList.add('oculto');$('pass-wrap').classList.add('oculto');$('aviso-ms').classList.add('oculto');$('aviso-ms-clic').classList.add('oculto');$('manual').classList.add('oculto');modo='personal';$('btn').textContent='Usar otro correo';return;}
+  if(d.personal){res($('resultado'),'alerta','',escapa(d.mensaje));$('guia').classList.add('oculto');$('pass-wrap').classList.add('oculto');$('aviso-ms').classList.add('oculto');$('aviso-ms-clic').classList.add('oculto');$('aviso-ms-editor').classList.add('oculto');$('manual').classList.add('oculto');modo='personal';$('btn').textContent='Usar otro correo';return;}
   $('aviso-ms').classList.toggle('oculto',!ms||msDisponible);
   $('aviso-ms-clic').classList.toggle('oculto',!(ms&&msDisponible));
+  $('aviso-ms-editor').classList.toggle('oculto',!(ms&&msDisponible));
   $('guia').classList.toggle('oculto',ms);
   $('pass-wrap').classList.toggle('oculto',ms);
   $('manual').classList.toggle('oculto',!d.necesita_manual);
