@@ -84,6 +84,26 @@
    "<!-- 1-sep: reescrito, mismo hecho (el tope de 300/mes ya no existe) reordenado para liderar con el beneficio -->",
    "<!-- 1-sep: reescrito, mismo hecho (el tope de 300/mes ya no existe) reordenado para liderar con el beneficio\n            30-oct (#107): baseline scroll_precio=10.3/día, cta_activar=0/semana (último dato medido en Umami, 7 días; no se leyó producción hoy). Comparar en 2 semanas. -->",
    1
+  ],
+  [
+   "Volumen bajo y dirigido (máximo 25 contactos al día), solo a perfiles",
+   "Volumen bajo y dirigido, a un ritmo que sube poco a poco, solo a perfiles",
+   2
+  ],
+  [
+   "conectas tu correo en un paso (con Microsoft, un clic), enviando desde tu propia dirección.",
+   "conectas tu correo, enviando desde tu propia dirección. Conectas tu correo en un paso: con Microsoft, solo inicias sesión. Si tu empresa pide aprobación, le avisamos a tu administrador por ti.",
+   2
+  ],
+  [
+   "conectas tu correo en un paso (con Microsoft, un clic) y tu agente arranca, enviando desde tu propia dirección.",
+   "conectas tu correo y tu agente arranca, enviando desde tu propia dirección. Conectas tu correo en un paso: con Microsoft, solo inicias sesión. Si tu empresa pide aprobación, le avisamos a tu administrador por ti.",
+   2
+  ],
+  [
+   "no se leyó producción hoy). Comparar en 2 semanas. -->",
+   "no se leyó producción hoy). Comparar en 2 semanas.\n            30-oct (#114, #115): baseline sin cambios, scroll_precio=10.3/día, cta_activar=0/semana (mismo dato de Umami). -->",
+   1
   ]
  ],
  "privacidad.html": [
@@ -141,6 +161,11 @@
    "el sistema se conecta para leer las respuestas de tus prospectos.",
    "el sistema se conecta para enviar tus correos y leer las respuestas de tus prospectos.",
    1
+  ],
+  [
+   "con Microsoft, un permiso que autorizas con un clic;",
+   "con Microsoft, solo inicias sesión y autorizas un permiso (si tu empresa pide aprobación, le avisamos a tu administrador por ti);",
+   1
   ]
  ],
  "terminos.html": [
@@ -194,6 +219,33 @@
   [
    " y borra la contraseña de mi buzón</span>",
    " y borra el acceso a mi buzón</span>",
+   1
+  ]
+ ],
+ "onboarding.html": [
+  [
+   "Tu correo es de Microsoft: se conecta con un solo toque, sin contraseña. Microsoft va a mostrar",
+   "Conectas tu correo en un paso: con Microsoft, solo inicias sesión. Si tu empresa pide aprobación, le avisamos a tu administrador por ti. Microsoft va a mostrar",
+   1
+  ],
+  [
+   "  if(firmaEstado==='confirmada'){await siguienteTrasFirma();return;}\n  const d=await cargarFirma();",
+   "  const editar=new URLSearchParams(location.search).get('firma')==='1';   // #108: el enlace de «cambiar mi firma» la abre aunque ya esté confirmada\n  if(firmaEstado==='confirmada'&&!editar){await siguienteTrasFirma();return;}\n  const d=await cargarFirma();",
+   1
+  ],
+  [
+   "  if(d.estado==='confirmada'){await siguienteTrasFirma();return;}\n  firmaPintar(d);pantalla('p-firma');",
+   "  if(d.estado==='confirmada'&&!editar){await siguienteTrasFirma();return;}\n  firmaPintar(d);pantalla('p-firma');\n  if(d.estado==='confirmada'){$('firma-msg').textContent='Tu firma ya está confirmada. Puedes cambiarla y guardarla de nuevo.';$('btn-firma-ok').textContent='Guardar mi firma';}",
+   1
+  ],
+  [
+   "// volver a conectar con un clic",
+   "// volver a conectar: solo iniciar sesión",
+   1
+  ],
+  [
+   "y vuelves aquí con un solo toque.",
+   "y vuelves aquí a iniciar sesión.",
    1
   ]
  ]
