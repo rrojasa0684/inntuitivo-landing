@@ -242,6 +242,11 @@
    "// volver a conectar con un clic",
    "// volver a conectar: solo iniciar sesión",
    1
+  ],
+  [
+   "y vuelves aquí con un solo toque.",
+   "y vuelves aquí a iniciar sesión.",
+   1
   ]
  ]
 }

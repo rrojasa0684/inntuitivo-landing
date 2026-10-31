@@ -22,7 +22,7 @@ for b in BLOQUEADOS:
     if b not in idx: mal.append(f"texto bloqueado ausente o cambiado: {b}")
 if "Conecta tu correo y tu agente arranca solo: prospecta, escribe y envía en tu nombre. Lo haces una vez — no tienes que volver a tocarlo." not in idx:
     mal.append("el párrafo del hero cambió fuera de su última frase")
-PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic"]
+PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic", "un solo toque", "con un toque"]
 # usos legítimos de "a mano" que no hablan del agente (no se tocan: fuera de lo aprobado)
 PERMITIDAS = ["Prospectar a mano", "selector armado a mano", "te ayudamos a mano", "Te escribo porque trabajo con despachos"]
 for f in sorted(glob.glob("*.html")):
