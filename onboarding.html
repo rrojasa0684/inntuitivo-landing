@@ -24,6 +24,7 @@
 html{scroll-behavior:smooth}
 body{font-family:'Century Gothic','Jost',sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.6;font-size:17px;min-height:100vh}
 a{color:var(--rojo)}
+label[for="firma-logo-archivo"]:has(+ #firma-logo-archivo:focus-visible){outline:3px solid var(--rojo);outline-offset:2px}
 a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--rojo);outline-offset:2px}
 .estrellas{position:fixed;inset:0;z-index:-2;background-image:
   radial-gradient(1px 1px at 20px 30px,#fff,transparent),
