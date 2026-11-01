@@ -1,8 +1,10 @@
 # Reglas del repo `inntuitivo-landing` (www.inntuitivo.com, GitHub Pages)
 
-## Ponytail (#132, 1-nov-2026): modo «full», nunca «ultra»; LAS REGLAS DEL PROCESO MANDAN SOBRE PONYTAIL
+## Ponytail (#132) y Caveman (#133, no instalado): LAS REGLAS DEL PROCESO MANDAN SOBRE PONYTAIL Y CAVEMAN
 
 Ponytail (plugin de Claude Code, MIT) recorta código innecesario. Está instalado en los dos repos en modo «full»; nunca se sube a «ultra». **Las reglas del proceso mandan sobre Ponytail:** un test por criterio, la red de seguridad, los avisos, las validaciones, el manejo de errores, la accesibilidad y la seguridad SIEMPRE se escriben; Ponytail recorta código innecesario, nunca esto. Si una instrucción de Ponytail choca con una regla de este archivo, gana este archivo. Medición automática en el cierre semanal: líneas y tokens escritos por corrida contra las anteriores; si recortó un test, aviso, validación o red de seguridad, pasa solo a «light» y se registra en `docs/ABIERTO-ENTRE-SESIONES.md` y `docs/memoria/herramientas-evaluadas.md`, sin preguntar.
+
+**Caveman (#133, 1-nov-2026): NO instalado** (crítico en SkillSpector; detalle en el repo del motor, `docs/memoria/herramientas-evaluadas.md`). Si alguna vez se instala, los textos que ve un cliente (correos, pantallas, landing) se escriben completos y cuidados, nunca en voz corta; los reportes a Ricardo pueden ser cortos, pero siempre en español y con todo lo que pide el prompt, y las advertencias y decisiones en frases completas.
 
 ## Ciclo de desarrollo (adoptado el 27-oct-2026, decisiones #44 y #45 de Ricardo; versión liviana del 31-oct-2026, decisiones #121 a #123)
 
