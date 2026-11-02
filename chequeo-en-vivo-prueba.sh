@@ -15,7 +15,7 @@ sitio() {   # sitio <carpeta>: sano por defecto (el sitemap se arma en servir(),
 servir() {   # un puerto nuevo por caso; el sitemap lleva PUERTO como marcador
     [ -n "$PID" ] && kill "$PID" 2>/dev/null || true
     PUERTO=$((20000 + RANDOM % 20000))
-    sed -i.bak "s/PUERTO/$PUERTO/g" "$1/sitemap.xml"; rm -f "$1/sitemap.xml.bak"
+    if [ -f "$1/sitemap.xml" ]; then sed -i.bak "s/PUERTO/$PUERTO/g" "$1/sitemap.xml"; rm -f "$1/sitemap.xml.bak"; fi
     python3 -m http.server "$PUERTO" --bind 127.0.0.1 --directory "$1" >/dev/null 2>&1 &
     PID=$!; sleep 1
 }
@@ -32,4 +32,7 @@ sitio "$TMP/retirada"; printf 'ok' > "$TMP/retirada/activar.html";            es
 sitio "$TMP/paddle"; printf 'Pago procesado por Paddle' > "$TMP/paddle/privacidad.html"; espera falla "menciona una página o proveedor retirado" "$TMP/paddle"
 sitio "$TMP/sin200"; rm "$TMP/sin200/cancelar.html";                       espera falla "cancelar.html responde 404" "$TMP/sin200"
 sitio "$TMP/mapa"; printf '<urlset><url><loc>http://127.0.0.1:PUERTO/activar.html</loc></url></urlset>' > "$TMP/mapa/sitemap.xml"; espera falla "sitemap" "$TMP/mapa"
+sitio "$TMP/sinmapa"; rm "$TMP/sinmapa/sitemap.xml";                       espera falla "sitemap.xml responde 404" "$TMP/sinmapa"
+sitio "$TMP/sinrobots"; rm "$TMP/sinrobots/robots.txt";                    espera falla "robots.txt responde 404" "$TMP/sinrobots"
+sitio "$TMP/vacio"; printf '<urlset></urlset>' > "$TMP/vacio/sitemap.xml"; espera falla "el sitemap no trae ninguna dirección" "$TMP/vacio"
 echo CHEQUEO_EN_VIVO_PRUEBA_OK

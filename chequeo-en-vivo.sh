@@ -18,21 +18,30 @@ fallas=()
 
 codigo() { curl -s -o /dev/null -w '%{http_code}' --max-time 20 -L "$1" || true; }
 
-sitemap="$(curl -s --max-time 20 "$BASE/sitemap.xml" || true)"
-robots="$(curl -s --max-time 20 "$BASE/robots.txt" || true)"
-[ -n "$sitemap" ] || fallas+=("sitemap.xml no responde")
+# Una sola descarga por dirección: deja el código en CODIGO y el cuerpo en CUERPO (un 503 pasajero no puede dejar una página "revisada" con el HTML vacío)
+pedir() {
+    local tmp; tmp="$(mktemp)"
+    CODIGO="$(curl -s -o "$tmp" -w '%{http_code}' --max-time 20 -L "$1" || true)"
+    CUERPO="$(cat "$tmp")"; rm -f "$tmp"
+}
+
+pedir "$BASE/sitemap.xml"; sitemap="$CUERPO"
+[ "$CODIGO" = "200" ] || fallas+=("sitemap.xml responde $CODIGO (se esperaba 200)")
+pedir "$BASE/robots.txt"; robots="$CUERPO"
+[ "$CODIGO" = "200" ] || fallas+=("robots.txt responde $CODIGO (se esperaba 200)")
 paginas=()
 while IFS= read -r loc; do
     [ -n "$loc" ] && paginas+=("$loc")
 done < <(printf '%s\n' "$sitemap" | grep -Eo '<loc>[^<]*</loc>' | sed 's|<loc>||; s|</loc>||' || true)
+[ "${#paginas[@]}" -gt 0 ] || fallas+=("el sitemap no trae ninguna dirección")
 for p in $PAGINAS_EXTRA; do paginas+=("$BASE/$p"); done
 
 # 1 y 2: cada página da 200 y sus enlaces internos también
 enlaces=()
 for url in "${paginas[@]}"; do
-    c="$(codigo "$url")"
+    pedir "$url"; c="$CODIGO"; html="$CUERPO"
     if [ "$c" != "200" ]; then fallas+=("$url responde $c (se esperaba 200)"); continue; fi
-    html="$(curl -s --max-time 20 -L "$url" || true)"
+    [ -n "$html" ] || { fallas+=("$url responde 200 pero llegó vacía"); continue; }
     while IFS= read -r h; do
         h="${h%%#*}"; h="${h%%\?*}"
         case "$h" in ""|mailto:*|tel:*|javascript:*|data:*|//*) continue ;; esac
