@@ -31,7 +31,6 @@ una marca de `baseline` en el commit — ver CI, abajo.
 |---|---|
 | `index.html` | La landing: hero, precio, CTAs, formulario de muestra gratis, modal |
 | `onboarding.html` | Alta self-service tras el pago — llama a los endpoints de `/onboarding/*` en `api.inntuitivo.com` |
-| `activar.html` | Checkout de Paddle — **código inerte hoy**: Paddle rechazó el dominio definitivamente, el gateway activo es PayPal (ver `docs/memoria/paddle-rechazo-definitivo-mor-vs-psp.md` en `outreach-engine`) |
 | `cancelar.html` | Cancelación de suscripción, doble opt-in — la página solo renderiza; la baja la confirma un POST tras clic humano |
 | `terminos.html` / `privacidad.html` | Legales |
 | `404.html` | Página de error |
