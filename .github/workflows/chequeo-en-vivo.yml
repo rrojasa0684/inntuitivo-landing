@@ -1,0 +1,37 @@
+name: chequeo-en-vivo
+
+# 2-nov-2026: "un cambio en la landing no está terminado hasta que el chequeo en vivo de lo publicado pasa". Mira www.inntuitivo.com (lo que Pages sirve), no el repo:
+# 200 en cada página del sitemap, 0 enlaces internos rotos, las páginas retiradas dan 404 y nada publicado menciona una página o proveedor retirado.
+# Corre solo: después de CADA publicación de GitHub Pages, todos los días, y a mano. Rojo en Actions = algo publicado está roto.
+# Un cambio en el propio chequeo corre además su prueba contra un sitio de juguete.
+
+on:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+  schedule:
+    - cron: "40 13 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "chequeo-en-vivo.sh"
+      - "chequeo-en-vivo-prueba.sh"
+      - ".github/workflows/chequeo-en-vivo.yml"
+
+jobs:
+  en-vivo:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prueba del propio chequeo
+        run: bash chequeo-en-vivo-prueba.sh
+      - name: Chequeo en vivo (reintenta mientras la red de Pages se actualiza)
+        run: |
+          for intento in 1 2 3 4; do
+            if bash chequeo-en-vivo.sh; then exit 0; fi
+            [ "$intento" -lt 4 ] && sleep 45
+          done
+          echo "::error::Lo publicado en www.inntuitivo.com está roto (ver la lista de arriba); un cambio en la landing no está terminado hasta que este chequeo pasa."
+          exit 1

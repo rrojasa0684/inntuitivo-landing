@@ -65,3 +65,7 @@ sin que nadie lo mida ni lo note):
 de archivo entre backticks de ESTE repo ya no existe en el árbol. Las
 referencias cruzadas a `outreach-engine` (marcadas en el texto como tal) no se
 chequean acá — viven en el árbol del otro repo.
+
+## Chequeo en vivo de lo publicado
+
+`chequeo-en-vivo.sh` revisa www.inntuitivo.com tal como lo sirve GitHub Pages: 200 en cada página del sitemap, 0 enlaces internos rotos, las páginas retiradas (`activar.html`) dan 404 y nada publicado menciona una página o proveedor retirado. Lo corre `.github/workflows/chequeo-en-vivo.yml` después de cada publicación de Pages y todos los días; `chequeo-en-vivo-prueba.sh` lo prueba contra un sitio de juguete. Un cambio en la landing no está terminado hasta que pasa.
