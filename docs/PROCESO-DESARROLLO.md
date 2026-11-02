@@ -108,6 +108,7 @@ FUERA DE ALCANCE: lo que no se toca
 - Un test por criterio, más el test del caso exacto que originó el trabajo. Los tests recorren la lista real, nunca cuentan, para que no haya falsos positivos.
 - Durante el desarrollo, **solo tests dirigidos**.
 - **La suite completa corre una sola vez, al final.** Si falla, se arregla la causa y se repite una vez.
+- **Por sesión, una sola suite: la paralela (`ops/test-linux.sh`).** La serial, la de orden normal y la de orden aleatorio (`PYTEST_OBJETIVO="tests/ --orden-semilla=N"`) corren solo en el cierre semanal (aleatoria con semilla nueva; si falla, se anota la semilla en ABIERTO) o si Ricardo las pide explícito. Ningún prompt anula esta regla. Para buscar un test que contamina se corre UNA vez el detector y se verifican solo los archivos marcados.
 - Sin llamadas pagadas ni envíos reales en los tests.
 
 ### 4 · Revisión adversarial: una ronda
@@ -196,6 +197,7 @@ Contenido del cierre:
 3. **Ready to Release completo** contra producción.
 4. **Documento de contexto** nuevo: lo arma Claude Code a partir del último, en la raíz del repo, y se copia a la bóveda y a `~/Downloads` con el mismo SHA-256. La bóveda queda al día.
 5. **Graphify semántico** sobre los documentos de la semana.
+   - Antes, una corrida de la suite en **orden aleatorio con semilla nueva** (`--orden-semilla=N`, serial); si falla, la semilla va a ABIERTO y el arreglo es un defecto.
 6. **Limpieza profunda** de la Mac y del droplet, incluida la caché de Docker, para que el snapshot no crezca.
 
 ## 4. Reglas que aplican siempre
@@ -209,6 +211,10 @@ Contenido del cierre:
 - **Releer desde disco** ABIERTO y la bóveda antes de editarlos.
 - **Documento de contexto:** se copia de `~/Downloads` a la raíz del repo, nunca se mueve.
 - **Cero pendientes reales:** lo que se encuentra se arregla en la corrida, va al lote semanal (solo observaciones menores) o queda en ABIERTO con su categoría.
+- **Producción decide con el dato (#140, 2-nov-2026):** si un arreglo depende de datos de producción, el diagnóstico y el arreglo van en el mismo deploy: el código decide con el dato cuando corre, dentro del deploy o del cron. Nunca se despliega primero para leer y después para arreglar.
+- **Tope por sesión:** una suite paralela y un deploy. Si un deploy falla, se arregla y se repite: es lo único que justifica un segundo deploy. Un cambio solo de documentación no corre la suite.
+- **Un script temporal no se despliega con fecha de vencimiento:** se borra en la misma corrida o va al lote semanal con fecha.
+- **Un cambio en la landing no está terminado hasta que el chequeo en vivo de lo publicado pasa** (`chequeo-en-vivo.sh` de la landing: 200 en cada página del sitemap, 0 enlaces internos rotos, las páginas retiradas dan 404, nada menciona lo retirado). Corre solo tras cada publicación de Pages y a diario.
 - **Una decisión sin resolver siempre figura en ESPERANDO.** Nunca se saca de la categoría para que dé cero.
 
 ## 5. Decisiones vigentes de este proceso
@@ -218,6 +224,7 @@ Contenido del cierre:
 - **#127:** el cierre semanal lo inicia Claude Code solo, al empezar una sesión con 7 días o más desde el último y cambios en medio; Ricardo no lo pide.
 - **#122:** recorrido focal en cada corrida; el Ready to Release completo, cada noche y en el cierre semanal.
 - **#123:** el cierre pesado (contexto, Graphify semántico, code review de la etapa), una vez por semana.
+- **#140:** el diagnóstico temporal del remate y la confirmación del conteo de tests se retiran en el cierre semanal automático del 8-nov, dentro de su única suite y deploy; nacen las tres reglas de producción-con-dato, tope por sesión y script temporal.
 
 ## 6. Dónde vive este documento
 
