@@ -141,9 +141,9 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
 <section id="antiguo" class="oculto centro">
   <div class="ico">✉️</div>
   <h1>Para cancelar, te mandamos un enlace a tu correo</h1>
-  <p>Este enlace es de una versión anterior. Usa el correo con el que pagas o el de tu cuenta: si corresponde a una cuenta activa, te llegará un enlace nuevo a ese correo. Ábrelo y confirma ahí. <b>Nada se cancela hasta que lo confirmes.</b></p>
+  <p>Este enlace es de una versión anterior. Escribe el correo con el que pagas o el de tu cuenta. Si está registrado, le mandamos al dueño de la cuenta un enlace para confirmar la baja; ábrelo y confirma ahí. <b>Nada se cancela hasta que lo confirmes.</b></p>
   <p><input type="email" id="correo_antiguo" placeholder="el correo con el que pagas o el de tu cuenta" autocomplete="email" maxlength="320" style="width:100%;max-width:340px;padding:.7rem;border:1px solid #cfd6e4;border-radius:10px;font:inherit"></p>
-  <button class="btn btn-baja" id="btnantiguo">Enviarme el correo de confirmación</button>
+  <button class="btn btn-baja" id="btnantiguo">Enviar el correo de confirmación</button>
 </section>
 
 <!-- REVISÁ TU CORREO (doble confirmación) -->
@@ -197,7 +197,7 @@ $('btnantiguo').addEventListener('click',async()=>{
   try{
     const r=await fetch(API+'/cancelar/solicitar-antiguo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({correo})});
     if(!r.ok) throw 0;
-    $('revisar_p').innerHTML='Si ese correo corresponde a una cuenta activa, te enviamos un enlace para confirmar la baja. Ábrelo y confirma ahí — así nos aseguramos de que eres tú quien cancela.'; ver('revisar');
+    $('revisar_p').innerHTML='Si el correo está registrado, le mandamos al dueño de la cuenta un enlace para confirmar la baja. Nada se cancela hasta que lo confirme.'; ver('revisar');
   }catch(_){ $('error_t').textContent='No pudimos procesarlo'; $('error_p').textContent='Intenta de nuevo en un momento, o escríbenos a info@inntuitivo.com.'; ver('error'); }
 });
 
