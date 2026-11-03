@@ -14,7 +14,7 @@ Fecha: 5 de octubre de 2026 · **Versión liviana del 31 de octubre de 2026 (dec
 > **Por qué la versión liviana (31-oct):** la semana del 27 al 31 de octubre, cada funcionalidad tardó cerca de 24 horas. Esto fue lo que más tiempo se llevó:
 > - el Ready to Release completo en cada cambio (de 25 a 60 minutos cada vez);
 > - de 2 a 3 rondas de revisión con Opus, y hasta 15 agentes en paralelo;
-> - el cierre pesado (contexto y Graphify semántico) en cada mini-corrida;
+> - el cierre pesado (contexto) en cada mini-corrida;
 > - el UX descubierto después de construir;
 > - decisiones que aparecían a mitad de la corrida;
 > - alcance que se sumaba de madrugada.
@@ -174,7 +174,7 @@ FUERA DE ALCANCE: lo que no se toca
   - limpieza de los dos entornos (Mac y droplet).
 - **No van en cada corrida:**
   - el documento de contexto;
-  - Graphify semántico;
+  - (el Graphify semántico de lo que cambió no está acá: va en cada cierre);
   - el code review de toda la etapa;
   - el Ready to Release completo.
 
@@ -198,7 +198,7 @@ Contenido del cierre:
    - un revisor por área tocada, no uno por área del producto.
 3. **Ready to Release completo** contra producción.
 4. **Documento de contexto** nuevo: lo arma Claude Code a partir del último, en la raíz del repo, y se copia a la bóveda y a `~/Downloads` con el mismo SHA-256. La bóveda queda al día.
-5. **Graphify semántico** sobre los documentos de la semana.
+5. **Comprobación del grafo:** 0 documentos sin caché (el Graphify semántico se hizo en cada cierre).
    - Antes, una corrida de la suite en **orden aleatorio con semilla nueva** (`--orden-semilla=N`, serial); si falla, la semilla va a ABIERTO y el arreglo es un defecto.
 6. **Limpieza profunda** de la Mac y del droplet, incluida la caché de Docker, para que el snapshot no crezca.
 
@@ -225,8 +225,12 @@ Contenido del cierre:
 - **#121:** observaciones menores al lote semanal, cerradas en una semana como máximo.
 - **#127:** el cierre semanal lo inicia Claude Code solo, al empezar una sesión con 7 días o más desde el último y cambios en medio; Ricardo no lo pide.
 - **#122:** recorrido focal en cada corrida; el Ready to Release completo, cada noche y en el cierre semanal.
-- **#123:** el cierre pesado (contexto, Graphify semántico, code review de la etapa), una vez por semana.
-- **#140:** el diagnóstico temporal del remate y la confirmación del conteo de tests se retiran en el cierre semanal automático del 8-nov, dentro de su única suite y deploy; nacen las tres reglas de producción-con-dato, tope por sesión y script temporal.
+- **#123:** el cierre pesado (contexto, code review de la etapa), una vez por semana; el Graphify semántico de lo que cambió va en cada cierre (regla del 3-nov, nunca se pasa al semanal).
+- **#140:** el diagnóstico temporal del remate y la confirmación del conteo de tests se retiraron el 2-nov dentro del deploy del code review del día; nacen las tres reglas de producción-con-dato, tope por sesión y script temporal.
+- **#141 (3-nov):** Claude Code decide con datos, sin preguntar, la prueba de «You should know» (#45); sin línea base del uso del plan, se retiró. Toda decisión anunciada en un reporte sale de una sola fuente.
+- **#142 (3-nov):** el respaldo de los enlaces de cancelación antiguos se retiró; un enlace antiguo o vencido lleva al flujo actual, que manda un correo de confirmación al correo de pago o al del buzón conectado de una cuenta activa; «Cancelar mi agente» en Ajustes cancela directo (#36).
+- **#143 (3-nov):** el correo inventado de gmail que llegó al remoto se deja en el historial; el pre-commit frena correos personales en `tests/` y `app/`.
+- **Reglas del 3-nov:** tests de lo tocado antes de la única suite completa, con una sola repetición; «PROGRAMADO es solo para causas externas»; push antes de deploy y el deploy verifica el HEAD esperado (`ops/desplegar.sh`, motor); el Graphify semántico va en cada cierre; las decisiones viven solo en la sección ESPERANDO de ABIERTO (cerrarlas o abrirlas no requiere deploy).
 
 ## 6. Dónde vive este documento
 
