@@ -137,11 +137,20 @@ p.sub{margin-top:14px;color:var(--tinta-suave);max-width:54ch}
   </div>
 </section>
 
+<!-- ENLACE ANTIGUO O VENCIDO (#142): el flujo de siempre, con el correo de confirmación -->
+<section id="antiguo" class="oculto centro">
+  <div class="ico">✉️</div>
+  <h1>Para cancelar, te mandamos un enlace a tu correo</h1>
+  <p>Este enlace es de una versión anterior. Escribe el correo con el que pagas y, si corresponde a una cuenta activa, te llegará un enlace nuevo: ábrelo y confirma ahí. <b>Nada se cancela hasta que lo confirmes.</b></p>
+  <p><input type="email" id="correo_antiguo" placeholder="tu correo de pago" autocomplete="email" maxlength="320" style="width:100%;max-width:340px;padding:.7rem;border:1px solid #cfd6e4;border-radius:10px;font:inherit"></p>
+  <button class="btn btn-baja" id="btnantiguo">Enviarme el correo de confirmación</button>
+</section>
+
 <!-- REVISÁ TU CORREO (doble confirmación) -->
 <section id="revisar" class="oculto centro">
   <div class="ico">📩</div>
   <h1>Revisa <em>tu correo</em></h1>
-  <p>Te enviamos un correo a <b id="correo2">tu buzón</b> con un enlace para confirmar la baja. Ábrelo y confirma ahí — así nos aseguramos de que eres tú quien cancela.</p>
+  <p id="revisar_p">Te enviamos un correo a <b id="correo2">tu buzón</b> con un enlace para confirmar la baja. Ábrelo y confirma ahí — así nos aseguramos de que eres tú quien cancela.</p>
   <p class="pie">¿No te llega en unos minutos? Revisa spam, o escríbenos a info@inntuitivo.com.</p>
 </section>
 
@@ -163,7 +172,7 @@ const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const token=params.get('token')||'';
 const demo=params.get('demo');           // modo preview: confirmar|finalizar|revisar|listo|caducado|fallo|generico
-function ver(id){['cargando','error','confirmar','finalizar','revisar','listo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
+function ver(id){['cargando','error','confirmar','finalizar','revisar','listo','antiguo'].forEach(s=>$(s).classList.toggle('oculto',s!==id));}
 function errFin(){$('error_t').textContent='No pudimos confirmar tu baja';$('error_p').textContent='No pudimos confirmar la cancelación con el proveedor de pago. Ya estamos al tanto y lo estamos revisando. Si prefieres, escríbenos a info@inntuitivo.com.';ver('error');}
 function errCaducado(){$('error_t').textContent='Este enlace caducó';$('error_p').textContent='El enlace de confirmación vence a la hora. Vuelve a pedir la baja desde el enlace que hay en los correos de tu agente y te enviamos uno nuevo.';ver('error');}
 // Fallo que NO es un 502 confirmado por el backend (red/CORS/api caído/500): no afirma dónde
@@ -179,6 +188,18 @@ function mostrarConfirmar(info){ $('dominio').textContent=info.dominio||'—'; $
     var cc=$('chk-credencial'); if(cc) cc.remove();  // remover, no vaciar: un span vacío deja un gap inline al renderizar
   }
   ver('confirmar'); }
+
+$('btnantiguo').addEventListener('click',async()=>{
+  const correo=($('correo_antiguo').value||'').trim();
+  if(correo.indexOf('@')<1){ $('correo_antiguo').focus(); return; }
+  $('btnantiguo').disabled=true; $('btnantiguo').innerHTML='<span class="spin"></span> Enviando…';
+  if(demo){ver('revisar');return;}
+  try{
+    const r=await fetch(API+'/cancelar/solicitar-antiguo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({correo})});
+    if(!r.ok) throw 0;
+    $('revisar_p').innerHTML='Si ese correo corresponde a una cuenta activa, te enviamos un enlace para confirmar la baja. Ábrelo y confirma ahí — así nos aseguramos de que eres tú quien cancela.'; ver('revisar');
+  }catch(_){ $('error_t').textContent='No pudimos procesarlo'; $('error_p').textContent='Intenta de nuevo en un momento, o escríbenos a info@inntuitivo.com.'; ver('error'); }
+});
 
 $('entiendo').addEventListener('change',e=>{$('btnbaja').disabled=!e.target.checked;});
 
@@ -212,6 +233,7 @@ $('btnfin').addEventListener('click',async()=>{
   // Preview local: ?demo=confirmar|finalizar|revisar|listo|caducado|fallo|generico con datos de mentira.
   if(demo){
     if(demo==='listo'){ver('listo');return;}
+    if(demo==='antiguo'){ver('antiguo');return;}
     if(demo==='revisar'){$('correo2').textContent='a***a@acme.com';ver('revisar');return;}
     if(demo==='finalizar'){ver('finalizar');return;}
     if(demo==='caducado'){errCaducado();return;}   // 400: enlace vencido/inválido
@@ -227,7 +249,7 @@ $('btnfin').addEventListener('click',async()=>{
   try{
     const r=await fetch(API+'/cancelar/info?token='+encodeURIComponent(token));
     const d=await r.json().catch(()=>({}));
-    if(!r.ok||!d.valido){ if(d && d.motivo==='ya_baja'){$('error_t').textContent='Ya está de baja';$('error_p').textContent='Tu agente ya se dio de baja. Si necesitas algo, escríbenos a info@inntuitivo.com.';} ver('error'); return; }
+    if(!r.ok||!d.valido){ if(d && d.motivo==='antiguo'){ver('antiguo');return;} if(d && d.motivo==='ya_baja'){$('error_t').textContent='Ya está de baja';$('error_p').textContent='Tu agente ya se dio de baja. Si necesitas algo, escríbenos a info@inntuitivo.com.';} ver('error'); return; }
     mostrarConfirmar(d);
   }catch(_){ ver('error'); }
 })();
