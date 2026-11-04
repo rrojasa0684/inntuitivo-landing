@@ -149,7 +149,7 @@ FUERA DE ALCANCE: lo que no se toca
 | Cómo | Un solo deploy por `ops/deploy.sh`, con la verificación de producción incluida y nginx aplicado solo | Merge a `main` (GitHub Pages publica solo) |
 | Después | El droplet igual a `origin/main` | `www.inntuitivo.com` responde 200 con lo nuevo |
 
-- La limpieza de Docker del droplet se hace solo con `ops/docker-builder-prune.sh` y la del deploy (#134); la de la Mac, solo con `ops/mac-poda-docker.sh` del motor (sin volúmenes; se corre al cerrar la corrida).
+- La limpieza de Docker del droplet se hace solo con `ops/docker-builder-prune.sh` y la del deploy (#134); la de la Mac, solo con `ops/mac-poda-docker.sh` del motor (solo los volúmenes huérfanos de la suite, nunca uno con nombre propio ni en uso; se corre al cerrar la corrida).
 - Nada de actualizaciones del sistema sin decisión de Ricardo.
 - Las lecturas de producción solo pasan por la verificación del deploy y por el cron. Nunca se le piden comandos a Ricardo.
 
