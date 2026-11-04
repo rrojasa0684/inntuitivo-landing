@@ -407,6 +407,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .precio-plan{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
 .precio-plan .precio-inner{padding:0;border-radius:0;background:none}
 .boton-plan{width:100%;text-align:center}
+.boton-demo{margin-top:12px}.boton-demo[hidden]{display:none}
 .micro-plan{text-align:center;margin-top:12px}
 .precio-unif .tabla-real-fuentes{border-top:1px solid var(--linea);margin-top:28px;padding-top:18px;text-align:left}
 .precio-unif .tabla-real-tabla thead .col-inntuitivo{background:linear-gradient(135deg,#DE0540,#452774)}
@@ -692,7 +693,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-04: baseline scroll_precio=1.5/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-04: baseline scroll_precio=1.6/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -1588,6 +1589,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
         <div>
           <a class="btn btn-primario boton-plan" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
+          <a class="btn btn-secundario boton-plan boton-demo" id="ver-demo" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" hidden>Ver demo ▶</a>
           <p class="micro micro-plan">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $45/mes por PayPal (creas la cuenta en el momento, una sola vez). Cancela cuando quieras.</p>
           <p class="demo-muestra">¿Prefieres ver primero cómo escribe? <a href="#muestra">Pide una muestra gratis</a></p>
           <p class="micro micro-plan">¿Dudas antes de activar? <a href="https://wa.me/50672045991?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
@@ -2368,5 +2370,10 @@ document.addEventListener('DOMContentLoaded', function () {
   })();
 </script>
 
+<script>
+/* 4-nov (#160): «Ver demo» aparece solo si el demo está vivo (interruptor propio del motor); si la consulta falla o dice que no, el botón sigue oculto y el resto de la página no cambia. */
+(function(){var b=document.getElementById('ver-demo');if(!b||!window.fetch)return;
+fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.activo===true)b.hidden=false}).catch(function(){});})();
+</script>
 </body>
 </html>

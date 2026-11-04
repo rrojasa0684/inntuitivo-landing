@@ -105,6 +105,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 .geo-hint{font-size:.85rem;color:var(--tinta-suave);margin:4px 0 10px}
 .geo-hint b{color:#E7DEF7}
 @media (max-width:520px){.fila2{grid-template-columns:1fr}}
+.demo-franja{position:sticky;top:0;z-index:60;background:#FFC65C;color:#1b1233;text-align:center;font-weight:600;font-size:.92rem;padding:8px 16px;border-bottom:2px solid var(--rojo)}
 @media (prefers-reduced-motion:reduce){.btn-primario{animation:none}.btn-primario::after{display:none}.spin{animation-duration:0s}}
 </style>
 </head>
@@ -287,7 +288,12 @@ async function pedir(url,op){
 const $=id=>document.getElementById(id);
 // Un límite de pedidos o un reinicio de la app no es un enlace vencido: se pide esperar y recargar, sin ofrecer un enlace nuevo (reemitirlo dejaría sin efecto el que sí sirve).
 function esperaYRecarga(){const h=document.querySelector('#reissue h1');if(h)h.innerHTML='Un momento, <em>ya seguimos</em>';$('reissue-txt').textContent='Estamos recibiendo muchos pedidos. Espera un momento y recarga esta página: tu enlace sigue siendo válido.';const panel=document.querySelector('#reissue .panel');if(panel)panel.style.display='none';ver('reissue');}
-const token=new URLSearchParams(location.search).get('token')||(location.hash.indexOf('ms_state=')>=0?(function(){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}})():'');
+const token=(function(){const q=new URLSearchParams(location.search).get('token');if(q)return q;   // flujo real: el token va en la dirección
+  const f=new URLSearchParams(location.hash.slice(1)).get('token');   // demo (#157 a #160): el token viaja en el fragmento y sale de la barra apenas se lee
+  if(f){try{sessionStorage.setItem('demo_tk',f);}catch(e){}history.replaceState(null,'',location.pathname);return f;}
+  if(location.hash.indexOf('ms_state=')>=0){try{return localStorage.getItem('ms_tk')||'';}catch(e){return '';}}
+  try{return sessionStorage.getItem('demo_tk')||'';}catch(e){return '';}   // recargar la página del demo no la pierde
+})();
 
 // #104: «Entrar a mi panel» abre la sesión directo, sin pedir ningún enlace por correo (el botón sirve una vez; el correo queda para volver otro día).
 $('ir-panel').addEventListener('click',async function(ev){ev.preventDefault();const r0=$('ir-panel-r');r0.textContent='';
@@ -349,6 +355,30 @@ function lineas(t){return (t||'').split('\n').map(x=>x.trim()).filter(Boolean);}
 function texto(arr){return (arr||[]).join('\n');}
 function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;box.innerHTML=(titulo?'<span class="titulo">'+titulo+'</span>':'')+(cuerpo||'')+(detalle||'');}
 
+// --- demo (#157 a #160): misma pantalla de conexión con el buzón de ejemplo ya conectado; solo si el motor dice demo:true ---
+let esDemo=false;
+function activarDemo(d){
+  esDemo=true;
+  const f=document.createElement('div');f.className='demo-franja';f.id='demo-franja';f.setAttribute('role','status');
+  f.textContent='Demo — así ve un cliente su agente. No se cobra ni se envía nada.';
+  document.body.insertBefore(f,document.body.firstChild);
+  ['bloque-conectar','bloqueo'].forEach(function(i){const e=$(i);if(e)e.remove();});   // sin campos de contraseña ni de Microsoft: nunca se pide una credencial
+  const correo=(d.buzon&&d.buzon.demo&&d.buzon.demo.correo)||'';
+  const b=document.createElement('div');b.id='demo-conectar';
+  b.innerHTML='<label>Tu correo de trabajo</label><p><strong>'+escapa(correo)+'</strong></p>'
+   +'<div class="resultado ok" role="status">✓ Conectado</div>'
+   +'<div class="provaviso">En el demo no conectamos tu correo.</div>'
+   +'<button id="btn-demo" class="btn btn-primario" type="button" style="margin-top:16px">Continuar</button>'
+   +'<div id="resultado-demo" class="resultado" role="status" aria-live="polite"></div>';
+  document.querySelector('#step3 .panel').appendChild(b);
+  $('btn-demo').addEventListener('click',async()=>{
+    $('btn-demo').disabled=true;
+    const r=await llamar('probar',{});   // el motor ignora el cuerpo en el demo
+    if(r&&r.ok){mostrarFinal();return;}
+    res($('resultado-demo'),'error','No pudimos continuar',escapa((r&&r.mensaje)||'Vuelve a intentar.'));$('btn-demo').disabled=false;
+  });
+}
+
 // --- arranque: lee el estado y reanuda donde iba ---
 (async()=>{
   if(!token){
@@ -361,6 +391,7 @@ function res(box,clase,titulo,cuerpo,detalle){box.className='resultado '+clase;b
     if(r.status===429||r.status>=500){esperaYRecarga();return;}
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(d.demo===true)activarDemo(d);
     msDisponible=!!(d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.disponible);   // desde el primer paso: quien llega al correo sin recargar también ve el botón
     if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
     if(d.nombre)$('titulo').innerHTML='Hola '+escapa(d.nombre)+', empecemos por <em>tu sitio</em>';
@@ -669,7 +700,7 @@ $('btn-volver').addEventListener('click',()=>{$('bloqueo').classList.add('oculto
 $('btn-otro').addEventListener('click',()=>{$('bloqueo').classList.add('oculto');$('bloque-conectar').classList.remove('oculto');$('email').value='';$('password').value='';$('resultado').className='resultado';$('email').focus();});
 
 function reanudarBuzon(b){
-  if(!b)return;
+  if(!b||esDemo)return;
   msDisponible=!!(b.microsoft&&b.microsoft.disponible);
   const vuelta=vueltaMs;
   if(b.email_envio)$('email').value=b.email_envio;
