@@ -111,6 +111,7 @@ FUERA DE ALCANCE: lo que no se toca
 - **Por sesión, una sola suite: la paralela (`ops/test-linux.sh`).** La serial, la de orden normal y la de orden aleatorio (`PYTEST_OBJETIVO="tests/ --orden-semilla=N"`) corren solo en el cierre semanal (aleatoria con semilla nueva; si falla, se anota la semilla en ABIERTO) o si Ricardo las pide explícito. Ningún prompt anula esta regla. Para buscar un test que contamina se corre UNA vez el detector y se verifican solo los archivos marcados.
 - **Antes de la única suite completa (3-nov-2026):** correr solo los tests de lo tocado y de lo que depende de ello. Si la suite completa falla por el cambio, se arregla, se corren solo los tests que fallaron y la suite completa se repite una sola vez.
 - **Commit antes de la suite (4-nov-2026):** antes de la única suite completa, todo queda commiteado en la rama: una suite sobre un árbol sin commitear no escribe la marca y obliga a repetirla.
+- **Log del deploy (4-nov):** el log del deploy se guarda completo en un archivo y se busca la línea que hace falta; nunca se corta con tail.
 - **PROGRAMADO es solo para causas externas.** El trabajo propio con fecha se presenta a Ricardo con la opción de cerrarlo hoy (3-nov-2026, #142).
 - Sin llamadas pagadas ni envíos reales en los tests.
 
