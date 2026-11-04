@@ -54,6 +54,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   baseline_fresco=1  # 4-nov-2026: ademas de la marca, el baseline de Umami tiene que estar fresco (< 24 h)
   diff_index_html=$(git diff "${rango_diff[@]}" -- index.html 2>/dev/null || true)
   marca=$(grep -iqE '^\+.*baseline' <<< "$diff_index_html" && echo si || echo no)
+  # segundo push del mismo dia: el comentario no cambia (no hay linea agregada) pero index.html lleva el vigente
+  [ "$marca" = "no" ] && python3 "$(dirname "$0")/baseline-umami.py" vigente "$local_sha" && marca=si
   if [ "$marca" = "no" ]; then
     bloqueado=1
     detalle="$detalle  - $local_ref ($remote_sha..$local_sha)\n"

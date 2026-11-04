@@ -56,8 +56,23 @@ def escribir(ruta):
     return None
 
 
+def vigente_en(sha):
+    """True si index.html en ese commit lleva el comentario igual al del baseline fresco (segundo push del mismo dia, sin linea agregada)."""
+    import subprocess
+    d, err = leer()
+    if err:
+        return False
+    try:
+        txt = subprocess.run(["git", "show", sha + ":index.html"], capture_output=True, text=True, check=True).stdout
+    except Exception:
+        return False
+    return comentario(d) in txt.split("\n")
+
+
 if __name__ == "__main__":
     modo = sys.argv[1] if len(sys.argv) > 1 else ""
+    if modo == "vigente":
+        sys.exit(0 if vigente_en(sys.argv[2]) else 1)
     err = leer()[1] if modo == "verificar" else escribir(sys.argv[2] if len(sys.argv) > 2 else "index.html") if modo == "escribir" else "uso: verificar | escribir [index.html]"
     if err:
         sys.stderr.write("\n🔴 BASELINE DE UMAMI NO DISPONIBLE: %s.\n   Corre ops/desplegar.sh en el motor para refrescar el baseline y vuelve a intentar. No se salta.\n\n" % err)
