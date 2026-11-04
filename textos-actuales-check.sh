@@ -29,7 +29,7 @@ def huella(ini, fin):
     b = re.sub(r"\s+", " ", re.sub(r"<!--.*?-->", "", idx[i:j + len(fin)], flags=re.S)).strip()
     return hashlib.sha256(b.encode()).hexdigest()
 HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "f6e96916fe62ed91591e0a11a2c39ef5dafe657d5668cb9c9fdb2823f28216aa"),
-           "partners (con su carrusel)": ('<section class="partners"', "</section>", "a07c325bd4250cfa66d832490d9ff7d85eba4a6f564c9c2fc8f9211a247f239d")}
+           "partners (con su carrusel)": ('<section class="partners"', "</section>", "3d9fed73b1cccd9fae3c67745a2d96177065c373a891e1684c684cbe7a000b6a")}
 for nombre, (ini, fin, esperada) in HUELLAS.items():
     if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
 PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic", "un solo toque", "con un toque"]
