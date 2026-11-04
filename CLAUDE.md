@@ -46,3 +46,5 @@ Ningún agente cambia ni reordena estos bloques. Los textos exactos están en `d
 En cada push a main, `.github/workflows/githook-check.yml` corre `ci-solo-docs-en-main.sh`: marca en rojo un commit de código que llegó sin pasar por una rama (misma lista blanca del hook: docs/ y archivos .md). Avisa, no bloquea.
 
 Los merges a `main` se hacen siempre con `--no-ff`: un avance rápido, squash o rebase deja commits de código directos en la línea principal y la CI los marca en rojo.
+
+- **Clave SSH (4-nov-2026):** al empezar cada sesión, si `ssh-add -l` no tiene identidades, se corre `ssh-add --apple-use-keychain -q ~/.ssh/id_ed25519`, que la carga desde el Llavero sin pedir nada (`~/.ssh/config` ya trae `AddKeysToAgent` y `UseKeychain` para github.com y el droplet). Nunca se le pide a Ricardo una frase de paso dentro de Claude Code.
