@@ -45,4 +45,10 @@ echo '<p>cuatro</p>' >> index.html; git commit -q -am cuatro 2>/dev/null && mal 
 rm "$T/b.json"; git -c core.hooksPath=/dev/null commit -q -am cuatro  # solo para preparar el escenario del push sin pasar por el commit
 if git push -q origin feat/x 2>"$T/err"; then mal "push pasó sin baseline fresco"; elif grep -q "refrescar el baseline" "$T/err"; then ok "push frenado sin archivo, con mensaje claro"; else mal "push frenado sin mensaje claro"; fi
 
+# 6. segundo push del mismo dia (comentario sin cambios, sin linea agregada): pasa si lleva el baseline vigente
+echo "{\"scroll_precio_dia\": 10.3, \"cta_activar_semana\": 0, \"fecha\": \"2026-11-04\", \"generado\": \"$ahora\"}" > "$T/b.json"
+git reset -q --hard origin/feat/x; echo '<p>cinco</p>' >> index.html; git add index.html; git commit -q -m cinco
+echo '<p>seis</p>' >> index.html; git add index.html; git commit -q -m seis
+git push -q origin feat/x 2>/dev/null && ok "segundo push del dia pasa con el comentario vigente" || mal "segundo push del dia frenado"
+
 [ "$fallas" = "0" ] && echo "BASELINE_UMAMI_OK" || { echo "BASELINE_UMAMI_FALLA ($fallas)"; exit 1; }
