@@ -12,7 +12,7 @@ Ponytail (plugin de Claude Code, MIT) recorta código innecesario. Está instala
 
 El documento completo es `docs/PROCESO-DESARROLLO.md` (misma versión que en el motor); acá solo se resume y se apunta, no se duplica.
 
-- Al empezar cada sesión se lee SOLO `docs/PROCESO-DESARROLLO.md` (arranque liviano, #131; el resto se lee cuando la tarea lo toca) y se confirma que `git config core.hooksPath` vale `.githooks` (el hook es por clon; `bash githook-pre-commit-check.sh --clon` lo verifica).
+- Al empezar cada sesión se lee SOLO `docs/PROCESO-DESARROLLO.md` de la landing (arranque liviano, #131; el motor lee además su ABIERTO y el estado de su contexto, y la sesión de la landing los lee solo para el cierre semanal; el resto se lee cuando la tarea lo toca) y se confirma que `git config core.hooksPath` vale `.githooks` (el hook es por clon; `bash githook-pre-commit-check.sh --clon` lo verifica).
 - Antes de tocar nada se clasifica el trabajo (funcionalidad, defecto, code review, auditoría, documentación), su **tamaño** (chico: 20 a 40 minutos; mediano: 60 a 90; lo grande se parte en piezas medianas, cada una con su publicación) y su **riesgo** (alto, medio, bajo; ante la duda, se sube un nivel de riesgo, no de tamaño). Una funcionalidad por corrida; el alcance no crece a mitad de corrida; todas las decisiones de producto se piden juntas antes de construir.
 - Una funcionalidad nueva lleva spec en `docs/specs/` (plantilla `docs/specs/PLANTILLA-SPEC.md`, archivo `AAAA-MM-DD-<tema>.md`) y espera la aprobación de Ricardo.
 - **Cualquier cambio visual pasa por la etapa 1 (Design System) con un mock aprobado por Ricardo antes de tocar el sitio.**

@@ -112,7 +112,6 @@ FUERA DE ALCANCE: lo que no se toca
 - **Antes de la única suite completa (3-nov-2026):** correr solo los tests de lo tocado y de lo que depende de ello. Si la suite completa falla por el cambio, se arregla, se corren solo los tests que fallaron y la suite completa se repite una sola vez.
 - **Commit antes de la suite (4-nov-2026):** antes de la única suite completa, todo queda commiteado en la rama: una suite sobre un árbol sin commitear no escribe la marca y obliga a repetirla.
 - **Prueba del buscador (#155, 4-nov-2026):** la prueba de las 35 empresas se remide sola cuando cambia el código que decide qué es un decisor válido (su «versión» es la huella de la lista `ELEMENTOS_QUE_DECIDEN` de `app/prospecting/buscador_decisores.py`) y cada 30 días; nunca se publica una cifra sin «verificacion vigente: si» en la línea «PRUEBA DECISORES» del deploy.
-- **Log del deploy (4-nov):** el log del deploy se guarda completo en un archivo y se busca la línea que hace falta; nunca se corta con tail.
 - **PROGRAMADO es solo para causas externas.** El trabajo propio con fecha se presenta a Ricardo con la opción de cerrarlo hoy (3-nov-2026, #142).
 - Sin llamadas pagadas ni envíos reales en los tests.
 
@@ -150,7 +149,7 @@ FUERA DE ALCANCE: lo que no se toca
 | Cómo | Un solo deploy por `ops/deploy.sh`, con la verificación de producción incluida y nginx aplicado solo | Merge a `main` (GitHub Pages publica solo) |
 | Después | El droplet igual a `origin/main` | `www.inntuitivo.com` responde 200 con lo nuevo |
 
-- La limpieza de Docker del droplet se hace solo con `ops/docker-builder-prune.sh` y la del deploy (#134); la de la Mac, solo con `ops/mac-poda-docker.sh` del motor (solo los volúmenes huérfanos de la suite, nunca uno con nombre propio ni en uso; se corre al cerrar la corrida).
+- La limpieza de Docker del droplet se hace solo con `ops/docker-builder-prune.sh` y la del deploy (#134); la de la Mac, solo con `ops/mac-poda-docker.sh` (solo los volúmenes huérfanos de la suite, nunca uno con nombre propio ni en uso; se corre al cerrar la corrida).
 - Nada de actualizaciones del sistema sin decisión de Ricardo.
 - Las lecturas de producción solo pasan por la verificación del deploy y por el cron. Nunca se le piden comandos a Ricardo.
 
@@ -234,9 +233,12 @@ Contenido del cierre:
 - **#142 (3-nov):** el respaldo de los enlaces de cancelación antiguos se retiró; un enlace antiguo o vencido lleva al flujo actual, que identifica la cuenta con el correo de pago o con el del buzón conectado de una cuenta activa; «Cancelar mi agente» en Ajustes cancela directo (#36).
 - **#144 (3-nov):** la confirmación de baja va SIEMPRE al correo de pago (el dueño), nunca al buzón conectado, aunque la persona haya escrito el del buzón; la pantalla responde igual exista o no la cuenta y el correo dice que alguien pidió cancelar desde la página pública y que, si no fue el dueño, se ignore.
 - **#145 (3-nov):** los deploys con `ops/desplegar.sh` están autorizados de forma permanente; sus candados son la marca de suite, el push previo, el HEAD esperado, la verificación de producción y la vuelta atrás.
+- **Log del deploy (4-nov):** el log del deploy se guarda completo en un archivo y se busca la línea que hace falta; nunca se corta con tail.
 - **Regla de Graphify (3-nov):** prohibido el re-estampado a mano: si `graphify_docs_cambiados.py` no da 0 después del merge, es un defecto de la herramienta y se arregla; el cierre de cada sesión corre `graphify_docs_cambiados.py` y exige 0 en todo el repo (motor); lo excluido va en `.graphifyignore` con su motivo.
 - **#143 (3-nov):** el correo inventado de gmail que llegó al remoto se deja en el historial; el pre-commit frena correos personales en `tests/` y `app/`.
 - **Reglas del 3-nov:** tests de lo tocado antes de la única suite completa, con una sola repetición; «PROGRAMADO es solo para causas externas»; push antes de deploy y el deploy verifica el HEAD esperado (`ops/desplegar.sh`, motor); el Graphify semántico va en cada cierre; las decisiones viven solo en la sección ESPERANDO de ABIERTO (cerrarlas o abrirlas no requiere deploy).
+- **Reglas del 4-nov:** un solo monitor por espera (mientras la tarea corre no se arman monitores nuevos); si `ssh-add -l` no tiene identidades, se carga la clave desde el Llavero con `ssh-add --apple-use-keychain` (comando exacto en `CLAUDE.md`; nunca se pide una frase de paso); el baseline de Umami de la landing lo escribe solo el hook de pre-commit con los números de `ops/desplegar.sh` (`out/umami-baseline.json`, solo de un deploy bueno y con la fecha de los números de a lo más 1 día) y el de pre-push exige que no pasen de 24 h, sin `--no-verify`; la prueba del buscador (#155) se remide sola cuando cambia la huella de `ELEMENTOS_QUE_DECIDEN` y cada 30 días.
+- **#146 a #169 (3 al 5-nov):** Explee retirado y cancelado (#146); buscador de decisores propio en los cuatro caminos con tope de $0.02 por empresa (#147 a #156); borrado y lápida por persona (#153, #154); demo público como espejo anonimizado (#157 a #160); tarjeta «Decisores encontrados» (#165); listas subidas por el cliente, solo suyas (#161 a #164, #167, #168); enlaces como texto en los correos al cliente (#166); la landing dice «Inntuitivo es tu SDR con IA» (#169). Detalle en ABIERTO y en `docs/memoria/`.
 
 ## 6. Dónde vive este documento
 

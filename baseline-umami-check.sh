@@ -27,11 +27,15 @@ if git commit -q -m uno 2>/dev/null; then mal "commit pasó sin archivo de basel
 echo '{"scroll_precio_dia": 9, "cta_activar_semana": 0, "fecha": "2026-01-01", "generado": "2026-01-01T00:00:00Z"}' > "$T/b.json"
 if git commit -q -m uno 2>"$T/err"; then mal "commit pasó con baseline viejo"; elif grep -q "refrescar el baseline" "$T/err"; then ok "commit frenado con baseline viejo y mensaje claro"; else mal "mensaje poco claro"; fi
 
+# 2b. generado fresco pero números de otra fecha (un deploy abortado reescribía `generado`): se frena
+echo "{\"scroll_precio_dia\": 9, \"cta_activar_semana\": 0, \"fecha\": \"2026-01-01\", \"generado\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$T/b.json"
+if git commit -q -m uno 2>"$T/err"; then mal "commit pasó con números de fecha vieja y archivo recién escrito"; elif grep -q "hace" "$T/err"; then ok "commit frenado con números de otra fecha"; else mal "mensaje poco claro (fecha vieja)"; fi
+
 # 3. archivo fresco: escribe el comentario y el commit pasa
-ahora=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-echo "{\"scroll_precio_dia\": 10.3, \"cta_activar_semana\": 0, \"fecha\": \"2026-11-04\", \"generado\": \"$ahora\"}" > "$T/b.json"
+ahora=$(date -u +%Y-%m-%dT%H:%M:%SZ); hoy=$(date -u +%F)
+echo "{\"scroll_precio_dia\": 10.3, \"cta_activar_semana\": 0, \"fecha\": \"$hoy\", \"generado\": \"$ahora\"}" > "$T/b.json"
 if git commit -q -m uno 2>/dev/null; then ok "commit pasa con baseline fresco"; else mal "commit frenado con baseline fresco"; fi
-[ "$(git show HEAD:index.html | grep -c 'baseline-auto 2026-11-04: baseline scroll_precio=10.3/día, cta_activar=0/semana')" = "1" ] && ok "comentario escrito una vez" || mal "comentario ausente o repetido"
+[ "$(git show HEAD:index.html | grep -c "baseline-auto $hoy: baseline scroll_precio=10.3/día, cta_activar=0/semana")" = "1" ] && ok "comentario escrito una vez" || mal "comentario ausente o repetido"
 git show HEAD:index.html | sed -n 3p | grep -q baseline-auto && ok "comentario justo después de <body>" || mal "comentario fuera de lugar"
 
 # 4. otro commit con el mismo baseline no duplica el comentario
@@ -46,7 +50,7 @@ rm "$T/b.json"; git -c core.hooksPath=/dev/null commit -q -am cuatro  # solo par
 if git push -q origin feat/x 2>"$T/err"; then mal "push pasó sin baseline fresco"; elif grep -q "refrescar el baseline" "$T/err"; then ok "push frenado sin archivo, con mensaje claro"; else mal "push frenado sin mensaje claro"; fi
 
 # 6. segundo push del mismo dia (comentario sin cambios, sin linea agregada): pasa si lleva el baseline vigente
-echo "{\"scroll_precio_dia\": 10.3, \"cta_activar_semana\": 0, \"fecha\": \"2026-11-04\", \"generado\": \"$ahora\"}" > "$T/b.json"
+echo "{\"scroll_precio_dia\": 10.3, \"cta_activar_semana\": 0, \"fecha\": \"$hoy\", \"generado\": \"$ahora\"}" > "$T/b.json"
 git reset -q --hard origin/feat/x; echo '<p>cinco</p>' >> index.html; git add index.html; git commit -q -m cinco
 echo '<p>seis</p>' >> index.html; git add index.html; git commit -q -m seis
 git push -q origin feat/x 2>/dev/null && ok "segundo push del dia pasa con el comentario vigente" || mal "segundo push del dia frenado"

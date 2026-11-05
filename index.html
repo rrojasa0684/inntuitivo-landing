@@ -702,7 +702,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.6/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.7/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -2387,7 +2387,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 /* 4-nov (#160): «Ver demo» aparece solo si el demo está vivo (interruptor propio del motor); si la consulta falla o dice que no, el botón sigue oculto y el resto de la página no cambia. */
 (function(){var b=document.getElementById('ver-demo');if(!b||!window.fetch)return;
-fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.activo===true)b.hidden=false}).catch(function(){});})();
+fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.activo===true&&d.lleno!==true)b.hidden=false}).catch(function(){});})();
 </script>
 </body>
 </html>
