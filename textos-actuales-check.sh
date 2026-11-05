@@ -79,18 +79,21 @@ if '<p class="listas-linea">' + LS_L + '</p>' not in idx: mal.append("falta la l
 PG = ["Pruébalo gratis", "Escribe tu sitio: tu agente entiende qué vendes y a quién.",
  "Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.",
  "Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.",
- "Tu prueba trae 6 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado)."]
+ "Escribe tu sitio y tu agente hace el trabajo con tu empresa. No envía nada hasta que actives.", "Tú · 30 segundos", "Tu agente</span>", "Tu panel</span>",
+ "créditos gratis</span><small>1 crédito = 1 lead completo</small>", "<li>Empresa que encaja</li><li>Correo verificado</li><li>Quien decide</li><li>Correo ya redactado</li>",
+ "Probar gratis 🚀", "Sin tarjeta · No envía nada hasta que actives · Se borra a los 14 días si no activas"]      # #181: la sección rediseñada (la línea larga de créditos se reemplazó por la franja)
 for t in PG:
     if t not in idx: mal.append(f"falta el texto aprobado de la prueba gratis (#175): {t[:50]}")
 if 'id="prueba"' not in idx or '<span id="muestra"></span>' not in idx: mal.append("falta la sección #prueba con el alias #muestra (#175)")
-if idx.count("Ver demo 💰") < 4: mal.append("faltan llamados «Ver demo 💰» (hero, barra, sección y precio; #176)")
-# #180: los «Ver demo 💰» de la barra, el hero y el precio bajan a #prueba; solo el de la sección abre el demo
+if idx.count("Ver demo 💰") != 3: mal.append("deben quedar exactamente 3 llamados «Ver demo 💰» (barra, hero y precio; #176, #181)")
+# #180/#181: los «Ver demo 💰» de la barra, el hero y el precio bajan a #prueba; lo único que abre el demo es el formulario de la sección (origen «prueba»)
 import re as _re
-_demo=[m for m in _re.finditer(r'<a [^>]*data-ver-demo[^>]*>', idx)]
-_hacia=[m.group(0) for m in _demo if 'data-ver-demo-origen=' in m.group(0)]
-_abre=[m.group(0) for m in _demo if 'api.inntuitivo.com/demo' in m.group(0)]
-if sorted(_re.search(r'data-ver-demo-origen="(\w+)"',x).group(1) for x in _hacia)!=["barra","hero","precio"] or any('href="#prueba"' not in x for x in _hacia): mal.append("los Ver demo de barra, hero y precio deben apuntar a #prueba (#180)")
-if len(_abre)!=1 or 'id="ver-demo-seccion"' not in _abre[0]: mal.append("solo el Ver demo de la sección Pruébalo gratis puede abrir el demo (#180)")
+_demo=[m.group(0) for m in _re.finditer(r'<a [^>]*data-ver-demo[^>]*>', idx)]
+if sorted(_re.search(r'data-ver-demo-origen="(\w+)"',x).group(1) for x in _demo if 'data-ver-demo-origen=' in x)!=["barra","hero","precio"] or any('href="#prueba"' not in x for x in _demo): mal.append("los Ver demo de barra, hero y precio deben apuntar a #prueba (#180)")
+_abre=[m.group(0) for m in _re.finditer(r'<[^>]*api\.inntuitivo\.com/demo[^>]*>', idx)]
+if len(_abre)!=1 or 'id="prueba-form"' not in _abre[0] or 'method="get"' not in _abre[0]: mal.append("lo único que abre el demo es el formulario de la sección Pruébalo gratis (#181)")
+if 'name="o" value="prueba"' not in idx or 'name="sitio"' not in idx or 'for="prueba-sitio"' not in idx: mal.append("el formulario de la sección debe llevar el origen prueba, el campo sitio y su etiqueta (#181)")
+if "style=" in idx[idx.index('<section id="prueba">'):idx.index('<section id="precio">')]: mal.append("la sección Pruébalo gratis no puede llevar estilos en línea (CSP, #181)")
 if "Ver una muestra gratis" in idx or "Pide una muestra gratis" in idx or 'id="ms-form"' in idx: mal.append("quedó la muestra gratis anterior en la landing (#175)")
 # #179: textos legales de la prueba gratis, tal cual los aprobó Ricardo, y ninguna línea de la muestra por correo
 TER = open("terminos.html", encoding="utf-8").read(); PRI = open("privacidad.html", encoding="utf-8").read()
