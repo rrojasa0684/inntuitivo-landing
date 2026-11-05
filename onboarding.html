@@ -99,6 +99,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 .final{text-align:center;padding:40px 0}
 .final .cohete{font-size:3rem}
 .final h1{margin-top:12px}
+.listo-listas{margin:28px auto 0;max-width:46ch;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(255,255,255,.05)}.listo-listas h2{font-size:1.05rem;margin:0}
 .final p{margin-top:16px;color:var(--tinta-suave);max-width:46ch;margin-left:auto;margin-right:auto}
 .pie{margin-top:26px;text-align:center;font-size:.82rem;color:var(--tinta-suave)}
 .pie a{color:var(--rosa-claro)}
@@ -241,6 +242,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
     <p id="final-msg">Tu agente ya está conectado a tu correo y empieza a buscar clientes por ti. Te avisamos por correo cuando alguien responda.</p>
     <p><a id="ir-panel" class="btn btn-primario" href="https://api.inntuitivo.com/panel/" style="display:inline-block;text-decoration:none">Entrar a mi panel</a></p>
     <p id="ir-panel-r" class="nota" role="status" aria-live="polite"></p>
+    <div id="listo-listas" class="listo-listas"><h2>¿Ya tienes una lista de Apollo, Lusha, Hunter o Explee?</h2><p>Súbela y tu agente la suma a los que encuentra solo.</p><p><a id="ir-listas" class="btn btn-sec" href="https://api.inntuitivo.com/panel/" style="display:inline-block;text-decoration:none">Subir mi lista</a></p><p id="ir-listas-r" class="nota" role="status" aria-live="polite"></p></div>
   </div>
 </section>
 
@@ -296,12 +298,14 @@ const token=(function(){const q=new URLSearchParams(location.search).get('token'
 })();
 
 // #104: «Entrar a mi panel» abre la sesión directo, sin pedir ningún enlace por correo (el botón sirve una vez; el correo queda para volver otro día).
-$('ir-panel').addEventListener('click',async function(ev){ev.preventDefault();const r0=$('ir-panel-r');r0.textContent='';
-  if(!token){location.href=this.href;return;}
-  try{const r=await pedir(API+'/onboarding/entrar-panel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});const d=await r.json();
+function entrarAlPanel(ev,el,r0,ir){ev.preventDefault();r0.textContent='';
+  if(!token){location.href=el.href;return Promise.resolve();}
+  return pedir(API+'/onboarding/entrar-panel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(ir?{token,ir}:{token})}).then(function(r){return r.json();}).then(function(d){
     if(d&&d.ok&&d.url){location.href=d.url;return;}
     r0.innerHTML=escapa((d&&d.mensaje)||'No pudimos abrir tu panel desde aquí.')+' <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';
-  }catch(e){r0.innerHTML='No pudimos abrir tu panel ahora. <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';}});
+  }).catch(function(){r0.innerHTML='No pudimos abrir tu panel ahora. <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';});}
+$('ir-panel').addEventListener('click',function(ev){entrarAlPanel(ev,this,$('ir-panel-r'),'');});
+$('ir-listas').addEventListener('click',function(ev){entrarAlPanel(ev,this,$('ir-listas-r'),'contactos');});   // #167: opcional, no suma pasos; lleva a Contactos
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
 // dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
 // pattern nuevo de los inputs type=email de index.html: exige un punto en el dominio.

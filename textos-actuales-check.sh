@@ -66,6 +66,12 @@ if any("a mano" in a for _, a in faq): mal.append("el FAQ dice 'a mano'")
 MS_P = "¿Funciona con Microsoft 365?"
 MS_R = "Sí. Solo inicias sesión. En algunas empresas el administrador aprueba la conexión una vez: te guiamos y le escribimos por ti."
 if (MS_P, MS_R) not in faq: mal.append("falta la pregunta «¿Funciona con Microsoft 365?» con su respuesta aprobada (#124)")
+# #168: la pregunta de las listas, con su respuesta exacta, y la línea de «Cómo funciona» (aprobadas por Ricardo)
+LS_P = "¿Puedo usar mis listas de Apollo, Lusha, Hunter o Explee?"
+LS_R = "Sí. Desde tu panel subes tus listas en CSV o Excel. Tu agente las suma a las empresas que encuentra solo en la web abierta, las filtra con tu perfil de cliente ideal, busca a quien decide, verifica cada correo antes de escribir y les escribe con tu marca. Tus listas son solo tuyas: nadie más las usa."
+LS_L = "¿Ya tienes tus listas? Súbelas y tu agente las filtra, verifica cada correo y les escribe como a las empresas que encuentra solo."
+if (LS_P, LS_R) not in faq: mal.append("falta la pregunta de las listas con su respuesta aprobada (#168)")
+if '<p class="listas-linea">' + LS_L + '</p>' not in idx: mal.append("falta la línea de las listas en «Cómo funciona» (#168)")
 print("TEXTOS_ACTUALES_OK" if not mal else "\n".join(mal))
 sys.exit(1 if mal else 0)
 PY
