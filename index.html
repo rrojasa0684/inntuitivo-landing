@@ -725,7 +725,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
          cambio, ~1/semana desde el 18-ago (mismo dato que ya se seguía por el CTA del hero,
          pero ahora el nav también apunta ahí). -->
     <div class="nav-acciones">
-      <a class="nav-demo" href="https://api.inntuitivo.com/demo?o=barra" data-umami-event="ver_demo_barra" data-ver-demo>Ver demo 💰</a>
+      <a class="nav-demo" href="#prueba" data-umami-event="ver_demo_hacia_seccion" data-umami-event-origen="barra" data-ver-demo data-ver-demo-origen="barra">Ver demo 💰</a>
       <a class="nav-cta" href="#activar">Activar mi agente 🤖</a>
     </div>
   </nav>
@@ -799,7 +799,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
            (instrucción explícita de Ricardo: el hero no se toca). Candado:
            cta-color-por-accion-check.sh. -->
       <div class="cta-row">
-        <a class="btn btn-secundario" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" data-ver-demo>Ver demo 💰</a>
+        <a class="btn btn-secundario" href="#prueba" data-umami-event="ver_demo_hacia_seccion" data-umami-event-origen="hero" data-ver-demo data-ver-demo-origen="hero">Ver demo 💰</a>
         <a class="btn btn-primario" href="#activar">Activar mi agente 🤖</a>
       </div>
       <p class="micro">Arranca hoy conectando tu correo · Cancela cuando quieras ✨</p>
@@ -1350,7 +1350,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <div class="pg-paso"><span class="pg-num">3</span><br>Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.</div>
     </div>
     <p class="pg-creditos">Tu prueba trae 6 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado).</p>
-    <div class="pg-cta"><a class="btn btn-secundario" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo_prueba" data-ver-demo>Ver demo 💰</a></div>
+    <div class="pg-cta"><a class="btn btn-secundario" id="ver-demo-seccion" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo_prueba" data-umami-event-origen="directo" data-ver-demo>Ver demo 💰</a></div>
   </section>
 
   <section id="precio">
@@ -1509,7 +1509,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
         <div>
           <a class="btn btn-primario boton-plan" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
-          <a class="btn btn-secundario boton-plan boton-demo" id="ver-demo" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" data-ver-demo>Ver demo 💰</a>
+          <a class="btn btn-secundario boton-plan boton-demo" id="ver-demo" href="#prueba" data-umami-event="ver_demo_hacia_seccion" data-umami-event-origen="precio" data-ver-demo data-ver-demo-origen="precio">Ver demo 💰</a>
           <p class="micro micro-plan">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $45/mes por PayPal (creas la cuenta en el momento, una sola vez). Cancela cuando quieras.</p>
           <p class="micro micro-plan">¿Dudas antes de activar? <a href="https://wa.me/50672045991?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
         </div>
@@ -2131,6 +2131,10 @@ document.addEventListener('DOMContentLoaded', function () {
 function ocultar(){bs.forEach(function(b){b.hidden=true})}
 if(!window.fetch)return ocultar();
 fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!(d&&d.activo===true&&d.lleno!==true))ocultar()}).catch(ocultar);})();
+/* #180: los tres «Ver demo» de arriba (barra, hero, precio) bajan a #prueba; solo el de la sección abre el demo. Se recuerda de cuál venía la persona: la barra pasa o=barra al demo (el reporte del demo ya la conoce); hero y precio siguen como «landing» y se distinguen en la medición (origen). */
+(function(){var d=document.getElementById('ver-demo-seccion');if(!d)return;
+document.querySelectorAll('a[data-ver-demo-origen]').forEach(function(a){a.addEventListener('click',function(){var o=a.getAttribute('data-ver-demo-origen');
+d.setAttribute('data-umami-event-origen',o);d.setAttribute('href','https://api.inntuitivo.com/demo?o='+(o==='barra'?'barra':'landing'))})})})();
 /* #175: el ancla antigua #muestra lleva a #prueba */
 if(location.hash==='#muestra'){var p=document.getElementById('prueba');if(p)p.scrollIntoView()}
 </script>
