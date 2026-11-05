@@ -5,11 +5,12 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARCHIVO = os.environ.get("UMAMI_BASELINE_ARCHIVO") or os.path.join(RAIZ, "..", "outreach-engine", "out", "umami-baseline.json")
 MAX_HORAS = 24
+MAX_DIAS_FECHA = 2   # la `fecha` es la de los números de Umami (no la hora en que la Mac escribió el archivo): unos números de otra corrida no pasan como frescos
 MARCA = "baseline-auto"
 
 
@@ -19,7 +20,7 @@ def leer():
         with open(ARCHIVO, encoding="utf-8") as f:
             d = json.load(f)
         gen = datetime.strptime(d["generado"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        float(d["scroll_precio_dia"]); float(d["cta_activar_semana"]); str(d["fecha"])
+        float(d["scroll_precio_dia"]); float(d["cta_activar_semana"]); date.fromisoformat(str(d["fecha"]))
     except FileNotFoundError:
         return None, "no existe el archivo del baseline (" + ARCHIVO + ")"
     except Exception as ex:
@@ -27,6 +28,9 @@ def leer():
     horas = (datetime.now(timezone.utc) - gen).total_seconds() / 3600
     if horas > MAX_HORAS:
         return None, "el baseline tiene %d h (máximo %d)" % (horas, MAX_HORAS)
+    dias = (datetime.now(timezone.utc).date() - date.fromisoformat(str(d["fecha"]))).days
+    if dias > MAX_DIAS_FECHA:
+        return None, "los números del baseline son del %s (hace %d días, máximo %d)" % (d["fecha"], dias, MAX_DIAS_FECHA)
     return d, None
 
 
