@@ -172,6 +172,14 @@
             "@type": "Answer",
             "text": "Tres casos en los que no es para ti: <strong>1)</strong> si tus clientes son personas y no empresas —vendes casas, seguros o cursos al consumidor final—: el agente busca empresas con correo publicado, no encuentra individuos. <strong>2)</strong> si tus clientes son corporaciones grandes —bancos, multinacionales, cadenas—: no publican un correo de contacto alcanzable y el agente encuentra puertas cerradas. <strong>3)</strong> si todavía no tienes claro qué tipo de empresa es tu cliente ideal, no hay una búsqueda que armar. Preferimos decírtelo antes y no cobrarte para que lo descubras después."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo usar mis listas de Apollo, Lusha, Hunter o Explee?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Desde tu panel subes tus listas en CSV o Excel. Tu agente las suma a las empresas que encuentra solo en la web abierta, las filtra con tu perfil de cliente ideal, busca a quien decide, verifica cada correo antes de escribir y les escribe con tu marca. Tus listas son solo tuyas: nadie más las usa."
+          }
         }
       ]
     }
@@ -269,6 +277,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .paso .num{font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--rosa-claro);margin-bottom:14px;display:block}
 .paso h3{font-size:1.1rem;font-weight:600;margin-bottom:8px;color:#fff}
 .paso p{font-size:.95rem;color:var(--tinta-suave)}
+.listas-linea{margin:28px auto 0;max-width:720px;text-align:center;font-size:.95rem;color:var(--tinta-suave)}
 
 /* Comparación */
 /* 18-sep-2026: overflow-x:hidden -- .col-vs.sin-agente/.con-agente arrancan
@@ -693,7 +702,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-04: baseline scroll_precio=1.6/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.6/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -1194,6 +1203,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         <p>Si no responden, insiste con criterio. Si responden, frena todo y te avisa al instante. Cada lunes recibes tu reporte: enviados, respuestas y conversaciones abiertas.</p>
       </div>
     </div>
+    <p class="listas-linea">¿Ya tienes tus listas? Súbelas y tu agente las filtra, verifica cada correo y les escribe como a las empresas que encuentra solo.</p>
   </section>
 
   <section>
@@ -1656,6 +1666,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     <details>
       <summary>¿Mis datos y mi correo están seguros?</summary>
       <p>Sí. El agente envía desde tu propio correo, con un acceso autorizado que puedes revocar cuando quieras, y las respuestas llegan directo a tu bandeja. Tus datos no se comparten con nadie y cada cliente corre en un entorno aislado.</p>
+    </details>
+    <details>
+      <summary>¿Puedo usar mis listas de Apollo, Lusha, Hunter o Explee?</summary>
+      <p>Sí. Desde tu panel subes tus listas en CSV o Excel. Tu agente las suma a las empresas que encuentra solo en la web abierta, las filtra con tu perfil de cliente ideal, busca a quien decide, verifica cada correo antes de escribir y les escribe con tu marca. Tus listas son solo tuyas: nadie más las usa.</p>
     </details>
     <details>
       <summary>¿Qué pasa si cancelo?</summary>
