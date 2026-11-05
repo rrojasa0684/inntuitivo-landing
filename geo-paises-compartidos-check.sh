@@ -13,7 +13,7 @@
 set -euo pipefail
 
 fail=0
-paginas=(index.html onboarding.html)
+paginas=(onboarding.html)  # 5-nov (#175): index.html ya no usa el selector (se retiró el formulario de la muestra)
 
 for pagina in "${paginas[@]}"; do
   if ! grep -q '<script src="geo-chips.js"></script>' "$pagina"; then
