@@ -62,6 +62,9 @@ for q in det:
     if q not in {x for x, _ in faq}: mal.append(f"pregunta visible sin su entrada en el JSON-LD: {q}")
 if not any(q == "¿Qué es un agente SDR y qué hace el mío?" for q, _ in faq): mal.append("falta la pregunta del SDR")
 if any("a mano" in a for _, a in faq): mal.append("el FAQ dice 'a mano'")
+# #169: la respuesta del SDR dice que Inntuitivo es tu SDR con IA (aprobado por Ricardo)
+SDR_A = dict(faq).get("¿Qué es un agente SDR y qué hace el mío?", "")
+if "Inntuitivo es tu SDR con IA: hace ese trabajo por ti. Busca empresas" not in SDR_A or "Tu agente de IA hace ese trabajo" in SDR_A: mal.append("la respuesta del SDR no dice «Inntuitivo es tu SDR con IA» (#169)")
 # #124: la pregunta de Microsoft 365, con su respuesta exacta, en el JSON-LD (y, por la igualdad de arriba, en el <details> visible)
 MS_P = "¿Funciona con Microsoft 365?"
 MS_R = "Sí. Solo inicias sesión. En algunas empresas el administrador aprueba la conexión una vez: te guiamos y le escribimos por ti."

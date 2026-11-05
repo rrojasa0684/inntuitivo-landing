@@ -33,12 +33,13 @@ if [ -z "${GITHOOK_RUTA:-}" ]; then
     [ -z "$modo" ] || [ "$modo" = "100755" ] || mal "el hook está guardado en git con modo $modo (debe ser 100755): git lo ignora"
 fi
 git -C "$T" init -q -b main || { echo "FALLA no se pudo crear el repo temporal"; exit 1; }
-mkdir "$T/.githooks"; cp "$HOOK" "$T/.githooks/pre-commit"; chmod +x "$T/.githooks/pre-commit"
+mkdir "$T/.githooks"; cp "$HOOK" "$T/.githooks/pre-commit"; chmod +x "$T/.githooks/pre-commit"; cp "$(dirname "$HOOK")/baseline-umami.py" "$T/.githooks/" 2>/dev/null || true
 paso config core.hooksPath .githooks
+export UMAMI_BASELINE_ARCHIVO="$T/b.json"; echo "{\"scroll_precio_dia\": 1, \"cta_activar_semana\": 1, \"fecha\": \"2026-11-04\", \"generado\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$T/b.json"
 echo x > "$T/README.md"; paso add README.md
 permitido "docs sobre main permitido (README.md)" -m "docs: inicio"
 
-mkdir -p "$T/js"; echo "a=1" > "$T/js/a.js"; echo "a=1" > "$T/index.html"
+mkdir -p "$T/js"; echo "a=1" > "$T/js/a.js"; printf "<html>\n<body>\n<p>a</p>\n</body>\n</html>\n" > "$T/index.html"
 paso add js/a.js
 rechazado "codigo sobre main rechazado (js/a.js)" "js/a.js" -m "feat: codigo"
 paso reset -q; paso add index.html
