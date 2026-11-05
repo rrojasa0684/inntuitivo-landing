@@ -1331,26 +1331,69 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
-  <!-- Prueba gratis (#175): reemplaza la muestra; #muestra queda como alias del ancla -->
+  <!-- Prueba gratis (#175, rediseñada en #181): reemplaza la muestra; #muestra queda como alias del ancla. Sin estilos en línea (CSP); animaciones solo con la clase pg-anim que pone el script y apagadas con prefers-reduced-motion. -->
 <style>
+  #prueba .pg-sub{margin-top:14px;color:var(--tinta-suave);max-width:58ch}
   .pg-pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}
-  .pg-paso{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:24px 22px;font-size:.98rem;color:var(--tinta-suave);line-height:1.55}
-  .pg-paso .pg-num{display:inline-block;font-weight:700;color:var(--rosa-claro);margin-bottom:8px}
-  .pg-creditos{text-align:center;margin-top:24px;color:var(--tinta);font-size:1rem}
-  .pg-cta{text-align:center;margin-top:20px}
-  @media (max-width:840px){.pg-pasos{grid-template-columns:1fr}}
+  .pg-paso{position:relative;overflow:hidden;background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:30px 22px 24px;font-size:.98rem;color:var(--tinta-suave);line-height:1.55;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+  .pg-paso:hover{transform:translateY(-4px);border-color:var(--rojo);box-shadow:0 14px 34px rgba(0,0,0,.35)}
+  .pg-barra{position:absolute;left:0;top:0;height:3px;width:100%;background:var(--gradiente)}
+  .pg-cab{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .pg-paso .pg-num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--rosa-claro);font-weight:700;color:var(--rosa-claro);flex:none}
+  .pg-etq{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--rosa-claro)}
+  .pg-icono{margin-left:auto;font-size:1.6rem;line-height:1}
+  .pg-franja{display:flex;flex-wrap:wrap;align-items:center;gap:20px 36px;margin-top:24px;background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:22px 26px}
+  .pg-cifra{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+  .pg-cifra strong{font-family:'Audiowide',sans-serif;font-weight:400;font-size:3.2rem;color:#fff}
+  .pg-cifra span{font-weight:600;color:var(--tinta)}
+  .pg-cifra small{margin-top:4px;color:var(--tinta-suave);font-size:.88rem}
+  .pg-incluye{list-style:none;display:flex;flex-wrap:wrap;gap:10px;flex:1 1 280px}
+  .pg-incluye li{border:1px solid var(--linea);border-radius:999px;padding:6px 14px;font-size:.9rem;color:var(--tinta)}
+  .pg-incluye li::before{content:"✓ ";color:var(--rosa-claro);font-weight:700}
+  .pg-cta{text-align:center;margin-top:28px}
+  .pg-form[hidden]{display:none}
+  .pg-campo{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:560px;margin:0 auto}
+  .pg-campo input{flex:1 1 240px;min-width:0;background:var(--carta);color:var(--tinta);border:1.5px solid var(--linea);border-radius:999px;padding:14px 22px;font:inherit;font-size:1rem}
+  .pg-campo input::placeholder{color:var(--tinta-suave)}
+  .pg-campo input:focus-visible{outline:3px solid var(--rojo);outline-offset:2px;border-color:var(--rojo)}
+  .pg-campo button{cursor:pointer;font-family:inherit}
+  .pg-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .pg-confianza{margin-top:14px;font-size:.88rem;color:var(--tinta-suave);text-align:center}
+  @media (max-width:840px){.pg-pasos{grid-template-columns:1fr}.pg-franja{padding:20px}.pg-campo button{flex:1 1 100%}}
+  @media (prefers-reduced-motion:no-preference){
+    .pg-anim .pg-num{animation:pg-pulso 2.4s ease-in-out infinite}
+    .pg-anim .pg-paso{opacity:0;transform:translateY(14px)}
+    .pg-anim .pg-barra{transform:scaleX(0);transform-origin:left}
+    .pg-anim.pg-listo .pg-paso{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease,border-color .2s ease,box-shadow .2s ease}
+    .pg-anim.pg-listo .pg-paso:hover{transform:translateY(-4px)}
+    .pg-anim.pg-listo .pg-barra{transform:scaleX(1);transition:transform .9s ease}
+    .pg-anim.pg-listo .pg-paso:nth-child(2),.pg-anim.pg-listo .pg-paso:nth-child(2) .pg-barra{transition-delay:.25s}
+    .pg-anim.pg-listo .pg-paso:nth-child(3),.pg-anim.pg-listo .pg-paso:nth-child(3) .pg-barra{transition-delay:.5s}
+  }
+  @keyframes pg-pulso{0%,100%{box-shadow:0 0 0 0 rgba(255,133,166,.45)}50%{box-shadow:0 0 0 7px rgba(255,133,166,0)}}
 </style>
   <section id="prueba">
     <span id="muestra"></span>
     <span class="eyebrow">🎁 Prueba gratis</span>
     <h2>Pruébalo gratis</h2>
+    <p class="pg-sub">Escribe tu sitio y tu agente hace el trabajo con tu empresa. No envía nada hasta que actives.</p>
     <div class="pg-pasos">
-      <div class="pg-paso"><span class="pg-num">1</span><br>Escribe tu sitio: tu agente entiende qué vendes y a quién.</div>
-      <div class="pg-paso"><span class="pg-num">2</span><br>Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.</div>
-      <div class="pg-paso"><span class="pg-num">3</span><br>Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.</div>
+      <div class="pg-paso"><span class="pg-barra"></span><div class="pg-cab"><span class="pg-num">1</span><span class="pg-etq">Tú · 30 segundos</span><span class="pg-icono" aria-hidden="true">🌐</span></div>Escribe tu sitio: tu agente entiende qué vendes y a quién.</div>
+      <div class="pg-paso"><span class="pg-barra"></span><div class="pg-cab"><span class="pg-num">2</span><span class="pg-etq">Tu agente</span><span class="pg-icono" aria-hidden="true">🛰️</span></div>Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.</div>
+      <div class="pg-paso"><span class="pg-barra"></span><div class="pg-cab"><span class="pg-num">3</span><span class="pg-etq">Tu panel</span><span class="pg-icono" aria-hidden="true">📊</span></div>Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.</div>
     </div>
-    <p class="pg-creditos">Tu prueba trae 6 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado).</p>
-    <div class="pg-cta"><a class="btn btn-secundario" id="ver-demo-seccion" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo_prueba" data-umami-event-origen="directo" data-ver-demo>Ver demo 💰</a></div>
+    <div class="pg-franja">
+      <div class="pg-cifra"><strong data-creditos>6</strong><span>créditos gratis</span><small>1 crédito = 1 lead completo</small></div>
+      <ul class="pg-incluye"><li>Empresa que encaja</li><li>Correo verificado</li><li>Quien decide</li><li>Correo ya redactado</li></ul>
+    </div>
+    <div class="pg-cta">
+      <form class="pg-form" id="prueba-form" action="https://api.inntuitivo.com/demo" method="get" data-ver-demo>
+        <input type="hidden" name="o" value="prueba">
+        <label class="pg-sr" for="prueba-sitio">Tu sitio web</label>
+        <div class="pg-campo"><input id="prueba-sitio" name="sitio" type="text" inputmode="url" autocomplete="url" maxlength="200" placeholder="tusitio.com"><button class="btn btn-secundario" type="submit">Probar gratis 🚀</button></div>
+      </form>
+      <p class="pg-confianza">Sin tarjeta · No envía nada hasta que actives · Se borra a los 14 días si no activas</p>
+    </div>
   </section>
 
   <section id="precio">
@@ -2131,10 +2174,11 @@ document.addEventListener('DOMContentLoaded', function () {
 function ocultar(){bs.forEach(function(b){b.hidden=true})}
 if(!window.fetch)return ocultar();
 fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!(d&&d.activo===true&&d.lleno!==true))ocultar()}).catch(ocultar);})();
-/* #180: los tres «Ver demo» de arriba (barra, hero, precio) bajan a #prueba; solo el de la sección abre el demo. Se recuerda de cuál venía la persona: la barra pasa o=barra al demo (el reporte del demo ya la conoce); hero y precio siguen como «landing» y se distinguen en la medición (origen). */
-(function(){var d=document.getElementById('ver-demo-seccion');if(!d)return;
-document.querySelectorAll('a[data-ver-demo-origen]').forEach(function(a){a.addEventListener('click',function(){var o=a.getAttribute('data-ver-demo-origen');
-d.setAttribute('data-umami-event-origen',o);d.setAttribute('href','https://api.inntuitivo.com/demo?o='+(o==='barra'?'barra':'landing'))})})})();
+/* #181: la sección «Pruébalo gratis»: el formulario abre el demo con el sitio (origen «prueba»); aparición con IntersectionObserver, apagada con prefers-reduced-motion. */
+(function(){var sec=document.getElementById('prueba'),f=document.getElementById('prueba-form');if(!sec)return;
+if(f)f.addEventListener('submit',function(){var v=(document.getElementById('prueba-sitio').value||'').trim();if(window.umami)umami.track(v?'prueba_gratis_con_sitio':'prueba_gratis_sin_sitio')});
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
+sec.classList.add('pg-anim');var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){sec.classList.add('pg-listo');o.disconnect()}})},{threshold:.15});o.observe(sec.querySelector('.pg-pasos'));})();
 /* #175: el ancla antigua #muestra lleva a #prueba */
 if(location.hash==='#muestra'){var p=document.getElementById('prueba');if(p)p.scrollIntoView()}
 </script>
