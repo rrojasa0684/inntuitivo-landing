@@ -162,7 +162,15 @@
           "name": "¿Quién es Houston?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te manda tu muestra y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre."
+            "text": "El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te guía en tu prueba gratis y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Hay prueba gratis?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Escribes tu sitio y tu agente hace el trabajo con tu empresa: busca a tus clientes ideales, verifica cada correo, encuentra a quien decide y redacta el correo, con la fuente de cada dato. La prueba trae 4 créditos gratis (1 crédito = 1 lead completo) y no envía nada hasta que actives. Si no activas, tu prueba se borra a los 14 días."
           }
         },
         {
@@ -193,9 +201,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- 17-sep-2026: selector de países COMPARTIDO con onboarding.html -- ver geo-chips.js/.css
-     (lista, comportamiento, estilo en un solo lugar) y geo-paises-compartidos-check.sh. -->
-<link rel="stylesheet" href="geo-chips.css">
 <style>
 :root{
   --rojo:#DE0540;
@@ -226,6 +231,8 @@ nav{padding:18px 0;display:flex;justify-content:space-between;align-items:center
 .marca{display:flex;align-items:center;gap:12px;text-decoration:none}
 .marca img{width:42px;height:42px}
 .marca .nombre{font-family:'Audiowide',sans-serif;font-size:1.25rem;color:#fff;letter-spacing:.01em}
+.nav-acciones{display:flex;align-items:center;gap:10px}
+.nav-demo{font-size:.95rem;font-weight:600;text-decoration:none;color:#fff;background:var(--morado);border:1.5px solid rgba(255,255,255,.3);padding:8.5px 18px;border-radius:999px;white-space:nowrap}
 .nav-cta{font-size:.95rem;font-weight:600;text-decoration:none;color:#fff;background:var(--gradiente);padding:10px 20px;border-radius:999px}
 
 /* Hero */
@@ -484,12 +491,6 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
 .redes a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--linea);transition:background .15s ease,transform .15s ease}
 .redes a:hover{background:var(--rojo);transform:translateY(-2px)}
 .redes svg{width:18px;height:18px;fill:#fff}
-.demo-muestra{text-align:center;margin-top:14px;font-size:1rem;color:var(--tinta)}
-/* inline-block: si no entra en la línea, baja entero en vez de partir la frase */
-/* Rojo de marca (#DE0540) aclarado en luminosidad —mismo tono y saturación—
-   para pasar 4.5:1 sobre el #180E31 del bloque: el de marca puro da 3.67:1.
-   4.55:1 y no el mínimo de 4.50, para que aguante un retoque del fondo. */
-.demo-muestra a{display:inline-block;padding:10px 4px;font-weight:400;color:#FA0B4C;text-decoration:underline;text-underline-offset:3px}
 
 @media (max-width:840px){
   .semana{grid-template-columns:1fr 1fr}
@@ -560,6 +561,11 @@ footer{padding:36px 0 28px;border-top:1px solid var(--linea);margin-top:24px;dis
   .hero p.sub,.hero p.que-es{font-size:1.02rem}
 }
 
+@media (max-width:520px){
+  .nav-acciones{width:100%}
+  .nav-demo,.nav-cta{flex:1;text-align:center;padding-left:8px;padding-right:8px;font-size:.84rem;white-space:nowrap}
+}
+
 /* CTA WhatsApp footer */
 .wsp-cta{display:inline-flex;align-items:center;gap:7px;background:#0B7A44;color:#fff !important;text-decoration:none;font-weight:600;font-size:.88rem;padding:8px 16px;border-radius:999px;transition:transform .15s ease,box-shadow .15s ease}
 .wsp-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,211,102,.4)}
@@ -617,7 +623,7 @@ nav{position:sticky;top:0;background:rgba(13,7,34,.8);backdrop-filter:blur(10px)
 nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 /* El nav sticky mide ~78px, y a <=520px envuelve a dos filas (~130px).
    Sin este margen tapa el eyebrow y parte del h2 al saltar desde los CTAs. */
-#muestra,#precio,#activar{scroll-margin-top:140px}
+#prueba,#precio,#activar{scroll-margin-top:140px}
 
 /* --- Paquete de animacion (punto 7) --- */
 /* 7a. Cascada escalonada en los grids */
@@ -702,7 +708,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.7/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.8/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -718,7 +724,10 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
          conversión APARTE del copy del 1-sep -- baseline propio: cta_activar antes de este
          cambio, ~1/semana desde el 18-ago (mismo dato que ya se seguía por el CTA del hero,
          pero ahora el nav también apunta ahí). -->
-    <a class="nav-cta" href="#activar">Activar mi agente 🤖</a>
+    <div class="nav-acciones">
+      <a class="nav-demo" href="https://api.inntuitivo.com/demo?o=barra" data-umami-event="ver_demo_barra" data-ver-demo>Ver demo 💰</a>
+      <a class="nav-cta" href="#activar">Activar mi agente 🤖</a>
+    </div>
   </nav>
 
   <!-- Houston, la mascota -- decorativa, position:absolute DENTRO de .panel
@@ -790,7 +799,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
            (instrucción explícita de Ricardo: el hero no se toca). Candado:
            cta-color-por-accion-check.sh. -->
       <div class="cta-row">
-        <a class="btn btn-secundario" href="#muestra">Ver una muestra gratis 💸</a>
+        <a class="btn btn-secundario" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" data-ver-demo>Ver demo 💰</a>
         <a class="btn btn-primario" href="#activar">Activar mi agente 🤖</a>
       </div>
       <p class="micro">Arranca hoy conectando tu correo · Cancela cuando quieras ✨</p>
@@ -1322,125 +1331,26 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     </div>
   </section>
 
-  <!-- Muestra gratis -->
+  <!-- Prueba gratis (#175): reemplaza la muestra; #muestra queda como alias del ancla -->
 <style>
-  .ms-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;margin-top:36px;align-items:stretch}
-  .ms-que{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:28px 26px}
-  .ms-que h3{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:16px}
-  .ms-que ul{list-style:none}
-  .ms-que li{padding:9px 0;font-size:.97rem;color:var(--tinta-suave);display:flex;gap:11px;line-height:1.5}
-  .ms-que li::before{content:"✓";color:var(--rosa-claro);font-weight:700;flex-shrink:0}
-  .ms-fit{margin-top:18px;font-size:.9rem;color:var(--tinta-suave);border-top:1px solid var(--linea);padding-top:16px;line-height:1.55}
-  .ms-fit strong{color:var(--tinta);font-weight:600}
-  /* 17-sep-2026: fusiona el contenido de la ex-caja .ms-mas dentro de .ms-que --
-     el grid ya igualaba el alto del CONTENEDOR (align-items:stretch) pero el
-     contenido de .ms-que terminaba antes, dejando un hueco vacío visible; medido
-     antes del fix: .ms-que=1028.09px / .ms-form=1028.09px de contenedor, con
-     .ms-mas suelta debajo en 266px. Después: .ms-que=.ms-form=1054.375px, sin
-     caja suelta. baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami,
-     últimos 7 días, mismo número citado arriba en el bloque Mercately). */
-  .ms-noves-title{font-size:1.05rem;font-weight:600;color:#fff;margin:24px 0 16px;padding-top:20px;border-top:1px solid var(--linea)}
-  .ms-que .ms-noves li::before{content:none}
-  .ms-que .ms-noves li .ic{flex-shrink:0}
-  .ms-form{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:22px;display:flex;flex-direction:column}
-  .ms-form h3{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:6px}
-  .ms-form p.ms-nota{font-size:.86rem;color:var(--tinta-suave);margin-bottom:6px}
-  .ms-form label{display:block;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;color:#CBBEE6;margin:14px 0 6px}
-  .ms-form label .ms-hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta-suave);font-size:.84rem;margin-top:4px}
-  .ms-form .ms-nudge{font-size:.82rem;color:var(--tinta-suave);margin-top:6px}
-  .ms-form .ms-nudge:empty{display:none}
-  .ms-form input,.ms-form textarea,.ms-form select{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--linea);border-radius:12px;color:var(--tinta);font-family:inherit;font-size:1rem;padding:12px 14px;resize:vertical}
-  .ms-form select{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238E80B3' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
-  .ms-form select option{background:#1a1030;color:var(--tinta)}
-  .ms-form input:focus,.ms-form textarea:focus,.ms-form select:focus{border-color:var(--rosa-claro);outline:none}
-  .ms-form input::placeholder,.ms-form textarea::placeholder{color:#8E80B3}
-  /* 17-sep-2026: el resto del look de los chips (color, hover, estado marcado,
-     tamaño en mobile) vive en geo-chips.css, COMPARTIDO con onboarding.html --
-     esta regla es la ÚNICA que se queda acá, porque tiene que ganarle a
-     .ms-form label{text-transform:uppercase} (1 clase + 1 elemento, specificity
-     0,1,1), que geo-chips.css's .geo-chip{text-transform:none} (1 clase,
-     0,1,0) SOLO pierde en esta página -- onboarding.html no tiene un
-     ".ms-form label" que compita, así que ahí no hace falta este refuerzo.
-     Sin este override las mayúsculas vuelven: bug real, ver historial. */
-  .ms-form .geo-chip{text-transform:none}
-  /* baseline scroll_precio=10.3/día, cta_activar=0/semana (mismo número citado en el
-     hero). Comparar de acá a 2 semanas. */
-  .ms-decisor-opciones{display:flex;gap:18px;margin-top:2px}
-  .ms-decisor-opcion{display:flex!important;align-items:center;gap:6px;font-size:.92rem;text-transform:none;letter-spacing:0;font-weight:400;color:var(--tinta);margin:0!important;cursor:pointer}
-  .ms-decisor-opcion input{width:auto!important;padding:0!important}
-  .ms-btn{display:block;width:100%;font-weight:600;font-family:inherit;text-align:center;padding:15px 28px;border:none;border-radius:999px;font-size:1.02rem;cursor:pointer;margin-top:20px;color:#fff;background:var(--gradiente);box-shadow:0 8px 24px rgba(222,5,64,.25);transition:transform .15s ease,box-shadow .15s ease}
-  .ms-btn:hover{transform:translateY(-2px)}
-  .ms-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-  /* Honeypot: fuera de pantalla, sin display:none para que los bots lo llenen */
-  .ms-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-  .ms-resultado{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:.94rem;line-height:1.5;display:none}
-  .ms-resultado .titulo{font-weight:600;display:block;margin-bottom:4px}
-  .ms-resultado.ok{display:block;background:rgba(62,213,152,.12);border:1px solid rgba(62,213,152,.5);color:#C8F4E2}
-  .ms-resultado.error{display:block;background:rgba(222,5,64,.12);border:1px solid rgba(222,5,64,.5);color:#FFD3DE}
-  .ms-resultado.alerta{display:block;background:rgba(255,198,92,.1);border:1px solid rgba(255,198,92,.45);color:#FBE7BE}
-  @media (max-width:840px){
-    .ms-grid{grid-template-columns:1fr}
-  }
+  .pg-pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}
+  .pg-paso{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:24px 22px;font-size:.98rem;color:var(--tinta-suave);line-height:1.55}
+  .pg-paso .pg-num{display:inline-block;font-weight:700;color:var(--rosa-claro);margin-bottom:8px}
+  .pg-creditos{text-align:center;margin-top:24px;color:var(--tinta);font-size:1rem}
+  .pg-cta{text-align:center;margin-top:20px}
+  @media (max-width:840px){.pg-pasos{grid-template-columns:1fr}}
 </style>
-  <section id="muestra">
-    <span class="eyebrow">🎁 Muestra gratis</span>
-    <h2>Ve a tu agente escribir sobre tus prospectos reales, antes de pagar nada</h2>
-    <!-- 31-oct: cambio solo de palabras (sin anglicismos), baseline sin cambio: scroll_precio 10,3/día y cta_activar 0/semana (último dato medido, 30-oct). -->
-    <p class="intro">Dinos a quién le vendes y tu agente arma una muestra con empresas reales de tu mercado: las encuentra, investiga a cada una y te escribe los correos. Tú solo lees el resultado — sin configurar nada, sin conectar tu correo y sin pagar.</p>
-    <div class="ms-grid">
-      <div class="ms-que">
-        <h3>Qué recibes</h3>
-        <ul>
-          <li>Tu agente evalúa decenas de empresas de tu mercado y te escribe un borrador por cada una que pasa su filtro. Cuántos recibes depende de cuántas publiquen un contacto — a veces varios, a veces ninguno. Prefiere no mandarte nada antes que inventar.</li>
-          <li>Cada dato viene con el enlace de dónde salió. Si no se puede comprobar, no va.</li>
-          <li>Todo llega a tu correo. No conectas tu buzón, no tocas nada técnico y no pagas nada.</li>
-          <li>Lo recibes dentro de la próxima hora: llenas el formulario y tu agente se pone a trabajar.</li>
-          <li>Lo que recibes es exactamente lo que tu agente enviaría. No es una demo: es el trabajo real, sin enviar.</li>
-          <li>Cada borrador cita algo del sitio de esa empresa, no de una plantilla. Son distintos porque cada empresa lo es.</li>
-        </ul>
-        <p class="ms-fit"><strong>Un dato honesto:</strong> funciona cuando tus clientes son empresas con web y un correo de contacto —pymes, startups, despachos contables, bufetes, consultoras, clínicas privadas—. Si les vendes a personas y no a empresas (por ejemplo, casas o seguros a particulares), el agente no las va a encontrar: busca empresas, no individuos.</p>
-        <h3 class="ms-noves-title">La muestra gratis 💸 te enseña los borradores. Esto es lo que no ves:</h3>
-        <ul class="ms-noves">
-          <li><span class="ic" aria-hidden="true">📤</span><span>El envío sale en tu nombre, desde tu propia dirección, escalonado, a ritmo humano — como lo mandarías tú.</span></li>
-          <li><span class="ic" aria-hidden="true">🚫</span><span>Si alguien pide la baja o un correo rebota, no se le vuelve a escribir. Nunca.</span></li>
-          <li><span class="ic" aria-hidden="true">✋</span><span>Si alguien responde, su secuencia se cancela sola: nadie recibe un «última vez que te escribo» después de haberte contestado.</span></li>
-          <li><span class="ic" aria-hidden="true">🔔</span><span>Solo recibes un aviso cuando hay interés real. Una respuesta cortés pero sin compromiso va a tu reporte semanal, no te interrumpe.</span></li>
-        </ul>
-      </div>
-      <div class="ms-form">
-        <h3>Pide tu muestra gratis 💸</h3>
-        <p class="ms-nota">Cuatro datos y tu agente se pone a trabajar.</p>
-        <form id="ms-form">
-          <label for="ms-sitio">Tu sitio web</label>
-          <input id="ms-sitio" name="sitio_web" type="url" required placeholder="tuempresa.com" spellcheck="false" autocomplete="url">
-          <label for="ms-target">¿A qué tipo de empresas les vendes? <span class="ms-hint">El rubro de tus clientes, no el tuyo; y que sean empresas, no personas. Cuanto más específico seas —tamaño, rubro—, mejor busca tu agente.</span></label>
-          <textarea id="ms-target" name="a_quien_vendes" required rows="2" placeholder="Ej: «hoteles y restaurantes medianos» — no «turismo» a secas."></textarea>
-          <div id="ms-target-nudge" class="ms-nudge" aria-live="polite"></div>
-          <label for="ms-geo-todas">¿Dónde están tus clientes? <span class="ms-hint">Marca uno o varios países donde quieres que tu agente busque. Si vendes en toda la región, usa el primer atajo.</span></label>
-          <div id="ms-geo-grid"></div>
-          <label for="ms-correo">Tu correo</label>
-          <input id="ms-correo" name="correo" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" required placeholder="tucorreo@tudominio.com" spellcheck="false" autocomplete="email">
-          <!-- 17-sep (2ª tanda, hallazgo de Ronald): baseline scroll_precio=73/7días=10.4/día,
-               cta_activar=0/7días (Umami). Cambio: pregunta "¿sos quien decide?" + correo del
-               decisor, opcional, en el form de muestra. Comparar de acá a 2 semanas. -->
-          <label>¿Eres quien decide comprar herramientas para el negocio? <span class="ms-hint">Opcional — si no eres tú, le avisamos a esa persona directamente.</span></label>
-          <div class="ms-decisor-opciones">
-            <label class="ms-decisor-opcion"><input type="radio" name="es_decisor" value="si"> Sí</label>
-            <label class="ms-decisor-opcion"><input type="radio" name="es_decisor" value="no"> No</label>
-          </div>
-          <div id="ms-decisor-correo-wrap" hidden>
-            <label for="ms-decisor-correo">Correo de quien decide <span class="ms-hint">Opcional — si lo dejas en blanco, tu muestra incluye una línea para que se la reenvíes tú mismo.</span></label>
-            <input id="ms-decisor-correo" name="correo_decisor" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" placeholder="correo@tudominio.com" spellcheck="false" autocomplete="email">
-          </div>
-          <div class="ms-hp" aria-hidden="true">
-            <label for="ms-hp-field">No llenar este campo</label>
-            <input id="ms-hp-field" name="ms_ref_2" type="text" tabindex="-1" autocomplete="new-password">
-          </div>
-          <button id="ms-btn" class="ms-btn" type="submit">Ver mi muestra gratis 💸</button>
-          <div id="ms-res" class="ms-resultado" role="status" aria-live="polite"></div>
-        </form>
-      </div>
+  <section id="prueba">
+    <span id="muestra"></span>
+    <span class="eyebrow">🎁 Prueba gratis</span>
+    <h2>Pruébalo gratis</h2>
+    <div class="pg-pasos">
+      <div class="pg-paso"><span class="pg-num">1</span><br>Escribe tu sitio: tu agente entiende qué vendes y a quién.</div>
+      <div class="pg-paso"><span class="pg-num">2</span><br>Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.</div>
+      <div class="pg-paso"><span class="pg-num">3</span><br>Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.</div>
     </div>
+    <p class="pg-creditos">Tu prueba trae 4 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado).</p>
+    <div class="pg-cta"><a class="btn btn-secundario" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo_prueba" data-ver-demo>Ver demo 💰</a></div>
   </section>
 
   <section id="precio">
@@ -1599,9 +1509,8 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
         <div>
           <a class="btn btn-primario boton-plan" href="https://api.inntuitivo.com/suscribir">Activar mi agente 🚀</a>
-          <a class="btn btn-secundario boton-plan boton-demo" id="ver-demo" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" hidden>Ver demo ▶</a>
+          <a class="btn btn-secundario boton-plan boton-demo" id="ver-demo" href="https://api.inntuitivo.com/demo?o=landing" data-umami-event="ver_demo" data-ver-demo>Ver demo 💰</a>
           <p class="micro micro-plan">Pagas $65 hoy con tarjeta, sin crear cuenta. Incluye el primer mes completo. Desde el mes 2, si quieres que tu agente siga, activas el plan de $45/mes por PayPal (creas la cuenta en el momento, una sola vez). Cancela cuando quieras.</p>
-          <p class="demo-muestra">¿Prefieres ver primero cómo escribe? <a href="#muestra">Pide una muestra gratis</a></p>
           <p class="micro micro-plan">¿Dudas antes de activar? <a href="https://wa.me/50672045991?text=Tengo%20una%20duda%20antes%20de%20activar%20mi%20agente" target="_blank" rel="noopener">Escríbeme por WhatsApp</a></p>
         </div>
       </div>
@@ -1682,7 +1591,11 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
          asistente de Inntuitivo"), ambos en outreach-engine -- mismo mecanismo. -->
     <details>
       <summary>¿Quién es Houston?</summary>
-      <p>El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te manda tu muestra y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre.</p>
+      <p>El asistente de Inntuitivo — tu copiloto mientras conoces el producto. Es quien te responde si escribes por WhatsApp o a info@: contesta dudas, te guía en tu prueba gratis y te avisa cuando algo necesita a una persona. El agente que prospecta para ti es otro, y ese no es copiloto: hace el trabajo solo, en tu nombre.</p>
+    </details>
+    <details>
+      <summary>¿Hay prueba gratis?</summary>
+      <p>Sí. Escribes tu sitio y tu agente hace el trabajo con tu empresa: busca a tus clientes ideales, verifica cada correo, encuentra a quien decide y redacta el correo, con la fuente de cada dato. La prueba trae 4 créditos gratis (1 crédito = 1 lead completo) y no envía nada hasta que actives. Si no activas, tu prueba se borra a los 14 días.</p>
     </details>
     <details>
       <summary>¿Para quién NO sirve Inntuitivo?</summary>
@@ -1842,7 +1755,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Aparicion progresiva al hacer scroll.
-  // #muestra y #activar quedan fuera del mecanismo genérico: son destino de
+  // #prueba y #activar quedan fuera del mecanismo genérico: son destino de
   // ancla y tienen su propio trigger dedicado más abajo.
   //
   // 18-sep-2026 (2da corrección, el hueco en blanco): el fix de hoy más temprano
@@ -1926,7 +1839,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
     elementos.forEach(function(el){ obsContenido.observe(el); });
   }
 
-  var targets = document.querySelectorAll('section:not(#muestra):not(#precio), .paso, .dia, details, .banner-marca');
+  var targets = document.querySelectorAll('section:not(#prueba):not(#precio), .paso, .dia, details, .banner-marca');
   targets.forEach(function(el){
     el.classList.add('reveal');
     revelarSinHueco(el, el, '0px 0px -15% 0px', [el], function(instantaneo){
@@ -2100,13 +2013,6 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 <!-- Analytics (Umami, cookieless) -->
 <script defer src="https://analytics.inntuitivo.com/script.js"
         data-website-id="0fb992b8-c3ab-4f40-baeb-d715f962d5fd"></script>
-<!-- 17-sep-2026: selector de países COMPARTIDO con onboarding.html -- ver geo-chips.css/.js
-     y geo-paises-compartidos-check.sh (candado: falla si alguna de las dos páginas deja
-     de citar estos archivos o vuelve a traer su propia lista de países). El markup
-     estático duplicado que tenía esta página se reemplazó por window.geoChipsHTML()/
-     geoInitChips() (ver más abajo, dentro del handler de #ms-form).
-     baseline scroll_precio=10.3/día, cta_activar=0/semana (Umami, últimos 7 días). -->
-<script src="geo-chips.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   function track(n, d) { if (window.umami) umami.track(n, d); }
@@ -2133,9 +2039,6 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });
     }
   }).catch(function () {});
-  document.querySelectorAll('a[href="#muestra"]').forEach(function (a) {
-    a.addEventListener('click', function () { track('cta_muestra'); });      // clic ver muestra gratis
-  });
   document.querySelectorAll('a[href="#activar"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_ver_precio'); });   // clic ver precio
   });
@@ -2158,168 +2061,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   // baseline (18-sep, ~1h después del fix crítico de scroll_precio, mismo dato de Umami
   // reusado -- no cambió en ese lapso) scroll_precio=7.6/día, cta_activar=1/semana.
-
-  // Formulario de la muestra gratis: postea a nuestro endpoint y muestra estados.
-  var msForm = document.getElementById('ms-form');
-  if (msForm) {
-    // ¿Sos quien decide? (opcional) -- el campo "correo de quien decide" solo tiene
-    // sentido si contestó "no"; se oculta con el resto hasta entonces.
-    var msDecisorWrap = document.getElementById('ms-decisor-correo-wrap');
-    msForm.querySelectorAll('input[name="es_decisor"]').forEach(function (r) {
-      r.addEventListener('change', function () {
-        msDecisorWrap.hidden = (r.value !== 'no' || !r.checked);
-        if (msDecisorWrap.hidden) document.getElementById('ms-decisor-correo').value = '';
-      });
-    });
-    // 17-sep-2026 (multiselector de países): lista, chips y comportamiento del
-    // selector COMPARTIDOS con onboarding.html -- ver geo-chips.js. "Toda
-    // Latinoamérica" es un ATAJO que marca todos los checkboxes reales -- nunca se
-    // manda como valor propio (un string "Latinoamérica" no matchea el país de
-    // NINGÚN borrador individual río abajo, ver filtrar_mismo_pais en
-    // outreach-engine -- el trial jamás se ofrecería).
-    document.getElementById('ms-geo-grid').innerHTML = window.geoChipsHTML('ms-geo-todas', '');
-    var msGeografiasSeleccionadas = [];
-    window.geoInitChips('ms-geo-todas', function (sel) { msGeografiasSeleccionadas = sel; });
-    msForm.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var res = document.getElementById('ms-res');
-      var btn = document.getElementById('ms-btn');
-      var decisorElegido = msForm.querySelector('input[name="es_decisor"]:checked');
-      var geografias = msGeografiasSeleccionadas;
-      var datos = {
-        sitio_web: (msForm.sitio_web.value || '').trim(),
-        a_quien_vendes: (msForm.a_quien_vendes.value || '').trim(),
-        geografias: geografias,
-        correo: (msForm.correo.value || '').trim(),
-        r: r || '',                             // código de origen del ?r= (linkedin, etc.), no visible al usuario
-        ms_ref_2: msForm.ms_ref_2.value || ''   // honeypot
-      };
-      if (decisorElegido) {
-        datos.es_decisor = (decisorElegido.value === 'si');
-        if (!datos.es_decisor) {
-          datos.correo_decisor = (msForm.correo_decisor.value || '').trim();
-        }
-      }
-      if (!datos.sitio_web || !datos.a_quien_vendes || !datos.geografias.length || !datos.correo) {
-        // 18-sep-2026: antes listaba los 4 campos siempre -- pero sitio_web/a_quien_vendes/
-        // correo tienen required (o type=email/url) nativo, así que el navegador bloquea el
-        // submit ANTES de que este código corra si a esos les falta algo. En la práctica este
-        // bloque solo es alcanzable por geografias (sin required nativo posible, es un
-        // selector armado a mano). El mensaje decía "completa tu sitio y correo" con esos dos
-        // campos ya completos -- confuso. Ahora lista solo lo que de verdad falta.
-        var falta = [];
-        if (!datos.sitio_web) falta.push('tu sitio web');
-        if (!datos.a_quien_vendes) falta.push('a quién le vendes');
-        if (!datos.geografias.length) falta.push('al menos un país');
-        if (!datos.correo) falta.push('tu correo');
-        res.className = 'ms-resultado error';
-        res.innerHTML = '<span class="titulo">Faltan datos</span>Completa ' + falta.join(', ') + '.';
-        return;
-      }
-      var textoBtn = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Enviando…';
-      res.className = 'ms-resultado';
-      fetch('https://api.inntuitivo.com/muestra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      }).then(function (r) {
-        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; });
-      }).then(function (o) {
-        if (o.ok && o.j.aviso) {
-          // #13 — dedupe/tope vuelven 200 pero NO son un "¡Listo!": el correo dice otra cosa.
-          // Se pinta como alerta, con el título+mensaje coherentes que manda el backend.
-          res.className = 'ms-resultado alerta';
-          res.innerHTML = '<span class="titulo">' + (o.j.titulo || 'Espera un momento') + '</span>' +
-            (o.j.mensaje || '');
-          btn.disabled = false;
-          btn.textContent = textoBtn;
-        } else if (o.ok) {
-          track('muestra_enviada', { target_len: datos.a_quien_vendes.length });
-          res.className = 'ms-resultado ok';
-          res.innerHTML = '<span class="titulo">¡Listo! 🚀</span>' +
-            (o.j.mensaje || 'Tu agente está armando la muestra. Te llega a tu correo dentro de la próxima hora.');
-          msForm.reset();
-          msDecisorWrap.hidden = true;
-          btn.textContent = 'Muestra pedida ✓';
-        } else if (o.status === 429) {
-          // Demasiadas solicitudes desde esta IP: mensaje distinto, sin decir "recibido".
-          res.className = 'ms-resultado alerta';
-          res.innerHTML = '<span class="titulo">Espera un momento</span>' +
-            'Recibimos varias solicitudes desde aquí hace poco. Intenta de nuevo más tarde.';
-          btn.disabled = false;
-          btn.textContent = textoBtn;
-        } else {
-          res.className = 'ms-resultado error';
-          res.innerHTML = '<span class="titulo">No pudimos recibirlo</span>' +
-            (o.j.error || 'Revisa los datos e intenta de nuevo.');
-          btn.disabled = false;
-          btn.textContent = textoBtn;
-        }
-      }).catch(function () {
-        res.className = 'ms-resultado error';
-        res.innerHTML = '<span class="titulo">Algo falló</span>' +
-          'Revisa tu conexión e intenta de nuevo. Si sigue, escríbenos a info@inntuitivo.com.';
-        btn.disabled = false;
-        btn.textContent = textoBtn;
-      });
-    });
-
-    // Bug del 2 ago (commit 1a6cb34, quitar novalidate): el navegador exigía el
-    // esquema y rebotaba 'tuempresa.com' con un globo genérico, sin dejar rastro.
-    // Se normaliza cómo escribe la gente ANTES de validar y se reemplaza el mensaje.
-    var msSitio = document.getElementById('ms-sitio');
-    function normalizarSitio() {
-      var v = msSitio.value.trim();
-      if (v && !/^https?:\/\//i.test(v)) { msSitio.value = 'https://' + v; }  // reflejado: ve qué se envía
-    }
-    msSitio.addEventListener('blur', normalizarSitio);
-    msSitio.addEventListener('keydown', function (e) { if (e.key === 'Enter') normalizarSitio(); });
-
-    function msMotivo(el) {
-      if (el.validity.valueMissing) return 'vacio';
-      if (el.validity.typeMismatch) return 'formato';
-      return 'invalido';
-    }
-    function msMensaje(el) {
-      if (el.validity.valueMissing) {
-        if (el.id === 'ms-sitio') return 'Falta tu sitio web — puede ser tuempresa.com';
-        if (el.id === 'ms-correo') return 'Falta tu correo.';
-        return 'Cuéntanos a qué tipo de empresas les vendes.';
-      }
-      if (el.validity.typeMismatch) {
-        if (el.id === 'ms-correo') return 'Ese correo no se ve bien: revisa que tenga @ y el dominio.';
-        return 'Escribe una dirección como tuempresa.com';
-      }
-      return 'Revisa este dato.';
-    }
-    ['ms-sitio', 'ms-target', 'ms-correo'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('input', function () { el.setCustomValidity(''); });   // limpia en cada tecla
-      el.addEventListener('invalid', function () {
-        el.setCustomValidity(msMensaje(el));                                     // mensaje propio, no el genérico
-        track('muestra_form_error', { campo: el.name || el.id, motivo: msMotivo(el) });
-      });
-    });
-
-    // Validación BLANDA del target: un renglón gris cuando quedó corto (<30, el mismo
-    // umbral que el backend trata como flojo). NUNCA bloquea. Aparece al SALIR del campo
-    // (no interrumpe mientras se escribe) y se va apenas se agrega detalle. Pide
-    // especificidad; no promete un resultado.
-    var msTarget = document.getElementById('ms-target');
-    var msNudge = document.getElementById('ms-target-nudge');
-    if (msTarget && msNudge) {
-      msTarget.addEventListener('blur', function () {
-        var v = (msTarget.value || '').trim();
-        msNudge.textContent = (v.length > 0 && v.length < 30)
-          ? 'Un poco más de detalle —tamaño, dónde— y tu agente busca mejor.'
-          : '';
-      });
-      msTarget.addEventListener('input', function () { msNudge.textContent = ''; });
-    }
-  }
 
   // 18-sep-2026: rompió hoy -- observaba #activar ENTERO (threshold:0.4) y ese
   // elemento pasó de ~1000-1200px a 2775px al agregarse la tabla de precios.
@@ -2385,9 +2126,13 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script>
-/* 4-nov (#160): «Ver demo» aparece solo si el demo está vivo (interruptor propio del motor); si la consulta falla o dice que no, el botón sigue oculto y el resto de la página no cambia. */
-(function(){var b=document.getElementById('ver-demo');if(!b||!window.fetch)return;
-fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.activo===true&&d.lleno!==true)b.hidden=false}).catch(function(){});})();
+/* #160/#175: los botones «Ver demo» (data-ver-demo) se ven solo si el demo está vivo y con cupo; si la consulta falla o dice que no, se ocultan y el resto de la página no cambia. */
+(function(){var bs=document.querySelectorAll('[data-ver-demo]');if(!bs.length)return;
+function ocultar(){bs.forEach(function(b){b.hidden=true})}
+if(!window.fetch)return ocultar();
+fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!(d&&d.activo===true&&d.lleno!==true))ocultar()}).catch(ocultar);})();
+/* #175: el ancla antigua #muestra lleva a #prueba */
+if(location.hash==='#muestra'){var p=document.getElementById('prueba');if(p)p.scrollIntoView()}
 </script>
 </body>
 </html>

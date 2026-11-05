@@ -28,7 +28,7 @@ def huella(ini, fin):
     if i < 0 or j < 0: return None
     b = re.sub(r"\s+", " ", re.sub(r"<!--.*?-->", "", idx[i:j + len(fin)], flags=re.S)).strip()
     return hashlib.sha256(b.encode()).hexdigest()
-HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "f6e96916fe62ed91591e0a11a2c39ef5dafe657d5668cb9c9fdb2823f28216aa"),
+HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "00cb4dae0026bcf85b3576d7d299045a0e6d8b3545b33daba92bfa18772f42fc"),
            "partners (con su carrusel)": ('<section class="partners"', "</section>", "3d9fed73b1cccd9fae3c67745a2d96177065c373a891e1684c684cbe7a000b6a")}
 for nombre, (ini, fin, esperada) in HUELLAS.items():
     if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
@@ -75,6 +75,16 @@ LS_R = "Sí. Desde tu panel subes tus listas en CSV o Excel. Tu agente las suma 
 LS_L = "¿Ya tienes tus listas? Súbelas y tu agente las filtra, verifica cada correo y les escribe como a las empresas que encuentra solo."
 if (LS_P, LS_R) not in faq: mal.append("falta la pregunta de las listas con su respuesta aprobada (#168)")
 if '<p class="listas-linea">' + LS_L + '</p>' not in idx: mal.append("falta la línea de las listas en «Cómo funciona» (#168)")
+# #175/#176: textos aprobados de la prueba gratis y de los llamados «Ver demo 💰» (aprobados por Ricardo)
+PG = ["Pruébalo gratis", "Escribe tu sitio: tu agente entiende qué vendes y a quién.",
+ "Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.",
+ "Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.",
+ "Tu prueba trae 4 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado)."]
+for t in PG:
+    if t not in idx: mal.append(f"falta el texto aprobado de la prueba gratis (#175): {t[:50]}")
+if 'id="prueba"' not in idx or '<span id="muestra"></span>' not in idx: mal.append("falta la sección #prueba con el alias #muestra (#175)")
+if idx.count("Ver demo 💰") < 4: mal.append("faltan llamados «Ver demo 💰» (hero, barra, sección y precio; #176)")
+if "Ver una muestra gratis" in idx or "Pide una muestra gratis" in idx or 'id="ms-form"' in idx: mal.append("quedó la muestra gratis anterior en la landing (#175)")
 print("TEXTOS_ACTUALES_OK" if not mal else "\n".join(mal))
 sys.exit(1 if mal else 0)
 PY
