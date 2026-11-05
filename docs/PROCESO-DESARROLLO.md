@@ -227,6 +227,7 @@ Contenido del cierre:
 - **#121:** observaciones menores al lote semanal, cerradas en una semana como máximo.
 - **#127:** el cierre semanal lo inicia Claude Code solo, al empezar una sesión con 7 días o más desde el último y cambios en medio; Ricardo no lo pide.
 - **#122:** recorrido focal en cada corrida; el Ready to Release completo, cada noche y en el cierre semanal.
+- **#179:** el recorrido focal corre en local con la misma CSP y los mismos límites de nginx que producción antes del deploy (réplica `ops/recorrido/replica.sh`); un defecto que solo aparece en producción es un hueco del recorrido local y se cierra ahí.
 - **#123:** el cierre pesado (contexto, code review de la etapa), una vez por semana; el Graphify semántico de lo que cambió va en cada cierre (regla del 3-nov, nunca se pasa al semanal).
 - **#140:** el diagnóstico temporal del remate y la confirmación del conteo de tests se retiraron el 2-nov dentro del deploy del code review del día; nacen las tres reglas de producción-con-dato, tope por sesión y script temporal.
 - **#141 (3-nov):** Claude Code decide con datos, sin preguntar, la prueba de «You should know» (#45); sin línea base del uso del plan, se retiró. Toda decisión anunciada en un reporte sale de una sola fuente.

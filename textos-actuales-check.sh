@@ -79,12 +79,23 @@ if '<p class="listas-linea">' + LS_L + '</p>' not in idx: mal.append("falta la l
 PG = ["Pruébalo gratis", "Escribe tu sitio: tu agente entiende qué vendes y a quién.",
  "Tu agente busca a tus clientes ideales, encuentra a quien decide y les escribe.",
  "Lo ves todo en tu panel, listo para enviar. Activa cuando quieras.",
- "Tu prueba trae 4 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado)."]
+ "Tu prueba trae 6 créditos gratis: 1 crédito = 1 lead completo (empresa que encaja, correo verificado, quien decide y el correo ya redactado)."]
 for t in PG:
     if t not in idx: mal.append(f"falta el texto aprobado de la prueba gratis (#175): {t[:50]}")
 if 'id="prueba"' not in idx or '<span id="muestra"></span>' not in idx: mal.append("falta la sección #prueba con el alias #muestra (#175)")
 if idx.count("Ver demo 💰") < 4: mal.append("faltan llamados «Ver demo 💰» (hero, barra, sección y precio; #176)")
 if "Ver una muestra gratis" in idx or "Pide una muestra gratis" in idx or 'id="ms-form"' in idx: mal.append("quedó la muestra gratis anterior en la landing (#175)")
+# #179: textos legales de la prueba gratis, tal cual los aprobó Ricardo, y ninguna línea de la muestra por correo
+TER = open("terminos.html", encoding="utf-8").read(); PRI = open("privacidad.html", encoding="utf-8").read()
+LEGAL_T = ["<h2>7. Prueba gratis</h2>", "Puedes probar Inntuitivo gratis una vez por empresa. Con tu sitio y tu correo de trabajo, tu agente busca clientes posibles, encuentra a quien decide y redacta correos que ves en tu panel, hasta usar los créditos de la prueba. Durante la prueba no se envía ningún correo. Si no activas tu agente, borramos tu prueba y todos sus datos a los 14 días. Si lo activas, tus leads pasan a tu cuenta."]
+LEGAL_P = ["<strong>Prueba gratis:</strong> guardamos tu sitio, tu correo de trabajo y los leads que tu agente encuentra, solo para mostrártelos en tu panel. Se borran a los 14 días si no activas, o pasan a tu cuenta si activas. Los datos de empresas y personas que aparecen como leads son datos profesionales públicos, con su fuente."]
+for x in LEGAL_T:
+    if x not in TER: mal.append(f"terminos.html: falta el texto legal aprobado (#179): {x[:50]}")
+for x in LEGAL_P:
+    if x not in PRI: mal.append(f"privacidad.html: falta el texto legal aprobado (#179): {x[:50]}")
+for viejo in ["La muestra gratuita", "La muestra no tiene costo", "Limitamos una muestra por dominio", "muestra gratuita", "formulario público de muestras", "Solicitudes de muestra"]:
+    for nombre, doc in (("terminos.html", TER), ("privacidad.html", PRI)):
+        if viejo in doc: mal.append(f"{nombre}: quedó el texto de la muestra por correo (#179): {viejo}")
 print("TEXTOS_ACTUALES_OK" if not mal else "\n".join(mal))
 sys.exit(1 if mal else 0)
 PY
