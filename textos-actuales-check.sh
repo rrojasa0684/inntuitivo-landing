@@ -28,7 +28,7 @@ def huella(ini, fin):
     if i < 0 or j < 0: return None
     b = re.sub(r"\s+", " ", re.sub(r"<!--.*?-->", "", idx[i:j + len(fin)], flags=re.S)).strip()
     return hashlib.sha256(b.encode()).hexdigest()
-HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "00cb4dae0026bcf85b3576d7d299045a0e6d8b3545b33daba92bfa18772f42fc"),
+HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "45060a9f6bed86e3514745aaa7335bd5fa932cbc993bab575e5cdbef72f39999"),
            "partners (con su carrusel)": ('<section class="partners"', "</section>", "3d9fed73b1cccd9fae3c67745a2d96177065c373a891e1684c684cbe7a000b6a")}
 for nombre, (ini, fin, esperada) in HUELLAS.items():
     if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
@@ -84,6 +84,13 @@ for t in PG:
     if t not in idx: mal.append(f"falta el texto aprobado de la prueba gratis (#175): {t[:50]}")
 if 'id="prueba"' not in idx or '<span id="muestra"></span>' not in idx: mal.append("falta la sección #prueba con el alias #muestra (#175)")
 if idx.count("Ver demo 💰") < 4: mal.append("faltan llamados «Ver demo 💰» (hero, barra, sección y precio; #176)")
+# #180: los «Ver demo 💰» de la barra, el hero y el precio bajan a #prueba; solo el de la sección abre el demo
+import re as _re
+_demo=[m for m in _re.finditer(r'<a [^>]*data-ver-demo[^>]*>', idx)]
+_hacia=[m.group(0) for m in _demo if 'data-ver-demo-origen=' in m.group(0)]
+_abre=[m.group(0) for m in _demo if 'api.inntuitivo.com/demo' in m.group(0)]
+if sorted(_re.search(r'data-ver-demo-origen="(\w+)"',x).group(1) for x in _hacia)!=["barra","hero","precio"] or any('href="#prueba"' not in x for x in _hacia): mal.append("los Ver demo de barra, hero y precio deben apuntar a #prueba (#180)")
+if len(_abre)!=1 or 'id="ver-demo-seccion"' not in _abre[0]: mal.append("solo el Ver demo de la sección Pruébalo gratis puede abrir el demo (#180)")
 if "Ver una muestra gratis" in idx or "Pide una muestra gratis" in idx or 'id="ms-form"' in idx: mal.append("quedó la muestra gratis anterior en la landing (#175)")
 # #179: textos legales de la prueba gratis, tal cual los aprobó Ricardo, y ninguna línea de la muestra por correo
 TER = open("terminos.html", encoding="utf-8").read(); PRI = open("privacidad.html", encoding="utf-8").read()
