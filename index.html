@@ -708,7 +708,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-05: baseline scroll_precio=1.9/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-06: baseline scroll_precio=1.9/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -2169,11 +2169,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script>
-/* #160/#175: los botones «Ver demo» (data-ver-demo) se ven solo si el demo está vivo y con cupo; si la consulta falla o dice que no, se ocultan y el resto de la página no cambia. */
-(function(){var bs=document.querySelectorAll('[data-ver-demo]');if(!bs.length)return;
-function ocultar(){bs.forEach(function(b){b.hidden=true})}
-if(!window.fetch)return ocultar();
-fetch('https://api.inntuitivo.com/demo/estado',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!(d&&d.activo===true&&d.lleno!==true))ocultar()}).catch(ocultar);})();
+/* #184/review 5-nov: «Pruébalo gratis» y sus llamados no dependen del demo: la prueba real nunca se oculta (antes la consulta de estado del demo los escondía si el demo de ejemplo se apagaba). */
 /* #181: la sección «Pruébalo gratis»: el formulario abre el demo con el sitio (origen «prueba»); aparición con IntersectionObserver, apagada con prefers-reduced-motion. */
 (function(){var sec=document.getElementById('prueba'),f=document.getElementById('prueba-form');if(!sec)return;
 if(f)f.addEventListener('submit',function(){var v=(document.getElementById('prueba-sitio').value||'').trim();if(window.umami)umami.track(v?'prueba_gratis_con_sitio':'prueba_gratis_sin_sitio')});
