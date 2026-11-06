@@ -8,8 +8,8 @@ import glob, hashlib, html, json, re, sys
 mal = []
 idx = open("index.html", encoding="utf-8").read()
 BLOQUEADOS = [
- "🎯 Para pymes y startups que venden a empresas",
- "Un agente de IA que <em>consigue clientes</em> mientras tú trabajas&nbsp;🚀",
+ "🎯 Para pymes y startups B2B que venden a empresas",
+ "Un agente de IA que <em>consigue clientes 24/7</em> mientras tú duermes&nbsp;🚀",
  "Pon tus ventas en órbita 🪐 de manera intuitiva 🚀",
  "🪐 Tu plataforma de agentes de IA más innovadora e inntuitiva ✨",
  "Agentes que trabajan por ti 24/7, en tu idioma, sin que aprendas nada técnico.",
@@ -28,7 +28,7 @@ def huella(ini, fin):
     if i < 0 or j < 0: return None
     b = re.sub(r"\s+", " ", re.sub(r"<!--.*?-->", "", idx[i:j + len(fin)], flags=re.S)).strip()
     return hashlib.sha256(b.encode()).hexdigest()
-HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "45060a9f6bed86e3514745aaa7335bd5fa932cbc993bab575e5cdbef72f39999"),
+HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "d95fa56731deaf7b1e90a01ee1218fc8c23a2eafc39e2fc98ce7852a46c95350"),
            "partners (con su carrusel)": ('<section class="partners"', "</section>", "3d9fed73b1cccd9fae3c67745a2d96177065c373a891e1684c684cbe7a000b6a")}
 for nombre, (ini, fin, esperada) in HUELLAS.items():
     if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
