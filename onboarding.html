@@ -127,6 +127,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <span class="p" data-p="3"><span class="n">3</span> Firma</span>
   <span class="p" data-p="4"><span class="n">4</span> Listo</span>
 </div>
+<p id="pasos-txt" class="nota oculto" role="status"></p>
 
 <!-- PASO 1 -->
 <section id="step1" class="oculto">
@@ -161,6 +162,7 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
   <span class="eyebrow">Conectar · Tu correo</span>
   <h1>Conecta <em>tu correo</em></h1>
   <p class="sub">Escribe tu correo y sigue las indicaciones. Nosotros probamos todo por ti: toma unos minutos.</p>
+  <p class="nota" id="por-que-conectar"><b>¿Por qué conectarlo?</b> Tus correos salen desde tu propio correo y las respuestas de tus clientes llegan a tu bandeja: se ven como tuyos, no de un desconocido.</p>
   <div class="panel">
     <div id="bloque-conectar">
       <label for="email">Tu correo de trabajo</label>
@@ -258,10 +260,10 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 <section id="reissue" class="oculto">
   <span class="eyebrow">Configuración</span>
   <h1>Necesitas un <em>enlace nuevo</em></h1>
-  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.</p>
+  <p class="sub" id="reissue-txt">Este enlace no es válido o ya venció. Ingresa el correo con el que te suscribiste o pediste tu prueba y te damos uno nuevo.</p>
   <div class="panel">
     <label for="remail">Tu correo de pago</label>
-    <input id="remail" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" placeholder="el correo con el que te suscribiste" spellcheck="false">
+    <input id="remail" type="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" placeholder="el correo con el que te suscribiste o pediste tu prueba" spellcheck="false">
     <button id="rbtn" class="btn btn-primario">Enviarme un enlace nuevo</button>
     <div id="rresultado" class="resultado"></div>
   </div>
@@ -343,8 +345,11 @@ const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detect
 
 function ver(sec){['cargando','step1','step2','step3','final','reissue','admin-gracias'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
   $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
-function marcarPaso(n){n=n>=6?4:n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
-function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+function marcarPaso(n){n=n>=6?4:n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});textoPasos(arguments[0]);}
+// auditoría 7-nov F3: dice en qué paso va y cuánto falta (tiempos aproximados por pantalla)
+function textoPasos(sub){const n=sub>=6?4:sub>=4?3:2;
+  const falta=sub<=1?'unos 6 minutos':sub===2?'unos 4 minutos':sub===3?'unos 3 minutos':sub===4?'menos de 2 minutos':'';
+  const t=$('pasos-txt');if(t){t.classList.toggle('oculto',n===4);t.textContent='Paso '+n+' de 4'+(falta?' · quedan '+falta:'');}}function escapa(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 // Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
 // el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
 // («¿cómo saben lo que puse?») en atención al detalle. Se inserta una sola vez, arriba del campo.
@@ -393,10 +398,14 @@ function activarPrueba(){
   f.textContent='Prueba gratis — no enviamos nada ni cobramos hasta que actives.';
   document.body.insertBefore(f,document.body.firstChild);
   const b=document.createElement('div');b.id='prueba-saltar';
-  b.innerHTML='<p class="nota">Puedes conectar tu correo ahora o hacerlo al activar. En la prueba nunca se envía nada.</p>'
-   +'<button id="btn-saltar" class="btn" type="button" style="margin-top:12px">Lo conecto al activar</button>'
+  b.innerHTML='<p class="nota">En la prueba puedes seguir sin conectar: tu agente trabaja igual y no se envía nada. Al activar sí hace falta tu correo.</p>'
    +'<div id="resultado-saltar" class="resultado" role="status" aria-live="polite"></div>';
   document.querySelector('#step3 .panel').appendChild(b);
+  // #194: un solo «Lo hago después», justo bajo «Conectar mi correo» (el de la prueba no manda enlaces por correo: sigue de una vez)
+  const d0=$('btn-despues');d0.classList.add('oculto');
+  const s=document.createElement('button');s.id='btn-saltar';s.type='button';s.className='btn btn-sec';s.textContent='Lo hago después';
+  d0.parentNode.insertBefore(s,d0);
+  const sub2=document.querySelector('#step2 .sub');if(sub2)sub2.textContent='Esto es lo que entendimos de tu sitio y de lo que escribiste. Corrige lo que haga falta: tu agente buscará con esto.';
   $('btn-saltar').addEventListener('click',async()=>{
     $('btn-saltar').disabled=true;
     try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/saltar',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});const d=await r.json();
@@ -418,7 +427,7 @@ function activarPrueba(){
     const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');
     if(r.status===429||r.status>=500){esperaYRecarga();return;}
     const d=await r.json();
-    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
+    if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste o pediste tu prueba y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste o pediste tu prueba y te damos uno nuevo.';ver('reissue');return;}
     if(d.demo===true)activarDemo(d);
     if(d.prueba===true)activarPrueba();
     if(d.listas_disponibles===false)$('listo-listas').classList.add('oculto');   // la subida está apagada o esta cuenta no sube listas (trial): la tarjeta de «Listo» no se ofrece
