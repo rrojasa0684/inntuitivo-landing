@@ -344,8 +344,9 @@ const CARDS=[
 const LOADERS=['Leyendo tu sitio…','Entendiendo a quién le vendes…','Detectando tu tono…','Buscando tus señales de credibilidad…'];
 
 function ver(sec){['cargando','step1','step2','step3','final','reissue','admin-gracias'].forEach(s=>$(s).classList.toggle('oculto',s!==sec));
-  $('pasos').classList.toggle('oculto',!['step1','step2','step3','final'].includes(sec));}
-function marcarPaso(n){n=n>=6?4:n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});textoPasos(arguments[0]);}
+  const conPasos=['step1','step2','step3','final'].includes(sec);$('pasos').classList.toggle('oculto',!conPasos);if($('pasos-txt')&&!conPasos)$('pasos-txt').classList.add('oculto');}
+function marcarPaso(n){n=n>=6?4:n>=4?3:2;document.querySelectorAll('.pasos .p').forEach(el=>{const p=+el.dataset.p;el.classList.toggle('activa',p===n);el.classList.toggle('hecha',p<n);});}
+{const _mp=marcarPaso;marcarPaso=function(sub){_mp(sub);textoPasos(sub);};}   // el texto «Paso N de 4» recibe el número ORIGINAL (arguments[0] ya estaba reasignado a n)
 // auditoría 7-nov F3: dice en qué paso va y cuánto falta (tiempos aproximados por pantalla)
 function textoPasos(sub){const n=sub>=6?4:sub>=4?3:2;
   const falta=sub<=1?'unos 6 minutos':sub===2?'unos 4 minutos':sub===3?'unos 3 minutos':sub===4?'menos de 2 minutos':'';
