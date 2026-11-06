@@ -2169,7 +2169,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script>
-/* #184/review 5-nov: «Pruébalo gratis» y sus llamados no dependen del demo: la prueba real nunca se oculta (antes /demo/estado los escondía si el demo de ejemplo se apagaba). */
+/* #184/review 5-nov: «Pruébalo gratis» y sus llamados no dependen del demo: la prueba real nunca se oculta (antes la consulta de estado del demo los escondía si el demo de ejemplo se apagaba). */
 /* #181: la sección «Pruébalo gratis»: el formulario abre el demo con el sitio (origen «prueba»); aparición con IntersectionObserver, apagada con prefers-reduced-motion. */
 (function(){var sec=document.getElementById('prueba'),f=document.getElementById('prueba-form');if(!sec)return;
 if(f)f.addEventListener('submit',function(){var v=(document.getElementById('prueba-sitio').value||'').trim();if(window.umami)umami.track(v?'prueba_gratis_con_sitio':'prueba_gratis_sin_sitio')});
