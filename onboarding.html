@@ -383,6 +383,27 @@ function activarDemo(d){
   });
 }
 
+// --- prueba gratis real (#182/#183): el mismo recorrido con los datos de la persona; conectar es opcional y no se envía ni se cobra nada hasta activar ---
+function activarPrueba(){
+  if($('demo-franja'))return;
+  const f=document.createElement('div');f.className='demo-franja';f.id='prueba-franja';f.setAttribute('role','status');
+  f.textContent='Prueba gratis — no enviamos nada ni cobramos hasta que actives.';
+  document.body.insertBefore(f,document.body.firstChild);
+  const b=document.createElement('div');b.id='prueba-saltar';
+  b.innerHTML='<p class="nota">Puedes conectar tu correo ahora o hacerlo al activar. En la prueba nunca se envía nada.</p>'
+   +'<button id="btn-saltar" class="btn" type="button" style="margin-top:12px">Lo conecto al activar</button>'
+   +'<div id="resultado-saltar" class="resultado" role="status" aria-live="polite"></div>';
+  document.querySelector('#step3 .panel').appendChild(b);
+  $('btn-saltar').addEventListener('click',async()=>{
+    $('btn-saltar').disabled=true;
+    try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/conectar/saltar',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});const d=await r.json();
+      if(d&&d.ok){mostrarFinal();return;}
+      res($('resultado-saltar'),'error','No pudimos continuar',escapa((d&&d.mensaje)||'Vuelve a intentar.'));
+    }catch(e){res($('resultado-saltar'),'error','No pudimos continuar','Revisa tu conexión y vuelve a intentar.');}
+    $('btn-saltar').disabled=false;
+  });
+}
+
 // --- arranque: lee el estado y reanuda donde iba ---
 (async()=>{
   if(!token){
@@ -396,6 +417,7 @@ function activarDemo(d){
     const d=await r.json();
     if(!d.valido){$('reissue-txt').textContent=d.motivo==='vencido'?'Este enlace venció. Ingresa el correo con el que te suscribiste y te damos uno nuevo.':'Este enlace no es válido o ya no existe. Ingresa el correo con el que te suscribiste y te damos uno nuevo.';ver('reissue');return;}
     if(d.demo===true)activarDemo(d);
+    if(d.prueba===true)activarPrueba();
     if(d.listas_disponibles===false)$('listo-listas').classList.add('oculto');   // la subida está apagada o esta cuenta no sube listas (trial): la tarjeta de «Listo» no se ofrece
     msDisponible=!!(d.buzon&&d.buzon.microsoft&&d.buzon.microsoft.disponible);   // desde el primer paso: quien llega al correo sin recargar también ve el botón
     if(d.sitio_sugerido&&!$('sitio').value){origenSitio=d.sitio_origen||'';$('sitio').value=d.sitio_sugerido;validarSitio();}
