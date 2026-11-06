@@ -96,7 +96,8 @@ input::placeholder,textarea::placeholder{color:#8E80B3}
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-3px;margin-right:8px;animation:girar .7s linear infinite}
 .cargando{margin-top:40px;text-align:center;color:var(--tinta-suave)}
 @keyframes girar{to{transform:rotate(360deg)}}
-.final{text-align:center;padding:40px 0}
+.final{text-align:center;padding:40px 0 0}
+.final p:empty{display:none}      /* #189: un párrafo de aviso vacío no ocupa lugar (ni su margen) antes de «¿Dudas?» */
 .final .cohete{font-size:3rem}
 .final h1{margin-top:12px}
 .listo-listas{margin:28px auto 0;max-width:46ch;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(255,255,255,.05)}.listo-listas h2{font-size:1.05rem;margin:0}
@@ -384,7 +385,9 @@ function activarDemo(d){
 }
 
 // --- prueba gratis real (#182/#183): el mismo recorrido con los datos de la persona; conectar es opcional y no se envía ni se cobra nada hasta activar ---
+let pruebaModo=false;
 function activarPrueba(){
+  pruebaModo=true;
   if($('demo-franja'))return;
   const f=document.createElement('div');f.className='demo-franja';f.id='prueba-franja';f.setAttribute('role','status');
   f.textContent='Prueba gratis — no enviamos nada ni cobramos hasta que actives.';
@@ -460,7 +463,15 @@ $('firma-logo-archivo').addEventListener('change',function(){const inp=this,f=in
   rd.onload=async function(){const d=await firmaLlamar('/logo',{imagen:String(rd.result).split(',')[1]||'',datos:firmaDatosEscritos()});inp.value='';
     if(d.ok){res($('firma-r'),'ok','',escapa('Cambiamos tu logo.'));firmaPintar(d,true);}else fallo(d.mensaje||'No pudimos usar esa imagen.');};rd.readAsDataURL(f);});
 
-function pantalla(p){['p-firma','p-dns','p-listo'].forEach(function(x){$(x).classList.toggle('oculto',x!==p);});marcarPaso(p==='p-listo'?6:4);window.scrollTo(0,0);}
+function pantalla(p){['p-firma','p-dns','p-listo'].forEach(function(x){$(x).classList.toggle('oculto',x!==p);});marcarPaso(p==='p-listo'?6:4);window.scrollTo(0,0);if(p==='p-listo'&&pruebaModo)textoListoPrueba();}
+// #189: en la prueba no se envía nada y el correo puede no estar conectado ("Lo conecto al activar"): «Listo» lo dice tal cual, sin prometer envíos ni avisos de respuestas.
+const TEXTO_LISTO_PRUEBA='Tu agente ya está buscando tus clientes y redactando sus correos. No envía nada hasta que actives.';
+async function textoListoPrueba(){
+  $('final-msg').textContent=TEXTO_LISTO_PRUEBA;
+  let ok=null;try{const r=await pedir(API+'/onboarding/'+encodeURIComponent(token)+'/estado');const d=await r.json();ok=!!(d.buzon&&d.buzon.mailbox_ok);}catch(e){}
+  if(ok===null)return;
+  $('final-msg').textContent=TEXTO_LISTO_PRUEBA+' '+(ok?'Tu correo ya está conectado y listo para cuando actives.':'Conectas tu correo al activar.');
+}
 async function mostrarFinal(firmaEstado){
   clearInterval(sondeo);ver('final');
   const editar=new URLSearchParams(location.search).get('firma')==='1';   // #108: el enlace de «cambiar mi firma» la abre aunque ya esté confirmada
