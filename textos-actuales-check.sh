@@ -86,6 +86,7 @@ for t in PG:
     if t not in idx: mal.append(f"falta el texto aprobado de la prueba gratis (#175): {t[:50]}")
 if 'id="prueba"' not in idx or '<span id="muestra"></span>' not in idx: mal.append("falta la sección #prueba con el alias #muestra (#175)")
 if idx.count("Ver demo 💰") != 3: mal.append("deben quedar exactamente 3 llamados «Ver demo 💰» (barra, hero y precio; #176, #181)")
+if "demo/estado" in idx: mal.append("la landing no puede ocultar «Pruébalo gratis» según /demo/estado: la prueba real nunca se apaga por el demo (#160, review 5-nov)")
 # #180/#181: los «Ver demo 💰» de la barra, el hero y el precio bajan a #prueba; lo único que abre el demo es el formulario de la sección (origen «prueba»)
 import re as _re
 _demo=[m.group(0) for m in _re.finditer(r'<a [^>]*data-ver-demo[^>]*>', idx)]
