@@ -1,6 +1,6 @@
 // #206 y #207 (7-nov-2026): la tabla «Cómo llega cada herramienta a quien decide» de #precio, con un navegador real.
-//  1. #208: solo se muestran las filas con dato con fuente en al menos 3 de las 4 herramientas de la competencia; con menos de 2 filas el bloque se oculta y «Tu plan» es el 2; con 2 o más, se ve y «Tu plan» es el 3.
-//     Se prueba con el JSON real del repo (lo esperado se calcula con la misma regla, así una fuente nueva hace volver la fila sin tocar este archivo) y con dos JSON de prueba (3 filas que cumplen; solo 1 que cumple).
+//  1. #208: solo se muestran las filas con dato con fuente en al menos 2 de las 4 herramientas de la competencia; con menos de 2 filas el bloque se oculta y «Tu plan» es el 2; con 2 o más, se ve y «Tu plan» es el 3.
+//     Se prueba con el JSON real del repo (lo esperado se calcula con la misma regla, así una fuente nueva hace volver la fila sin tocar este archivo) y con dos JSON de prueba (3 filas que cumplen, con una de 1 dato que sale; solo 1 fila que cumple).
 //  2. JSON ausente (404), inválido, o con una cifra sin URL -> el bloque no se ve y «Tu plan» es el 2.
 //  3. A 390 px la página no se desborda a lo ancho (se lee por tarjetas); a 1440 px se ve la tabla y la columna de Inntuitivo.
 //  4. Ningún porcentaje propio de Inntuitivo (#207) y ninguna cifra de relleno del diseño (64, 51, 48, 46, 29 %) en el repo.
@@ -24,7 +24,7 @@ const servidor = createServer((req, res) => {
 const base = `http://127.0.0.1:${servidor.address().port}`;
 const COMP = ['apollo', 'clay', 'explee', 'grok'];
 const informadas = (f) => COMP.filter((c) => f.celdas[c].estado === 'informado').length;
-const esperadasDe = (json) => JSON.parse(json).filas.filter((f) => informadas(f) >= 3);
+const esperadasDe = (json) => JSON.parse(json).filas.filter((f) => informadas(f) >= 2);
 // JSON de prueba: copia la primera cifra de Apollo (con su fuente) a las celdas de la competencia que se indican en cada fila
 const conCompetencia = (porFila) => {
   const d = JSON.parse(REAL), modelo = d.filas.flatMap((f) => f.celdas.apollo.estado === 'informado' ? [f.celdas.apollo] : [])[0];
@@ -33,13 +33,13 @@ const conCompetencia = (porFila) => {
   }));
   return JSON.stringify(d);
 };
-const TRES_FILAS = conCompetencia([3, 4, 3, 2, 2, 1]);   // cumplen las filas 0, 1 y 2
-const UNA_FILA = conCompetencia([3, 2, 2, 1, 0, 0]);     // cumple solo la 0
+const TRES_FILAS = conCompetencia([2, 3, 4, 1, 1, 0]);   // cumplen las filas 0, 1 y 2 (2, 3 y 4 de 4); las de 1 y 0 salen
+const UNA_FILA = conCompetencia([2, 1, 1, 0, 0, 0]);     // cumple solo la 0 (2 de 4); 1 no alcanza
 const sinUrl = JSON.parse(TRES_FILAS); sinUrl.filas[0].celdas.apollo.datos[0].url = '';
 const estados = [
   ['el real del repo', REAL, 200],
-  ['3 filas cumplen (3, 4 y 3 de 4)', TRES_FILAS, 200],
-  ['solo 1 fila cumple', UNA_FILA, 200],
+  ['3 filas cumplen (2, 3 y 4 de 4; las de 1 salen)', TRES_FILAS, 200],
+  ['solo 1 fila cumple (2 de 4; las de 1 salen)', UNA_FILA, 200],
   ['JSON ausente (404)', '', 404],
   ['JSON inválido', '{no es json', 200],
   ['una cifra sin URL', JSON.stringify(sinUrl), 200],
