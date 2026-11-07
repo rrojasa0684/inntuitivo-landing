@@ -1,0 +1,331 @@
+{
+ "version": 1,
+ "actualizado": "2026-11-06",
+ "titulo": "2 · Cómo llega cada herramienta a quien decide",
+ "subtitulo": "Un lead sin decisor es un correo a info@ que nadie lee. Así trabaja cada opción, con datos públicos y su fuente.",
+ "pie": "Cifras públicas de terceros, con métricas y mercados distintos; no son un benchmark nuestro. Fuentes y fechas en cada dato. ¿Ves un dato viejo? Avísanos.",
+ "columnas": [
+  {
+   "id": "inntuitivo",
+   "nombre": "Inntuitivo"
+  },
+  {
+   "id": "apollo",
+   "nombre": "Apollo"
+  },
+  {
+   "id": "clay",
+   "nombre": "Clay"
+  },
+  {
+   "id": "explee",
+   "nombre": "Explee"
+  },
+  {
+   "id": "grok",
+   "nombre": "Grok"
+  }
+ ],
+ "filas": [
+  {
+   "id": "origen",
+   "atributo": "De dónde sale el decisor",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "De las páginas públicas de cada empresa: su sitio y otras fuentes públicas. No de una base comprada."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "clay": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "Consulta proveedores de datos uno tras otro hasta hallar un resultado válido (cascada).",
+       "url": "https://www.clay.com/waterfall-enrichment",
+       "fuente": "Clay, página de la función",
+       "midio": "Clay (documentación propia)",
+       "que_mide": "Cómo busca datos de contacto",
+       "mercado": "No aplica",
+       "vende_competidor": false,
+       "texto_clave": "search sequentially across multiple tools until you find a valid match",
+       "fecha_consulta": "2026-11-06"
+      }
+     ]
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "Busca en la web en tiempo real y navega páginas (herramienta Web Search de su API).",
+       "url": "https://docs.x.ai/developers/tools/web-search",
+       "fuente": "xAI, documentación de la API",
+       "midio": "xAI (documentación propia)",
+       "que_mide": "Qué hace la herramienta de búsqueda",
+       "mercado": "No aplica",
+       "vende_competidor": false,
+       "texto_clave": "search the web in real-time",
+       "fecha_consulta": "2026-11-06"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "fuente_por_dato",
+   "atributo": "Fuente pública visible por cada dato",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "Sí: cada decisor se guarda con la página pública que lo respalda."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "clay": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "no_informado",
+     "datos": []
+    }
+   }
+  },
+  {
+   "id": "patron",
+   "atributo": "Correos armados por patrón",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "No: solo correos publicados, nunca armados por patrón."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "clay": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "no_informado",
+     "datos": []
+    }
+   }
+  },
+  {
+   "id": "correo_valido",
+   "atributo": "Correo válido (cifra pública de terceros)",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "Verifica cada correo antes del primer envío."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "61 % de correos encontrados y válidos según ZeroBounce, con Apollo solo.",
+       "url": "https://dev.to/zackrag/waterfall-enrichment-in-2026-i-tested-4-provider-configs-against-the-same-350-prospects-30nf",
+       "fuente": "DEV, «Waterfall enrichment in 2026»",
+       "midio": "Zackrag, autor del post en DEV (no declara si vende un producto competidor)",
+       "que_mide": "Correo encontrado y válido según ZeroBounce (no catch-all ni riesgoso)",
+       "mercado": "350 prospectos de nivel VP/Director en empresas SaaS de 50 a 500 empleados de EE. UU.",
+       "vende_competidor": false,
+       "texto_clave": "Apollo only",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "61 %",
+       "fecha_publicacion": "2 de julio (la página no muestra el año; el título dice 2026)"
+      },
+      {
+       "texto": "73,2 % válidos en 100.000 contactos exportados de Apollo entre enero y junio de 2026.",
+       "url": "https://bouncezero.io/apollo-email-accuracy-study-2026",
+       "fuente": "BounceZero, «Apollo.io Email Accuracy Study 2026»",
+       "midio": "BounceZero, que vende verificación de correos",
+       "que_mide": "Contactos exportados y verificados justo después de exportar",
+       "mercado": "No lo informa",
+       "vende_competidor": true,
+       "texto_clave": "73.2%",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "73,2 %",
+       "fecha_publicacion": "Julio de 2026"
+      }
+     ]
+    },
+    "clay": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "83 % de correos encontrados y válidos con una cascada de 4 proveedores armada en Clay (Apollo, People Data Labs, Hunter.io y Snov.io).",
+       "url": "https://dev.to/zackrag/waterfall-enrichment-in-2026-i-tested-4-provider-configs-against-the-same-350-prospects-30nf",
+       "fuente": "DEV, «Waterfall enrichment in 2026»",
+       "midio": "Zackrag, autor del post en DEV (no declara si vende un producto competidor)",
+       "que_mide": "Correo encontrado y válido según ZeroBounce, misma prueba",
+       "mercado": "350 prospectos de nivel VP/Director en empresas SaaS de 50 a 500 empleados de EE. UU.",
+       "vende_competidor": false,
+       "texto_clave": "Four-provider waterfall built in Clay",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "83 %",
+       "fecha_publicacion": "2 de julio (la página no muestra el año; el título dice 2026)"
+      }
+     ]
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "no_informado",
+     "datos": []
+    }
+   }
+  },
+  {
+   "id": "rebote",
+   "atributo": "Rebote (cifra pública de terceros)",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "Pausa el envío automáticamente si los rebotes o las quejas suben."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "8,3 % de rebote en 60 correos enviados, con Apollo solo.",
+       "url": "https://dev.to/zackrag/waterfall-enrichment-in-2026-i-tested-4-provider-configs-against-the-same-350-prospects-30nf",
+       "fuente": "DEV, «Waterfall enrichment in 2026»",
+       "midio": "Zackrag, autor del post en DEV (no declara si vende un producto competidor)",
+       "que_mide": "Rebote medido solo en una muestra de 60 correos enviados desde un dominio calentado",
+       "mercado": "350 prospectos de nivel VP/Director en empresas SaaS de 50 a 500 empleados de EE. UU.",
+       "vende_competidor": false,
+       "texto_clave": "8.3%",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "8,3 %",
+       "fecha_publicacion": "2 de julio (la página no muestra el año; el título dice 2026)"
+      }
+     ]
+    },
+    "clay": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "13,8 % de rebote en 60 correos enviados, con la cascada de 4 proveedores.",
+       "url": "https://dev.to/zackrag/waterfall-enrichment-in-2026-i-tested-4-provider-configs-against-the-same-350-prospects-30nf",
+       "fuente": "DEV, «Waterfall enrichment in 2026»",
+       "midio": "Zackrag, autor del post en DEV (no declara si vende un producto competidor)",
+       "que_mide": "Rebote medido solo en una muestra de 60 correos enviados desde un dominio calentado",
+       "mercado": "350 prospectos de nivel VP/Director en empresas SaaS de 50 a 500 empleados de EE. UU.",
+       "vende_competidor": false,
+       "texto_clave": "13.8%",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "13,8 %",
+       "fecha_publicacion": "2 de julio (la página no muestra el año; el título dice 2026)"
+      }
+     ]
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "no_informado",
+     "datos": []
+    }
+   }
+  },
+  {
+   "id": "pymes",
+   "atributo": "Pymes y Latinoamérica",
+   "celdas": {
+    "inntuitivo": {
+     "estado": "informado",
+     "propio": true,
+     "datos": [
+      {
+       "texto": "Hecho para pymes de Latinoamérica, en español."
+      }
+     ]
+    },
+    "apollo": {
+     "estado": "informado",
+     "datos": [
+      {
+       "texto": "64,3 % válidos en empresas de 1 a 10 empleados y 69,8 % en las de 11 a 50 (73,2 % en el total).",
+       "url": "https://bouncezero.io/apollo-email-accuracy-study-2026",
+       "fuente": "BounceZero, «Apollo.io Email Accuracy Study 2026»",
+       "midio": "BounceZero, que vende verificación de correos",
+       "que_mide": "Contactos exportados y verificados, por tamaño de empresa",
+       "mercado": "No lo informa",
+       "vende_competidor": true,
+       "texto_clave": "64.3%",
+       "fecha_consulta": "2026-11-06",
+       "cifra": "64,3 %",
+       "fecha_publicacion": "Julio de 2026"
+      }
+     ]
+    },
+    "clay": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "explee": {
+     "estado": "no_informado",
+     "datos": []
+    },
+    "grok": {
+     "estado": "no_informado",
+     "datos": []
+    }
+   }
+  }
+ ],
+ "huella_motor": "4b8ae231a6be",
+ "generado": "2026-11-07",
+ "conteo": {
+  "terceros": 7,
+  "propias": 6,
+  "no_informado": 17
+ }
+}
