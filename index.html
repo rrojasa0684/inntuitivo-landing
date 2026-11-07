@@ -421,6 +421,25 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .precio-unif .tabla-real{background:none;border:0;border-radius:0;padding:0;margin-top:0}
 .parte-titulo{font-family:'Audiowide',sans-serif;font-weight:400;font-size:1.05rem;color:#fff;margin:0 0 18px;letter-spacing:.02em}
 .precio-plan{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
+.decisores{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
+.decisores[hidden]{display:none}
+.decisores .dec-sub{color:#B5A9D4;font-size:.96rem;line-height:1.6;max-width:60ch;margin:0 0 18px;text-wrap:pretty}
+.dec-scroll{overflow-x:auto}
+.dec-tabla{min-width:560px;display:flex;flex-direction:column;font-size:.94rem}
+.dec-fila{display:grid;grid-template-columns:1.2fr 2fr 1.1fr;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--linea)}
+.dec-cab{padding:0 16px 16px;font-size:.78rem;letter-spacing:.03em;text-transform:uppercase;color:#B5A9D4;font-weight:600}
+.dec-inn{background:rgba(222,5,64,.10);border-radius:16px;margin:10px 0 4px;box-shadow:inset 0 0 0 2px #FF85A6,0 0 20px rgba(255,133,166,.18)}
+.dec-nom{display:flex;flex-direction:column;color:#fff;font-weight:600}
+.dec-nom small{font-size:.78rem;color:#B5A9D4;font-weight:400;opacity:.75}
+.dec-barra{display:flex;align-items:center;gap:12px}
+.dec-pista{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.dec-pista i{display:block;height:100%;border-radius:999px;background:#452774}
+.dec-inn .dec-pista i{background:linear-gradient(90deg,#DE0540,#FF85A6)}
+.dec-cifra{min-width:56px;text-align:right;font-weight:600;color:#B5A9D4}
+.dec-inn .dec-cifra{font-family:'Audiowide',sans-serif;font-size:1.3rem;color:#FF85A6}
+.dec-vs{white-space:nowrap;text-align:right;font-family:'Audiowide',sans-serif;color:#FF85A6}
+.dec-pie{margin-top:14px;font-size:.88rem;color:#B5A9D4;text-wrap:pretty}
+@media(max-width:520px){.dec-tabla{min-width:0}.dec-fila{grid-template-columns:.9fr 1.4fr .8fr;gap:8px;padding:12px 10px}.dec-cab{padding:0 10px 12px;font-size:.66rem}.dec-inn .dec-cifra{font-size:1.1rem}.dec-cifra{min-width:40px}.dec-barra{gap:6px}.dec-pista{min-width:30px}}
 .precio-plan .precio-inner{padding:0;border-radius:0;background:none}
 .boton-plan{width:100%;text-align:center}
 .boton-demo{margin-top:12px}.boton-demo[hidden]{display:none}
@@ -708,7 +727,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-06: baseline scroll_precio=2/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.1/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -1530,8 +1549,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
       </div>
         </div>
+        <!-- #202 a #205 (6-nov-2026): bloque «Cuántos leads llegan con quien decide». OCULTO hasta que decisores.json (lo publica el motor) esté verificado y alguna herramienta sea publicable; nunca cifras ilustrativas.
+             Con el bloque visible «Tu plan» pasa de 2 a 3 (el número vive en #plan-num). Spec: docs/memoria/tasa-decisores-comparativa.md del motor. -->
+        <div class="decisores" id="decisores" hidden>
+          <h3 class="parte-titulo">2 · Cuántos leads llegan con quien decide</h3>
+          <p class="dec-sub">Un lead sin decisor es un correo a info@ que nadie lee. Medimos, sobre el mismo set de empresas, cuántos traen a la persona que decide, correcta y con una fuente pública que lo respalda.</p>
+          <div class="dec-scroll"><div class="dec-tabla" id="dec-tabla"></div></div>
+          <p class="dec-pie" id="dec-pie"></p>
+        </div>
         <div class="precio-plan" id="activar">
-          <h3 class="parte-titulo">2 · Tu plan</h3>
+          <h3 class="parte-titulo"><span id="plan-num">2</span> · Tu plan</h3>
       <div class="precio-inner">
         <div>
           <span class="oferta">Un precio por agente 🚀</span>
@@ -2081,6 +2108,36 @@ document.addEventListener('DOMContentLoaded', function () {
       var f = function (x) { return '$' + (Math.round(x) === x ? x : Math.round(x)); };
       document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });
     }
+  }).catch(function () {});
+  // #202 a #205: el bloque de decisores se muestra SOLO si decisores.json es válido, está verificado y alguna herramienta es publicable (si no, la sección queda como siempre).
+  fetch('decisores.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d || d.estado !== 'verificado' || !d.inntuitivo || typeof d.inntuitivo.tasa !== 'number' || !Array.isArray(d.herramientas)) return;
+    var pub = d.herramientas.filter(function (h) { return h && h.publicable === true && typeof h.tasa === 'number' && typeof h.ventaja === 'number'; });
+    if (!pub.length) return;
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var tabla = document.getElementById('dec-tabla'), pie = document.getElementById('dec-pie'), bloque = document.getElementById('decisores');
+    if (!tabla || !pie || !bloque) return;
+    var pct = function (x) { return Math.round(x * 100) + ' %'; };
+    var el = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    var fila = function (cls, nombre, sub, tasa, vs) {
+      var f = el('div', 'dec-fila ' + cls), n = el('div', 'dec-nom', nombre), b = el('div', 'dec-barra'), p = el('div', 'dec-pista'), i = el('i');
+      if (sub) n.appendChild(el('small', '', sub));
+      i.style.width = Math.max(0, Math.min(100, Math.round(tasa * 100))) + '%'; p.appendChild(i);
+      b.appendChild(p); b.appendChild(el('span', 'dec-cifra', pct(tasa)));
+      f.appendChild(n); f.appendChild(b); f.appendChild(el('div', 'dec-vs', vs));
+      return f;
+    };
+    var cab = el('div', 'dec-fila dec-cab');
+    ['Herramienta', 'Decisor correcto con fuente', 'Inntuitivo vs. ella'].forEach(function (t) { cab.appendChild(el('span', '', t)); });
+    tabla.appendChild(cab);
+    tabla.appendChild(fila('dec-inn', 'Inntuitivo 🚀', 'Web abierta + verificación', d.inntuitivo.tasa, ''));
+    pub.forEach(function (h) { tabla.appendChild(fila('', h.nombre, h.rotulo || h.tipo || '', h.tasa, '+' + pct(h.ventaja))); });
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d.actualizado || '');
+    var fecha = m ? parseInt(m[3], 10) + ' de ' + meses[parseInt(m[2], 10) - 1] + ' de ' + m[1] : '';
+    pie.appendChild(document.createTextNode('Medido' + (fecha ? ' el ' + fecha : '') + ' sobre ' + (d.muestra_empresas || '') + ' empresas pyme de Latinoamérica, el mismo set para todas. ' + (d.definicion || '') + ' ¿Ves un dato viejo? '));
+    var a = el('a', '', 'Avísanos'); a.href = 'mailto:info@inntuitivo.com?subject=Dato%20desactualizado%20de%20decisores'; pie.appendChild(a);
+    bloque.hidden = false;
+    var num = document.getElementById('plan-num'); if (num) num.textContent = '3';
   }).catch(function () {});
   document.querySelectorAll('a[href="#activar"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_ver_precio'); });   // clic ver precio

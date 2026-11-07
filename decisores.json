@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "estado": "pendiente",
+  "actualizado": "2026-11-06",
+  "muestra_empresas": 0,
+  "definicion": "Decisor correcto con fuente pública: el nombre y un cargo con poder de compra aparecen literalmente en una página pública junto a la empresa.",
+  "inntuitivo": {"nombre": "Inntuitivo", "tasa": 0},
+  "herramientas": []
+}
