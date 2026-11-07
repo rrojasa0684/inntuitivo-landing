@@ -2107,7 +2107,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });
     }
   }).catch(function () {});
-  // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre y «Tu plan» es el 2.
+  // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre y «Tu plan» es el 2. #208: solo se publican las filas con dato con fuente en al menos 3 de las 4 herramientas de la competencia; con menos de 2 filas, el bloque se oculta.
   fetch('datos-decisores-publicos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
     var bloque = document.getElementById('decisores'), tabla = document.getElementById('dec-tabla'), cards = document.getElementById('dec-cards');
     if (!bloque || !tabla || !cards || !d || !Array.isArray(d.columnas) || !Array.isArray(d.filas) || !d.columnas.length || !d.filas.length) return;
@@ -2121,6 +2121,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
     if (!ok) return;
+    // #208: una fila se publica solo si al menos 3 de las 4 herramientas de la competencia (todas menos Inntuitivo) tienen dato con fuente; con menos de 2 filas el bloque no se muestra y «Tu plan» sigue siendo el 2.
+    var filas = d.filas.filter(function (f) {
+      return d.columnas.filter(function (c) { return c.id !== 'inntuitivo' && f.celdas[c.id].estado === 'informado'; }).length >= 3;
+    });
+    if (filas.length < 2) return;
     var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
     var fmt = function (iso) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? parseInt(m[3], 10) + ' ' + meses[parseInt(m[2], 10) - 1] + ' ' + m[1] : ''; };
     var el = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -2144,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', function () {
     d.columnas.forEach(function (c) { var th = el('th', c.id === 'inntuitivo' ? 'col-inntuitivo' : '', c.nombre + (c.id === 'inntuitivo' ? ' 🚀' : '')); th.scope = 'col'; trh.appendChild(th); });
     thead.appendChild(trh); tabla.appendChild(thead);
     var tbody = el('tbody');
-    d.filas.forEach(function (f) {
+    filas.forEach(function (f) {
       var tr = el('tr'), th = el('th', '', f.atributo); th.scope = 'row'; tr.appendChild(th);
       d.columnas.forEach(function (c) { var td = el('td', c.id === 'inntuitivo' ? 'col-inntuitivo' : ''); td.appendChild(celda(f.celdas[c.id])); tr.appendChild(td); });
       tbody.appendChild(tr);
@@ -2152,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', function () {
     tabla.appendChild(tbody);
     d.columnas.forEach(function (c) {
       var card = el('div', 'tabla-real-card' + (c.id === 'inntuitivo' ? ' col-inntuitivo' : '')), h = el('h3', '', c.nombre + (c.id === 'inntuitivo' ? ' 🚀' : '')), dl = el('dl');
-      d.filas.forEach(function (f) { var row = el('div'), dt = el('dt', '', f.atributo), dd = el('dd'); dd.appendChild(celda(f.celdas[c.id])); row.appendChild(dt); row.appendChild(dd); dl.appendChild(row); });
+      filas.forEach(function (f) { var row = el('div'), dt = el('dt', '', f.atributo), dd = el('dd'); dd.appendChild(celda(f.celdas[c.id])); row.appendChild(dt); row.appendChild(dd); dl.appendChild(row); });
       card.appendChild(h); card.appendChild(dl); cards.appendChild(card);
     });
     bloque.hidden = false;
