@@ -2,6 +2,9 @@
 // ninguna celda propia lleva un porcentaje (#207: el propio solo cuando pase del 40 %); ninguna cifra de relleno del diseño. Uso: node datos-decisores-validar.mjs archivo.json. Salida: DATOS_DECISORES_VALIDOS o error (exit 1).
 import { readFileSync } from 'node:fs';
 
+// #211: los enlaces de las fuentes se limitan a estos dominios (la misma lista que DOMINIOS_APROBADOS del motor, app/datos_decisores_publicos.py).
+const APROBADOS = ['dev.to', 'bouncezero.io', 'www.clay.com', 'docs.x.ai'];
+const aprobado = (u) => { try { const p = new URL(u); return p.protocol === 'https:' && !p.username && (p.port === '' || p.port === '443') && APROBADOS.includes(p.hostname); } catch (e) { return false; } };
 const errores = [];
 let d;
 try { d = JSON.parse(readFileSync(process.argv[2], 'utf8')); } catch (e) { console.error('JSON ilegible: ' + e.message); process.exit(1); }
@@ -16,9 +19,10 @@ else for (const f of d.filas) for (const c of d.columnas) {
     if (c.id === 'inntuitivo' && ce.propio !== true) errores.push(`${k}: la celda de Inntuitivo debe ser propia`);
     if (ce.propio === true) { if (/\d\s*%|\d+\s+de\s+\d+|por\s*ciento/i.test(x.texto)) errores.push(`${k}: cifra propia (#207)`); continue; }
     if (!/^https:\/\/[^\s]+$/.test(x.url || '')) errores.push(`${k}: cifra sin URL https`);
+    if (/^https:\/\/[^\s]+$/.test(x.url || '') && !aprobado(x.url)) errores.push(`${k}: dominio de la fuente fuera de la lista aprobada (#211)`);
     if (!x.midio || !x.fecha_consulta) errores.push(`${k}: falta quién midió o la fecha de consulta`);
   }
 }
-if (/(^|[^0-9,.])(64|51|48|46|29|28)[\s\u00a0]*%/.test(JSON.stringify(d))) errores.push('aparece una cifra de relleno del diseño o el porcentaje propio');
+// #213: una sola regla de validez (la del motor): ningún porcentaje en las celdas propias y toda cifra de terceros con URL https aprobada, quién midió y fecha. Un dato legítimo de un tercero con su fuente es válido, sea cual sea la cifra.
 if (errores.length) { console.error('DATOS_DECISORES_INVALIDOS\n' + errores.join('\n')); process.exit(1); }
 console.log('DATOS_DECISORES_VALIDOS');
