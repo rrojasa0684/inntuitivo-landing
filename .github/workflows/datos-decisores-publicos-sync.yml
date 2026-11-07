@@ -1,0 +1,56 @@
+name: datos-decisores-publicos-sync
+
+# 7-nov-2026 (#206): la tabla pública de decisores se publica SOLA, igual que los precios (sin secretos: usa el GITHUB_TOKEN de la corrida). El motor regenera cada día las celdas de Inntuitivo y cada
+# mes revisa que cada página citada siga diciendo su cifra (si no, la celda pasa a «No informado» y avisa a info@). Aquí, cada día, se baja lo que sirve la API, se VALIDA (toda cifra con su URL https,
+# ningún porcentaje propio) y, si cambió algo (sin contar la fecha de generación), se publica en main y se espera a Pages para correr el chequeo en vivo.
+# API caída o sin datos -> no se toca nada. Datos inválidos -> rojo y NO se publica.
+
+on:
+  schedule:
+    - cron: "10 14 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: datos-decisores-publicos-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Bajar lo que sirve la API
+        id: bajar
+        run: |
+          if curl -fsS --max-time 30 https://api.inntuitivo.com/datos/decisores-publicos.json -o nuevo.json; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "La API no respondió con datos: no se toca nada."; fi
+      - name: Validar
+        if: steps.bajar.outputs.ok == '1'
+        run: node datos-decisores-validar.mjs nuevo.json
+      - name: Publicar si cambió
+        id: pub
+        if: steps.bajar.outputs.ok == '1'
+        run: |
+          cambio=$(node -e "const f=(p)=>{const d=JSON.parse(require('fs').readFileSync(p,'utf8'));delete d.generado;return JSON.stringify(d)};console.log(f('nuevo.json')===f('datos-decisores-publicos.json')?'no':'si')")
+          if [ "$cambio" = "no" ]; then echo "Sin cambios: nada que publicar."; exit 0; fi
+          cp nuevo.json datos-decisores-publicos.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos-decisores-publicos.json
+          git commit -m "chore: tabla pública de decisores actualizada por el motor ($(date -u +%F))"
+          git push
+          echo "publicado=1" >> "$GITHUB_OUTPUT"
+      - name: Esperar a Pages y correr el chequeo en vivo
+        if: steps.pub.outputs.publicado == '1'
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS "https://www.inntuitivo.com/datos-decisores-publicos.json?x=$i" | cmp -s - datos-decisores-publicos.json; then break; fi
+            sleep 15
+          done
+          bash chequeo-en-vivo.sh

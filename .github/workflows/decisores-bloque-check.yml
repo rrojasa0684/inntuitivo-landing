@@ -1,0 +1,25 @@
+name: decisores-bloque-check
+
+# 7-nov-2026 (#206, #207): la tabla «Cómo llega cada herramienta a quien decide» con un navegador real: se ve con el JSON válido («Tu plan» es el 3), no se ve sin él o con una cifra sin URL («Tu plan» es el 2),
+# a 390 px no desborda, y ningún porcentaje propio ni cifra de relleno del diseño existe en el repo.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "datos-decisores-publicos.json"
+      - "decisores-bloque-check.mjs"
+      - ".github/workflows/decisores-bloque-check.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: node decisores-bloque-check.mjs
