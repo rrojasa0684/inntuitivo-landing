@@ -2119,7 +2119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var ce = f.celdas[c.id];
         if (!ce || (ce.estado !== 'informado' && ce.estado !== 'no_informado') || !Array.isArray(ce.datos)) return false;
         if (ce.estado === 'informado' && !ce.datos.length) return false;
-        return ce.datos.every(function (x) { return x && typeof x.texto === 'string' && x.texto && (ce.propio === true || (typeof x.url === 'string' && /^https:\/\/[^\s]+$/.test(x.url) && x.midio && x.fecha_consulta)); });
+        return ce.datos.every(function (x) { return x && typeof x.texto === 'string' && x.texto && ((ce.propio === true && c.id === 'inntuitivo') || (typeof x.url === 'string' && /^https:\/\/[^\s]+$/.test(x.url) && x.midio && x.fecha_consulta)); });
       });
     });
     if (!ok) return;

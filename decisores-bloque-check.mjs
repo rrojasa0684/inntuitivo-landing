@@ -7,7 +7,7 @@
 // Uso: node decisores-bloque-check.mjs [carpeta_capturas]. Salida: DECISORES_BLOQUE_OK o error (exit 1). Los JSON de prueba solo se sirven al navegador.
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 const salida = process.argv[2];
@@ -20,7 +20,8 @@ const servidor = createServer((req, res) => {
   if (!existsSync(f)) { res.statusCode = 404; return res.end(); }
   res.setHeader('content-type', ruta.endsWith('.json') ? 'application/json' : ruta.endsWith('.css') ? 'text/css' : ruta.endsWith('.js') ? 'text/javascript' : ruta.endsWith('.png') ? 'image/png' : 'text/html');
   res.end(readFileSync(f));
-}).listen(0);
+}).listen(0, '127.0.0.1');
+await new Promise((ok) => servidor.once('listening', ok));
 const base = `http://127.0.0.1:${servidor.address().port}`;
 const COMP = ['apollo', 'clay', 'explee', 'grok'];
 const informadas = (f) => COMP.filter((c) => f.celdas[c].estado === 'informado').length;
@@ -106,6 +107,24 @@ try {
 for (const n of ['64', '51', '48', '46', '29', '28']) {
   const hit = execSync(`grep -rlE '(^|[^0-9,.])${n} ?%' --include=*.json --include=*.mjs . || true`, { cwd: new URL('.', import.meta.url).pathname, encoding: 'utf8' }).split('\n').filter((l) => l && !l.includes('node_modules') && !l.includes('package') && !l.endsWith('decisores-bloque-check.mjs') && !l.includes('precios-competencia'));
   if (hit.length) fallas.push(`porcentaje de relleno o propio ${n} % en: ${hit.join(', ')}`);
+}
+// El validador del bot rechaza lo que el render no debe publicar (review 6-nov): «propio» fuera de Inntuitivo, cifra propia con otra forma, columnas distintas de las 5.
+{
+  const real = JSON.parse(readFileSync(new URL('datos-decisores-publicos.json', import.meta.url), 'utf8'));
+  const casos = {
+    'propio en la competencia': (d) => { d.filas[0].celdas.apollo = { estado: 'informado', propio: true, datos: [{ texto: '8 de cada 10' }] }; },
+    'cifra propia «14 de 50»': (d) => { d.filas[0].celdas.inntuitivo.datos[0].texto = 'Encuentra 14 de 50'; },
+    'cifra propia «por ciento»': (d) => { d.filas[0].celdas.inntuitivo.datos[0].texto = '28 por ciento'; },
+    'columna repetida': (d) => { d.columnas.push({ ...d.columnas[1] }); },
+    'fila sin atributo': (d) => { delete d.filas[0].atributo; },
+  };
+  for (const [nombre, mut] of Object.entries(casos)) {
+    const d = JSON.parse(JSON.stringify(real)); mut(d);
+    const tmp = `/tmp/dec-validar-${process.pid}.json`; writeFileSync(tmp, JSON.stringify(d));
+    let salio = 0; try { execSync(`node datos-decisores-validar.mjs ${tmp}`, { cwd: new URL('.', import.meta.url).pathname, stdio: 'pipe' }); } catch { salio = 1; }
+    unlinkSync(tmp);
+    if (!salio) fallas.push(`el validador del bot aceptó: ${nombre}`);
+  }
 }
 if (fallas.length) { console.error('DECISORES_BLOQUE_FALLA\n' + fallas.join('\n')); process.exit(1); }
 console.log('DECISORES_BLOQUE_OK');
