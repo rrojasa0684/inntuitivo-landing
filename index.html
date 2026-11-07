@@ -725,7 +725,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.4/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.5/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -2114,6 +2114,18 @@ document.addEventListener('DOMContentLoaded', function () {
     var bloque = document.getElementById('decisores'), tabla = document.getElementById('dec-tabla'), cards = document.getElementById('dec-cards');
     if (!bloque || !tabla || !cards || !d || !Array.isArray(d.columnas) || !Array.isArray(d.filas) || !d.columnas.length || !d.filas.length) return;
     if (d.columnas[0].id !== 'inntuitivo') return;
+    // #211: solo se publican fuentes de los dominios aprobados (la misma lista que DOMINIOS_APROBADOS del motor); un dato de otro dominio se descarta y, si la celda se queda sin datos, dice «No informado».
+    var APROBADOS = ['dev.to', 'bouncezero.io', 'www.clay.com', 'docs.x.ai'];
+    var aprobado = function (u) { try { var p = new URL(u); return p.protocol === 'https:' && !p.username && (p.port === '' || p.port === '443') && APROBADOS.indexOf(p.hostname) !== -1; } catch (e) { return false; } };
+    d.filas.forEach(function (f) {
+      if (!f || !f.celdas) return;
+      d.columnas.forEach(function (c) {
+        var ce = f.celdas[c.id];
+        if (!ce || ce.propio === true || !Array.isArray(ce.datos)) return;
+        ce.datos = ce.datos.filter(function (x) { return x && aprobado(x.url); });
+        if (!ce.datos.length) { ce.estado = 'no_informado'; }
+      });
+    });
     var ok = d.filas.every(function (f) {
       return f && f.atributo && f.celdas && d.columnas.every(function (c) {
         var ce = f.celdas[c.id];

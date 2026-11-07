@@ -354,12 +354,12 @@ function textoPasos(sub){const n=sub>=6?4:sub>=4?3:2;
 // Nota sobre el campo del cliente ideal cuando se pre-llenó con la muestra: dice de dónde salió
 // el dato (Regla 14: es cierto — es lo que escribió al pedir su muestra) y convierte la sorpresa
 // («¿cómo saben lo que puse?») en atención al detalle. Se inserta una sola vez, arriba del campo.
-function notaMuestra(fecha){
+function notaMuestra(fecha,origen){
   const el=$('f-icp_descripcion'); if(!el)return;
   const cont=el.closest('.campo')||el.parentElement; if(!cont||cont.querySelector('.nota-muestra'))return;
   const n=document.createElement('p'); n.className='nota-muestra';
   n.style.cssText='font-size:.85em;opacity:.75;margin:.15rem 0 .5rem';
-  n.textContent=(fecha?('El '+fecha+' pediste una muestra y pusiste esto'):'Pediste una muestra y pusiste esto')+' — corrígelo si cambió.';
+  n.textContent=(fecha?('El '+fecha+' pediste una muestra y pusiste esto'):(origen==='prueba'?'En tu prueba gratis pusiste esto':'Pediste una muestra y pusiste esto'))+' — corrígelo si cambió.';
   cont.insertBefore(n,el);
 }
 function lineas(t){return (t||'').split('\n').map(x=>x.trim()).filter(Boolean);}
@@ -540,7 +540,7 @@ async function pollAnalisis(){
         const mp=d.muestra_previa;
         if(mp&&(mp.target||'').trim()){perfil.icp_descripcion=mp.target;if((mp.industrias||[]).length)perfil.industrias=mp.industrias;}
         renderPerfil(perfil);
-        if(mp&&(mp.target||'').trim())notaMuestra(mp.fecha);
+        if(mp&&(mp.target||'').trim())notaMuestra(mp.fecha,mp.origen);
         $('r1').className='resultado';ver('step2');marcarPaso(2);window.scrollTo(0,0);$('btn-analizar').disabled=false;return;}
       if(d.estado==='error'){clearInterval(loaderTimer);res($('r1'),'error','No pudimos analizar',escapa(d.error||'Intenta de nuevo.'));$('btn-analizar').disabled=false;return;}
     }catch(e){}
@@ -724,7 +724,7 @@ $('btn').addEventListener('click',async()=>{
   if(!password){res($('resultado'),'alerta','','Pega la contraseña en el cuadro de arriba. Si no la tienes aún, sigue los pasos que te mostramos.');$('btn').disabled=false;return;}
   const cuerpo={email,password};
   if(!$('manual').classList.contains('oculto')&&$('host_servidor').value.trim())cuerpo.servidor=$('host_servidor').value.trim();
-  res($('resultado'),'alerta','<span class="spin"></span>Probando tu correo…','Entramos, nos mandamos un mensaje de prueba y lo leemos. Puede tardar hasta un minuto.');
+  res($('resultado'),'alerta','<span class="spin"></span>Verificando tu buzón…','Entramos, nos mandamos un mensaje de prueba y lo leemos. Puede tardar hasta un minuto.');
   const d=await llamar('probar',cuerpo);
   $('btn').disabled=false;
   if(d.ok){$('resultado').className='resultado';mostrarFinal();return;}
