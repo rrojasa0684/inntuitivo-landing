@@ -450,6 +450,8 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 /* 1-oct-2026: separadores de fila dentro de la columna Inntuitivo, mismo grosor (1px) que las otras columnas y un tono suave sobre el fondo resaltado; no tocan el borde, el encabezado ni el total. */
 .precio-unif .tabla-real-tabla tbody tr:not(.fila-gancho) td.col-inntuitivo{border-bottom:1px solid rgba(255,133,166,.32)}
 .precio-unif .tabla-real-tabla .fila-gancho td.col-inntuitivo{color:var(--rosa-claro);box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),inset 0 -2px 0 var(--rosa-claro),0 4px 20px rgba(255,133,166,.18)}
+/* 6-nov-2026: la celda de Inntuitivo de la ÚLTIMA fila visible de la tabla de decisores cierra igual que el total del bloque 1: borde inferior de 2px en --rosa-claro y esquinas inferiores de 16px (las filas se filtran solas con la regla de #208, por eso es :last-child y no una fila fija). */
+.precio-unif .decisores .dec-t tbody tr:last-child td.col-inntuitivo{border-bottom:none;border-radius:0 0 16px 16px;box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),inset 0 -2px 0 var(--rosa-claro),0 4px 20px rgba(255,133,166,.18)}
 @media (max-width:840px){
   .precio-unif .tabla-real-card.col-inntuitivo{border:2px solid var(--rosa-claro)}
   .precio-unif .tabla-real-card.col-inntuitivo .fila-gancho dd{color:var(--rosa-claro)}
