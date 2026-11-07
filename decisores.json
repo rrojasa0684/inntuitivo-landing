@@ -1,9 +1,61 @@
 {
-  "version": 1,
-  "estado": "pendiente",
-  "actualizado": "2026-11-06",
-  "muestra_empresas": 0,
-  "definicion": "Decisor correcto con fuente pública: el nombre y un cargo con poder de compra aparecen literalmente en una página pública junto a la empresa.",
-  "inntuitivo": {"nombre": "Inntuitivo", "tasa": 0},
-  "herramientas": []
+ "version": 1,
+ "estado": "verificado",
+ "actualizado": "2026-11-07",
+ "muestra_empresas": 50,
+ "definicion": "Decisor correcto con fuente pública: el nombre y un cargo con poder de compra aparecen literalmente en una página pública junto a la empresa.",
+ "inntuitivo": {
+  "nombre": "Inntuitivo",
+  "tasa": 0.28,
+  "correctos": 14,
+  "cobertura": 0.28
+ },
+ "herramientas": [
+  {
+   "id": "clay",
+   "nombre": "Clay",
+   "tipo": "Enriquecimiento en cascada",
+   "rotulo": "",
+   "medida": false,
+   "tasa": null,
+   "ventaja": null,
+   "publicable": false,
+   "motivo": "sin credencial o sin API de búsqueda: no se raspa su interfaz"
+  },
+  {
+   "id": "apollo",
+   "nombre": "Apollo",
+   "tipo": "Base de datos comprada",
+   "rotulo": "",
+   "medida": false,
+   "tasa": null,
+   "ventaja": null,
+   "publicable": false,
+   "motivo": "sin credencial o sin API de búsqueda: no se raspa su interfaz"
+  },
+  {
+   "id": "explee",
+   "nombre": "Explee",
+   "tipo": "Búsqueda con IA",
+   "rotulo": "piloto propio oct-nov, set distinto",
+   "medida": false,
+   "tasa": null,
+   "ventaja": null,
+   "publicable": false,
+   "motivo": "sin credencial o sin API de búsqueda: no se raspa su interfaz"
+  },
+  {
+   "id": "grok",
+   "nombre": "Grok",
+   "tipo": "LLM general",
+   "rotulo": "LLM general, no motor de prospección",
+   "medida": false,
+   "tasa": null,
+   "ventaja": null,
+   "publicable": false,
+   "motivo": "sin credencial o sin API de búsqueda: no se raspa su interfaz"
+  }
+ ],
+ "huella": "7c56c6d2c9ff",
+ "inntuitivo_medido": "2026-11-07T01:59:10.702572+00:00"
 }
