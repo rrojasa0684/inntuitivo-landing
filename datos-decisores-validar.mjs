@@ -23,6 +23,6 @@ else for (const f of d.filas) for (const c of d.columnas) {
     if (!x.midio || !x.fecha_consulta) errores.push(`${k}: falta quién midió o la fecha de consulta`);
   }
 }
-if (/(^|[^0-9,.])(64|51|48|46|29|28)[\s\u00a0]*%/.test(JSON.stringify(d))) errores.push('aparece una cifra de relleno del diseño o el porcentaje propio');
+// #213: una sola regla de validez (la del motor): ningún porcentaje en las celdas propias y toda cifra de terceros con URL https aprobada, quién midió y fecha. Un dato legítimo de un tercero con su fuente es válido, sea cual sea la cifra.
 if (errores.length) { console.error('DATOS_DECISORES_INVALIDOS\n' + errores.join('\n')); process.exit(1); }
 console.log('DATOS_DECISORES_VALIDOS');

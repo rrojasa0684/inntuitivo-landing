@@ -36,11 +36,15 @@ const conCompetencia = (porFila) => {
 };
 const TRES_FILAS = conCompetencia([2, 3, 4, 1, 1, 0]);   // cumplen las filas 0, 1 y 2 (2, 3 y 4 de 4); las de 1 y 0 salen
 const UNA_FILA = conCompetencia([2, 1, 1, 0, 0, 0]);     // cumple solo la 0 (2 de 4); 1 no alcanza
+const DOS_FILAS = conCompetencia([2, 2, 1, 0, 0, 0]);    // #213: justo el mínimo para mostrar el bloque
+const CUATRO_FILAS = conCompetencia([2, 2, 3, 4, 1, 0]); // #213: cuatro filas cumplen
 const sinUrl = JSON.parse(TRES_FILAS); sinUrl.filas[0].celdas.apollo.datos[0].url = '';
 const estados = [
   ['el real del repo', REAL, 200],
   ['3 filas cumplen (2, 3 y 4 de 4; las de 1 salen)', TRES_FILAS, 200],
   ['solo 1 fila cumple (2 de 4; las de 1 salen)', UNA_FILA, 200],
+  ['2 filas cumplen (el mínimo para mostrar)', DOS_FILAS, 200],
+  ['4 filas cumplen', CUATRO_FILAS, 200],
   ['JSON ausente (404)', '', 404],
   ['JSON inválido', '{no es json', 200],
   ['una cifra sin URL', JSON.stringify(sinUrl), 200],
@@ -105,8 +109,11 @@ try {
   }
 } finally { await browser.close(); servidor.close(); }
 for (const n of ['64', '51', '48', '46', '29', '28']) {
-  const hit = execSync(`grep -rlE '(^|[^0-9,.])${n} ?%' --include=*.json --include=*.mjs . || true`, { cwd: new URL('.', import.meta.url).pathname, encoding: 'utf8' }).split('\n').filter((l) => l && !l.includes('node_modules') && !l.includes('package') && !l.endsWith('decisores-bloque-check.mjs') && !l.includes('precios-competencia'));
+  const hit = execSync(`grep -rlE '(^|[^0-9,.])${n} ?%' --include=*.json --include=*.mjs --include=*.yml . || true`, { cwd: new URL('.', import.meta.url).pathname, encoding: 'utf8' }).split('\n').filter((l) => l && !l.includes('node_modules') && !l.includes('package') && !l.endsWith('decisores-bloque-check.mjs') && !l.includes('precios-competencia'));
   if (hit.length) fallas.push(`porcentaje de relleno o propio ${n} % en: ${hit.join(', ')}`);
+  // #213: también el texto visible de las páginas (con espacio antes del %, para no confundirlo con CSS como «46%»)
+  const html = execSync(`grep -rlE '(^|[^0-9,.])${n} %' --include=*.html . || true`, { cwd: new URL('.', import.meta.url).pathname, encoding: 'utf8' }).split('\n').filter((l) => l && !l.includes('node_modules') && !l.includes('precios-competencia'));
+  if (html.length) fallas.push(`porcentaje de relleno o propio ${n} % en el texto de: ${html.join(', ')}`);
 }
 // El validador del bot rechaza lo que el render no debe publicar (review 6-nov): «propio» fuera de Inntuitivo, cifra propia con otra forma, columnas distintas de las 5.
 {

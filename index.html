@@ -725,7 +725,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.5/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.6/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -2122,7 +2122,7 @@ document.addEventListener('DOMContentLoaded', function () {
       d.columnas.forEach(function (c) {
         var ce = f.celdas[c.id];
         if (!ce || ce.propio === true || !Array.isArray(ce.datos)) return;
-        ce.datos = ce.datos.filter(function (x) { return x && aprobado(x.url); });
+        ce.datos = ce.datos.filter(function (x) { return x && (!/^https:\/\/[^\s]+$/.test(x.url || '') || aprobado(x.url)); });      // un dato SIN url https se deja pasar: la validación de abajo oculta todo el bloque (cifra sin fuente)
         if (!ce.datos.length) { ce.estado = 'no_informado'; }
       });
     });

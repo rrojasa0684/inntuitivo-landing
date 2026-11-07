@@ -22,14 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
       - name: Bajar lo que sirve la API
         id: bajar
         run: |
-          if curl -fsS --proto =https --max-filesize 1000000 --max-time 30 https://api.inntuitivo.com/datos/decisores-publicos.json -o nuevo.json; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "La API no respondió con datos: no se toca nada."; fi
+          if curl -fsS --proto =https --max-filesize 1000000 --max-time 30 https://api.inntuitivo.com/datos/decisores-publicos.json -o nuevo.json; then echo "ok=1" >> "$GITHUB_OUTPUT"; else
+            echo "La API no respondió con datos: no se toca nada."
+            # #213: sin un 200 durante más de 3 días el trabajo sale en rojo (la tabla publicada se estaría quedando vieja sin que nadie lo vea)
+            node -e "const g=Date.parse(JSON.parse(require('fs').readFileSync('datos-decisores-publicos.json','utf8')).generado);if(!(Date.now()-g<3*86400000)){console.error('La API lleva más de 3 días sin responder con datos y la tabla publicada no se actualiza.');process.exit(1)}"
+          fi
       - name: Validar
         if: steps.bajar.outputs.ok == '1'
         run: node datos-decisores-validar.mjs nuevo.json
@@ -39,7 +43,13 @@ jobs:
         run: |
           cambio=$(node -e "const f=(p)=>{const d=JSON.parse(require('fs').readFileSync(p,'utf8'));delete d.generado;return JSON.stringify(d)};console.log(f('nuevo.json')===f('datos-decisores-publicos.json')?'no':'si')")
           if [ "$cambio" = "no" ]; then echo "Sin cambios: nada que publicar."; exit 0; fi
+          cp datos-decisores-publicos.json anterior.json
           cp nuevo.json datos-decisores-publicos.json
+          # #213: el chequeo del bloque corre AQUÍ, antes del commit (el commit del bot no dispara otros workflows); si falla, no se publica
+          npm ci
+          npx playwright install --with-deps chromium
+          if ! node decisores-bloque-check.mjs; then cp anterior.json datos-decisores-publicos.json; echo "El bloque no pasa su chequeo con los datos nuevos: no se publica."; exit 1; fi
+          rm -f anterior.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add datos-decisores-publicos.json
