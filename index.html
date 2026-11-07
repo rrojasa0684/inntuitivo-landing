@@ -725,7 +725,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.3/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-07: baseline scroll_precio=2.4/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -2119,7 +2119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var ce = f.celdas[c.id];
         if (!ce || (ce.estado !== 'informado' && ce.estado !== 'no_informado') || !Array.isArray(ce.datos)) return false;
         if (ce.estado === 'informado' && !ce.datos.length) return false;
-        return ce.datos.every(function (x) { return x && typeof x.texto === 'string' && x.texto && (ce.propio === true || (typeof x.url === 'string' && /^https:\/\/[^\s]+$/.test(x.url) && x.midio && x.fecha_consulta)); });
+        return ce.datos.every(function (x) { return x && typeof x.texto === 'string' && x.texto && ((ce.propio === true && c.id === 'inntuitivo') || (typeof x.url === 'string' && /^https:\/\/[^\s]+$/.test(x.url) && x.midio && x.fecha_consulta)); });
       });
     });
     if (!ok) return;

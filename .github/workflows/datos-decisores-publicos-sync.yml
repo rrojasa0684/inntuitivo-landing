@@ -29,7 +29,7 @@ jobs:
       - name: Bajar lo que sirve la API
         id: bajar
         run: |
-          if curl -fsS --max-time 30 https://api.inntuitivo.com/datos/decisores-publicos.json -o nuevo.json; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "La API no respondió con datos: no se toca nada."; fi
+          if curl -fsS --proto =https --max-filesize 1000000 --max-time 30 https://api.inntuitivo.com/datos/decisores-publicos.json -o nuevo.json; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "La API no respondió con datos: no se toca nada."; fi
       - name: Validar
         if: steps.bajar.outputs.ok == '1'
         run: node datos-decisores-validar.mjs nuevo.json
@@ -50,7 +50,8 @@ jobs:
         if: steps.pub.outputs.publicado == '1'
         run: |
           for i in $(seq 1 40); do
-            if curl -fsS "https://www.inntuitivo.com/datos-decisores-publicos.json?x=$i" | cmp -s - datos-decisores-publicos.json; then break; fi
+            if curl -fsS "https://www.inntuitivo.com/datos-decisores-publicos.json?x=$i" | cmp -s - datos-decisores-publicos.json; then ok=1; break; fi
             sleep 15
           done
+          if [ "${ok:-0}" != 1 ]; then echo "Pages no publicó el JSON nuevo en 10 minutos: rojo."; exit 1; fi
           bash chequeo-en-vivo.sh
