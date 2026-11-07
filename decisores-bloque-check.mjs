@@ -66,6 +66,11 @@ try {
         return { vis: !!b.offsetParent, plan: document.getElementById('plan-num').textContent, filas, cols, enlaces: enlaces.length, https: enlaces.every((a) => a.href.startsWith('https://')),
           cifrasSinEnlace: cifras.filter((p) => !p.querySelector('.dec-fuente')).length, ni: document.querySelectorAll('#dec-tabla .dec-ni').length,
           desborda: document.documentElement.scrollWidth > innerWidth, texto: b.innerText, inn: !!document.querySelector('#dec-tabla thead .col-inntuitivo'),
+          cierre: (() => { const td = document.querySelector('#dec-tabla tbody tr:last-child td.col-inntuitivo'), g = document.querySelector('.tabla-real-tabla .fila-gancho td.col-inntuitivo'), c = td && getComputedStyle(td), cg = g && getComputedStyle(g);
+            const th = document.querySelector('#dec-tabla thead .col-inntuitivo'), ct = th && getComputedStyle(th), cn = document.querySelector('#dec-cards .tabla-real-card.col-inntuitivo'), ccn = cn && getComputedStyle(cn);
+            return td && g && th && cn ? { radUlt: c.borderBottomLeftRadius + '/' + c.borderBottomRightRadius, radGancho: cg.borderBottomLeftRadius + '/' + cg.borderBottomRightRadius, bordeInf: c.boxShadow.includes('0px -2px 0px 0px'), bordeInfGancho: cg.boxShadow.includes('0px -2px 0px 0px'),
+              radTh: ct.borderTopLeftRadius + '/' + ct.borderTopRightRadius, radThCostos: getComputedStyle(document.querySelector('.tabla-real-tabla thead .col-inntuitivo')).borderTopLeftRadius + '/' + getComputedStyle(document.querySelector('.tabla-real-tabla thead .col-inntuitivo')).borderTopRightRadius,
+              tarjeta: ccn.borderBottomWidth + ' ' + ccn.borderBottomLeftRadius } : null; })(),
           tarjetas: document.querySelectorAll('#dec-cards .tabla-real-card').length, tablaVisible: !!document.querySelector('#dec-tabla').offsetParent, tarjetasVisibles: !!document.querySelector('#dec-cards').offsetParent };
       });
       const etiqueta = `${nombre} @${w}`;
@@ -81,6 +86,15 @@ try {
         if (r.ni !== ni) fallas.push(`${etiqueta}: ${r.ni} «No informado» (se esperaban ${ni})`);
         if (!r.inn || r.tarjetas !== 5) fallas.push(`${etiqueta}: falta la columna o la tarjeta de Inntuitivo`);
         if (/28\s*%|14 de 50/.test(r.texto)) fallas.push(`${etiqueta}: aparece el porcentaje propio (#207)`);
+        // cierre de la columna de Inntuitivo (6-nov): la ÚLTIMA fila visible cierra igual que el total del bloque 1 (borde inferior de 2px y esquinas inferiores de 16px), el encabezado igual que el del bloque 1, y en celular la tarjeta cerrada
+        if (w > 840) {
+          if (!r.cierre) fallas.push(`${etiqueta}: no se pudo leer el cierre de la columna de Inntuitivo`);
+          else {
+            if (!r.cierre.bordeInf || !r.cierre.bordeInfGancho) fallas.push(`${etiqueta}: la última fila de la columna de Inntuitivo no tiene borde inferior`);
+            if (r.cierre.radUlt !== r.cierre.radGancho || r.cierre.radUlt !== '16px/16px') fallas.push(`${etiqueta}: esquinas inferiores ${r.cierre.radUlt} (el total del bloque 1 tiene ${r.cierre.radGancho})`);
+            if (r.cierre.radTh !== r.cierre.radThCostos) fallas.push(`${etiqueta}: esquinas superiores del encabezado ${r.cierre.radTh} (el bloque 1 tiene ${r.cierre.radThCostos})`);
+          }
+        } else if (!r.cierre || r.cierre.tarjeta !== '2px 16px') fallas.push(`${etiqueta}: la tarjeta de Inntuitivo no está cerrada (borde y esquinas): ${r.cierre && r.cierre.tarjeta}`);
         if (w === 390 && (r.tablaVisible || !r.tarjetasVisibles)) fallas.push(`${etiqueta}: en celular debe verse por tarjetas`);
         if (w === 1440 && (!r.tablaVisible || r.tarjetasVisibles)) fallas.push(`${etiqueta}: en computadora debe verse la tabla`);
         if (salida && nombre === 'el real del repo') { mkdirSync(salida, { recursive: true }); await (await page.$('#precio')).screenshot({ path: `${salida}/precio-decisores-${w}.png` }); }
