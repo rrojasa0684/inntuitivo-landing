@@ -25,4 +25,7 @@ echo "$blk" | grep -qi "password\|\$('email')\|microsoft/inicio" && fail "activa
 grep -q "new URLSearchParams(location.search).get('token')" $f || fail "regresión: el flujo real lee el token de la query"
 grep -q "new URLSearchParams(location.hash.slice(1)).get('token')" $f || fail "el demo debe leer el token del fragmento"
 grep -q "history.replaceState(null,'',location.pathname);return f;" $f || fail "el token del fragmento debe salir de la barra al leerse"
+# 8-nov: «Lo hago después» de la prueba vive fuera de #bloque-conectar (ese bloque se oculta con el bloqueo de Microsoft y el botón desaparecía)
+grep -q "b.parentNode.insertBefore(s,b);" $f || fail "«Lo hago después» (btn-saltar) debe insertarse fuera de #bloque-conectar"
+grep -q "d0.parentNode.insertBefore(s,d0)" $f && fail "«Lo hago después» no puede ir dentro de #bloque-conectar (junto a btn-despues)"
 echo DEMO_ONBOARDING_OK
