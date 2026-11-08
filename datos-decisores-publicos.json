@@ -36,7 +36,7 @@
      "propio": true,
      "datos": [
       {
-       "texto": "De las páginas públicas de cada empresa: su sitio y otras fuentes públicas. No de una base comprada."
+       "texto": "Cuando tu agente busca solo: de las páginas públicas de cada empresa, su sitio y otras fuentes públicas. No de una base comprada."
       }
      ]
     },
@@ -91,7 +91,7 @@
      "propio": true,
      "datos": [
       {
-       "texto": "Sí: cada decisor se guarda con la página pública que lo respalda."
+       "texto": "Sí, cuando tu agente busca solo: cada decisor se guarda con la página pública que lo respalda."
       }
      ]
     },
@@ -122,7 +122,7 @@
      "propio": true,
      "datos": [
       {
-       "texto": "No: solo correos publicados, nunca armados por patrón."
+       "texto": "No, cuando tu agente busca solo: solo correos publicados, nunca armados por patrón."
       }
      ]
     },
@@ -322,7 +322,7 @@
   }
  ],
  "huella_motor": "4b8ae231a6be",
- "generado": "2026-11-07",
+ "generado": "2026-11-08",
  "conteo": {
   "terceros": 7,
   "propias": 6,
