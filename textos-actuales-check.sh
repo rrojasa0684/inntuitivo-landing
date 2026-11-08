@@ -32,7 +32,7 @@ HUELLAS = {"hero (con su panel)": ('<header class="hero">', "</header>", "d95fa5
            "partners (con su carrusel)": ('<section class="partners"', "</section>", "3d9fed73b1cccd9fae3c67745a2d96177065c373a891e1684c684cbe7a000b6a")}
 for nombre, (ini, fin, esperada) in HUELLAS.items():
     if huella(ini, fin) != esperada: mal.append(f"bloque bloqueado cambiado: {nombre} (si Ricardo aprobó el cambio, actualizar la huella)")
-PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic", "un solo toque", "con un toque"]
+PROHIBIDAS = ["desde inntuitivo.com", "300 al mes", "modo plataforma", "infraestructura de Inntuitivo", "infraestructura de inntuitivo", "a mano", "25 contactos", "un clic", "un solo toque", "con un toque", "contactos"]   # 8-nov (#197): la palabra es «lead»; «contactos» solo en los usos de abajo
 # usos legítimos de "a mano" que no hablan del agente (no se tocan: fuera de lo aprobado)
 PERMITIDAS = ["Prospectar a mano", "selector armado a mano", "te ayudamos a mano", "Te escribo porque trabajo con despachos"]
 for f in sorted(glob.glob("*.html")):
@@ -42,6 +42,7 @@ for f in sorted(glob.glob("*.html")):
         for p in PROHIBIDAS:
             if p.lower() not in low: continue
             if p == "a mano" and any(x in linea for x in PERMITIDAS): continue
+            if p == "contactos" and ("'contactos'" in linea or "275M de contactos" in linea): continue   # ruta interna del panel y comentario HTML sobre Apollo, no son texto visible
             if p == "un clic" and ("verificarlo en un clic" in linea or "verificable en un clic" in linea): continue   # otro uso: la fuente de cada dato, no la conexión con Microsoft
             if p.lower() == "modo plataforma" and f == "cancelar.html" and linea.strip().startswith("//"): continue
             mal.append(f"{f}: '{p}' en: {linea.strip()[:90]}")
