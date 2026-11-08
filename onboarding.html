@@ -405,7 +405,7 @@ function activarPrueba(){
   // #194: un solo «Lo hago después», justo bajo «Conectar mi correo» (el de la prueba no manda enlaces por correo: sigue de una vez)
   const d0=$('btn-despues');d0.classList.add('oculto');
   const s=document.createElement('button');s.id='btn-saltar';s.type='button';s.className='btn btn-sec';s.textContent='Lo hago después';
-  d0.parentNode.insertBefore(s,d0);
+  b.parentNode.insertBefore(s,b);   // 8-nov: fuera de #bloque-conectar, que se oculta con el bloqueo de Microsoft; «Lo hago después» siempre visible
   const sub2=document.querySelector('#step2 .sub');if(sub2)sub2.textContent='Esto es lo que entendimos de tu sitio y de lo que escribiste. Corrige lo que haga falta: tu agente buscará con esto.';
   $('btn-saltar').addEventListener('click',async()=>{
     $('btn-saltar').disabled=true;
