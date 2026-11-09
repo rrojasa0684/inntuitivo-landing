@@ -1,0 +1,39 @@
+name: avisar-motor
+
+# #219 (9-nov-2026): cada corrida de main de este repo se avisa al motor (POST firmado con HMAC) para que el reporte diario sepa el estado de CI sin token de lectura en el servidor. Un flujo en rojo más de 24 h es un
+# hallazgo; si dejan de llegar avisos 48 h también (el latido diario existe para que el silencio se note). El aviso nunca pone nada en rojo. Si se agrega un flujo a este repo, su nombre va en `workflows:` (lo exige
+# ops/avisar-lista-check.sh en readme-check).
+
+on:
+  workflow_run:
+    workflows: [breakpoints-check, chequeo-en-vivo, cta-activacion-check, cta-color-check, datos-decisores-publicos-sync, decisores-bloque-check, geo-paises-check, githook-check, index-baseline-check, observer-threshold-check, pipefail-grep-check, precio-competencia-check, precios-competencia-semanal, readme-check, textos-actuales-check]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: avisar al motor (nunca falla)
+        continue-on-error: true
+        env:
+          AVISO_CLAVE: ${{ secrets.AVISO_GITHUB_CLAVE }}
+          GH_TOKEN: ${{ github.token }}
+          AVISO_FLUJO: ${{ github.event.workflow_run.name || 'latido' }}
+          AVISO_RESULTADO: ${{ github.event.workflow_run.conclusion || 'success' }}
+          AVISO_RAMA: ${{ github.event.workflow_run.head_branch || 'main' }}
+          AVISO_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          AVISO_HORA: ${{ github.event.workflow_run.updated_at }}
+          AVISO_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: python3 ops/github_aviso.py
