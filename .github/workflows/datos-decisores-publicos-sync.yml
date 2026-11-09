@@ -46,7 +46,7 @@ jobs:
           cp datos-decisores-publicos.json anterior.json
           cp nuevo.json datos-decisores-publicos.json
           # #213: el chequeo del bloque corre AQUÍ, antes del commit (el commit del bot no dispara otros workflows); si falla, no se publica
-          npm install --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps chromium
           if ! node decisores-bloque-check.mjs; then cp anterior.json datos-decisores-publicos.json; echo "El bloque no pasa su chequeo con los datos nuevos: no se publica."; exit 1; fi
           rm -f anterior.json

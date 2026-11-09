@@ -308,7 +308,7 @@ function entrarAlPanel(ev,el,r0,ir){ev.preventDefault();r0.textContent='';
     r0.innerHTML=escapa((d&&d.mensaje)||'No pudimos abrir tu panel desde aquí.')+' <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';
   }).catch(function(){r0.innerHTML='No pudimos abrir tu panel ahora. <a href="https://api.inntuitivo.com/panel/">Pedir mi enlace</a>';});}
 $('ir-panel').addEventListener('click',function(ev){entrarAlPanel(ev,this,$('ir-panel-r'),'');});
-$('ir-listas').addEventListener('click',function(ev){entrarAlPanel(ev,this,$('ir-listas-r'),'contactos');});   // #167: opcional, no suma pasos; lleva a Contactos
+$('ir-listas').addEventListener('click',function(ev){entrarAlPanel(ev,this,$('ir-listas-r'),'contactos');});   // #167: opcional, no suma pasos; lleva a la sección de listas del panel
 // 18-sep-2026: antes solo chequeaba includes('@') -- dejaba pasar "foo@bar" (sin
 // dominio real) hacia el backend en los tres usos de abajo. Mismo criterio que el
 // pattern nuevo de los inputs type=email de index.html: exige un punto en el dominio.

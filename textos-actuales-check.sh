@@ -42,7 +42,7 @@ for f in sorted(glob.glob("*.html")):
         for p in PROHIBIDAS:
             if p.lower() not in low: continue
             if p == "a mano" and any(x in linea for x in PERMITIDAS): continue
-            if p == "contactos" and ("'contactos'" in linea or "275M de contactos" in linea): continue   # ruta interna del panel y comentario HTML sobre Apollo, no son texto visible
+            if p == "contactos" and "contactos" not in linea.replace("'contactos'", "").replace("275M de contactos", "").lower(): continue   # ruta interna del panel y comentario HTML sobre Apollo, no son texto visible; se quita solo esa subcadena, un «contactos» visible en la misma línea sí falla
             if p == "un clic" and ("verificarlo en un clic" in linea or "verificable en un clic" in linea): continue   # otro uso: la fuente de cada dato, no la conexión con Microsoft
             if p.lower() == "modo plataforma" and f == "cancelar.html" and linea.strip().startswith("//"): continue
             mal.append(f"{f}: '{p}' en: {linea.strip()[:90]}")
