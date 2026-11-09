@@ -35,7 +35,7 @@ fi
 git -C "$T" init -q -b main || { echo "FALLA no se pudo crear el repo temporal"; exit 1; }
 mkdir "$T/.githooks"; cp "$HOOK" "$T/.githooks/pre-commit"; chmod +x "$T/.githooks/pre-commit"; cp "$(dirname "$HOOK")/baseline-umami.py" "$T/.githooks/" 2>/dev/null || true
 paso config core.hooksPath .githooks
-export UMAMI_BASELINE_ARCHIVO="$T/b.json"; echo "{\"scroll_precio_dia\": 1, \"cta_activar_semana\": 1, \"fecha\": \"2026-11-04\", \"generado\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$T/b.json"
+export UMAMI_BASELINE_ARCHIVO="$T/b.json"; echo "{\"scroll_precio_dia\": 1, \"cta_activar_semana\": 1, \"fecha\": \"$(date -u +%Y-%m-%d)\", \"generado\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$T/b.json"
 echo x > "$T/README.md"; paso add README.md
 permitido "docs sobre main permitido (README.md)" -m "docs: inicio"
 
