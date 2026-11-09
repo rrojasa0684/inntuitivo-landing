@@ -17,6 +17,8 @@ on:
     paths:
       - "README.md"
       - "readme-nombres-check.sh"
+      - ".github/workflows/*.yml"
+      - "ops/avisar-lista-check.sh"
 
 jobs:
   check:
@@ -28,3 +30,5 @@ jobs:
             echo "::error::README.md menciona un archivo entre backticks que ya no existe en el árbol -- ver la lista de arriba. Actualizá el nombre o quitá la referencia."
             exit 1
           fi
+      - name: todo flujo está en la lista de avisar-motor (#219)
+        run: bash ops/avisar-lista-check.sh
