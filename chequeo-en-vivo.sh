@@ -70,6 +70,14 @@ done
 # 4: sitemap y robots.txt
 if printf '%s\n%s' "$sitemap" "$robots" | grep -Eiq "$PROHIBIDOS"; then fallas+=("el sitemap o robots.txt menciona una página o proveedor retirado"); fi
 
+# 5 (#227): el día de ejemplo no lleva una cifra escrita a mano y datos-plan-limite.json, si existe, trae un entero de 1 a 1000
+pedir "$BASE/"; home="$CUERPO"
+if printf '%s' "$home" | grep -Eq '[0-9]+ emails personalizados enviados en tu nombre'; then fallas+=("el día de ejemplo trae una cifra fija (#227)"); fi
+pedir "$BASE/datos-plan-limite.json"
+if [ "$CODIGO" = "200" ]; then
+    printf '%s' "$CUERPO" | grep -Eq '"correos_por_dia"[[:space:]]*:[[:space:]]*[0-9]+[[:space:]]*[,}]' || fallas+=("datos-plan-limite.json no trae correos_por_dia como entero")
+fi
+
 if [ "${#fallas[@]}" -gt 0 ]; then
     echo "CHEQUEO_EN_VIVO_FALLA"
     printf '  - %s\n' "${fallas[@]}"

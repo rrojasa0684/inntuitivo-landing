@@ -1,0 +1,57 @@
+name: datos-plan-limite-sync
+
+# 10-nov-2026 (#227): el día de ejemplo de la landing dice «Hasta N emails…» y N es el límite diario calculado del plan. Se publica SOLA, igual que la tabla de decisores: se baja lo que sirve la API,
+# se VALIDA (entero de 1 a 1000) y, si cambió el número, se publica en main y se espera a Pages para correr el chequeo en vivo. API caída o dato inválido -> no se toca nada (el JSON anterior sigue).
+
+on:
+  schedule:
+    - cron: "40 14 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: datos-plan-limite-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+      - name: Bajar y validar lo que sirve la API
+        id: bajar
+        run: |
+          if curl -fsS --proto =https --max-filesize 10000 --max-time 30 https://api.inntuitivo.com/datos/plan-limite.json -o nuevo.json; then
+            node datos-plan-limite-validar.mjs nuevo.json && echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "La API no respondió con datos: no se toca nada."
+          fi
+      - name: Publicar si cambió
+        id: pub
+        if: steps.bajar.outputs.ok == '1'
+        run: |
+          n=$(node -e "console.log(JSON.parse(require('fs').readFileSync('nuevo.json','utf8')).correos_por_dia)")
+          v=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('datos-plan-limite.json','utf8')).correos_por_dia)}catch(e){console.log('')}")
+          if [ "$n" = "$v" ]; then echo "Sin cambios ($n por día): nada que publicar."; exit 0; fi
+          cp nuevo.json datos-plan-limite.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos-plan-limite.json
+          git commit -m "chore: límite diario del plan actualizado por el motor ($n por día, $(date -u +%F))"
+          git push
+          echo "publicado=1" >> "$GITHUB_OUTPUT"
+      - name: Esperar a Pages y correr el chequeo en vivo
+        if: steps.pub.outputs.publicado == '1'
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS "https://www.inntuitivo.com/datos-plan-limite.json?x=$i" | cmp -s - datos-plan-limite.json; then ok=1; break; fi
+            sleep 15
+          done
+          if [ "${ok:-0}" != 1 ]; then echo "Pages no publicó el JSON nuevo en 10 minutos: rojo."; exit 1; fi
+          bash chequeo-en-vivo.sh
