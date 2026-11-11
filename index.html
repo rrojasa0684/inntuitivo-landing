@@ -725,7 +725,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-08: baseline scroll_precio=2.7/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-11: baseline scroll_precio=2.8/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -842,7 +842,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       <ul class="feed">
         <li><span class="hora">08:14</span><span>27 prospectos encontrados que encajan con tu cliente ideal</span></li>
         <li><span class="hora">08:52</span><span>Cada uno investigado: web, sector, gancho de personalización</span></li>
-        <li><span class="hora">09:30</span><span>12 emails personalizados enviados en tu nombre</span></li>
+        <li><span class="hora">09:30</span><span id="dia-ejemplo-envios">Emails personalizados enviados en tu nombre</span></li>
         <li><span class="hora">14:07</span><span class="tag">→ Carlos (despacho contable, 6 personas) respondió: quiere saber más</span></li>
         <li><span class="hora">14:08</span><span>Te avisé al instante. La conversación es tuya.</span></li>
       </ul>
@@ -2108,6 +2108,11 @@ document.addEventListener('DOMContentLoaded', function () {
       var f = function (x) { return '$' + (Math.round(x) === x ? x : Math.round(x)); };
       document.querySelectorAll('[data-precio="licencia-rango"]').forEach(function (e) { e.textContent = f(Math.min.apply(null, n)) + '–' + f(Math.max.apply(null, n)); });
     }
+  }).catch(function () {});
+  // #227: el día de ejemplo dice «Hasta N emails…» con el límite diario calculado del plan (lo publica el motor en datos-plan-limite.json). Sin JSON o con un valor no válido, queda el texto sin cifra: nunca un número fijo en el código.
+  fetch('datos-plan-limite.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    var el = document.getElementById('dia-ejemplo-envios'), n = d && d.correos_por_dia;
+    if (el && typeof n === 'number' && Math.floor(n) === n && n >= 1 && n <= 1000) el.textContent = 'Hasta ' + n + ' emails personalizados enviados en tu nombre';
   }).catch(function () {});
   // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre y «Tu plan» es el 2. #208: solo se publican las filas con dato con fuente en al menos 2 de las 4 herramientas de la competencia; con menos de 2 filas, el bloque se oculta.
   fetch('datos-decisores-publicos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
