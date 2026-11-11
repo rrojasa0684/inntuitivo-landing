@@ -6,7 +6,7 @@ name: avisar-motor
 
 on:
   workflow_run:
-    workflows: [breakpoints-check, chequeo-en-vivo, cta-activacion-check, cta-color-check, datos-decisores-publicos-sync, decisores-bloque-check, geo-paises-check, githook-check, index-baseline-check, observer-threshold-check, pipefail-grep-check, precio-competencia-check, precios-competencia-semanal, readme-check, textos-actuales-check]
+    workflows: [breakpoints-check, chequeo-en-vivo, cta-activacion-check, cta-color-check, datos-decisores-publicos-sync, datos-plan-limite-sync, decisores-bloque-check, geo-paises-check, githook-check, index-baseline-check, observer-threshold-check, pipefail-grep-check, precio-competencia-check, precios-competencia-semanal, readme-check, textos-actuales-check]
     types: [completed]
     branches: [main]
   schedule:
