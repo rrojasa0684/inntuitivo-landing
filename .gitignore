@@ -1,4 +1,6 @@
 .claude/*
+# 13-nov-2026 (Ricardo): la configuración de permisos del proyecto se versiona, para que la negación de «gh pr review» y de «gh api» sobre revisiones viaje con el repo.
+!.claude/settings.json
 !.claude/agents/
 
 # ops/observer-threshold-check.mjs (Playwright) -- ver package.json
