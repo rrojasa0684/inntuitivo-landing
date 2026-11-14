@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(gh pr review *)",
+      "Bash(gh pr review)",
+      "Bash(gh api *reviews*)"
+    ]
+  }
+}
