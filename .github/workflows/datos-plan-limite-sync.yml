@@ -33,7 +33,7 @@ jobs:
           else
             echo "La API no respondió con datos: no se toca nada."
           fi
-      - name: Publicar si cambió (idempotente: un rerun no vuelve a publicar lo ya publicado)
+      - name: Publicar si cambió (idempotente, un rerun no vuelve a publicar lo ya publicado)
         id: pub
         if: steps.bajar.outputs.ok == '1'
         run: bash datos-plan-limite-publicar.sh nuevo.json
