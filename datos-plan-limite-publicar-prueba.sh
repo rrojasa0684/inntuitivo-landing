@@ -59,4 +59,7 @@ d="$TMP/f"; mkdir -p "$d"; nuevo_origin "$d" 6; base="$(git -C "$d/origin.git" r
 if ( rm -rf "$d/runner"; git clone -q "$d/origin.git" "$d/runner" 2>/dev/null; cd "$d/runner" && printf 'no es json' > nuevo.json && bash "$AQUI/datos-plan-limite-publicar.sh" nuevo.json ) >/dev/null 2>&1; then falla "un JSON ilegible no debía publicar"; fi
 [ "$(commits "$d")" = "$antes" ] || falla "un JSON ilegible tocó origin"
 echo "ok: JSON ilegible (falla y no toca nada)"
+# 7. el flujo se puede lanzar a mano: GitHub respondió 422 «Workflow does not have workflow_dispatch trigger» con la forma `workflow_dispatch: {}`; se usa la forma sin llaves, como el resto
+grep -qE '^  workflow_dispatch:[[:space:]]*$' "$AQUI/.github/workflows/datos-plan-limite-sync.yml" || falla "el flujo no declara workflow_dispatch sin llaves"
+echo "ok: el flujo declara workflow_dispatch (se puede lanzar a mano)"
 echo PUBLICAR_PRUEBA_OK
