@@ -18,6 +18,9 @@ on:
     paths:
       - "chequeo-en-vivo.sh"
       - "chequeo-en-vivo-prueba.sh"
+      - "datos-plan-limite-publicar.sh"
+      - "datos-plan-limite-publicar-prueba.sh"
+      - ".github/workflows/datos-plan-limite-sync.yml"
       - ".github/workflows/chequeo-en-vivo.yml"
 
 jobs:
@@ -28,6 +31,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prueba del propio chequeo
         run: bash chequeo-en-vivo-prueba.sh
+      - name: Prueba de la publicación idempotente de datos-plan-limite (15-nov-2026)
+        run: bash datos-plan-limite-publicar-prueba.sh
       - name: Chequeo en vivo (reintenta mientras la red de Pages se actualiza)
         run: |
           for intento in 1 2 3 4; do
