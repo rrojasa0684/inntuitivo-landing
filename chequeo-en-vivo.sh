@@ -16,12 +16,28 @@ RETIRADAS="activar.html"                 # páginas borradas: tienen que dar 404
 PROHIBIDOS='activar\.html|paddle'        # no puede aparecer en nada publicado (sin distinguir mayúsculas)
 fallas=()
 
-codigo() { curl -s -o /dev/null -w '%{http_code}' --max-time 20 -L "$1" || true; }
+# 15-nov-2026: un 5xx o un tiempo agotado (código 000) de GitHub Pages es pasajero (el 15-nov un 503 sobre un favicon puso en rojo datos-plan-limite-sync con los datos ya publicados): se reintenta hasta 3 veces con espera
+# creciente (CHEQUEO_ESPERA segundos, por defecto 3, luego el doble y el doble). Un 4xx NO se reintenta: es un enlace roto de verdad.
+ESPERA="${CHEQUEO_ESPERA:-3}"
+pasajero() { case "$1" in 5??|000) return 0 ;; *) return 1 ;; esac; }
+codigo() {   # codigo <url> [-L]: imprime el código HTTP final
+    local c e="$ESPERA" i
+    for i in 0 1 2 3; do
+        c="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 ${2:-} "$1" || true)"
+        pasajero "$c" && [ "$i" -lt 3 ] || break
+        sleep "$e"; e=$((e * 2))
+    done
+    printf '%s' "$c"
+}
 
 # Una sola descarga por dirección: deja el código en CODIGO y el cuerpo en CUERPO (un 503 pasajero no puede dejar una página "revisada" con el HTML vacío)
 pedir() {
-    local tmp; tmp="$(mktemp)"
-    CODIGO="$(curl -s -o "$tmp" -w '%{http_code}' --max-time 20 -L "$1" || true)"
+    local tmp e="$ESPERA" i; tmp="$(mktemp)"
+    for i in 0 1 2 3; do
+        CODIGO="$(curl -s -o "$tmp" -w '%{http_code}' --max-time 20 -L "$1" || true)"
+        pasajero "$CODIGO" && [ "$i" -lt 3 ] || break
+        sleep "$e"; e=$((e * 2))
+    done
     CUERPO="$(cat "$tmp")"; rm -f "$tmp"
 }
 
@@ -57,13 +73,13 @@ for url in "${paginas[@]}"; do
 done
 while IFS= read -r e; do
     [ -n "$e" ] || continue
-    c="$(codigo "$e")"
+    c="$(codigo "$e" -L)"
     [ "$c" = "200" ] || fallas+=("enlace roto: $e responde $c")
 done < <(printf '%s\n' "${enlaces[@]:-}" | sort -u)
 
 # 3: las retiradas dan 404
 for r in $RETIRADAS; do
-    c="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$BASE/$r" || true)"
+    c="$(codigo "$BASE/$r")"
     [ "$c" = "404" ] || fallas+=("$r debería dar 404 y responde $c")
 done
 

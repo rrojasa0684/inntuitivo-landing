@@ -1,5 +1,6 @@
 name: datos-plan-limite-sync
 
+# 15-nov-2026: la publicación vive en datos-plan-limite-publicar.sh (idempotente, con su prueba) y el chequeo en vivo reintenta los 5xx pasajeros de Pages.
 # 10-nov-2026 (#227): el día de ejemplo de la landing dice «Hasta N emails…» y N es el límite diario calculado del plan. Se publica SOLA, igual que la tabla de decisores: se baja lo que sirve la API,
 # se VALIDA (entero de 1 a 1000) y, si cambió el número, se publica en main y se espera a Pages para correr el chequeo en vivo. API caída o dato inválido -> no se toca nada (el JSON anterior sigue).
 
@@ -32,21 +33,10 @@ jobs:
           else
             echo "La API no respondió con datos: no se toca nada."
           fi
-      - name: Publicar si cambió
+      - name: Publicar si cambió (idempotente: un rerun no vuelve a publicar lo ya publicado)
         id: pub
         if: steps.bajar.outputs.ok == '1'
-        run: |
-          n=$(node -e "console.log(JSON.parse(require('fs').readFileSync('nuevo.json','utf8')).correos_por_dia)")
-          v=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('datos-plan-limite.json','utf8')).correos_por_dia)}catch(e){console.log('')}")
-          if [ "$n" = "$v" ]; then echo "Sin cambios ($n por día): nada que publicar."; exit 0; fi
-          cp nuevo.json datos-plan-limite.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add datos-plan-limite.json
-          git commit -m "chore: límite diario del plan actualizado por el motor ($n por día, $(date -u +%F))"
-          git pull --rebase -q origin main || { sleep 5; git pull --rebase -q origin main; }      # 11-nov: otro push a main entre el clon y el push lo rechazaba (fetch first) y el flujo quedaba en rojo
-          git push
-          echo "publicado=1" >> "$GITHUB_OUTPUT"
+        run: bash datos-plan-limite-publicar.sh nuevo.json
       - name: Esperar a Pages y correr el chequeo en vivo
         if: steps.pub.outputs.publicado == '1'
         run: |
@@ -55,4 +45,4 @@ jobs:
             sleep 15
           done
           if [ "${ok:-0}" != 1 ]; then echo "Pages no publicó el JSON nuevo en 10 minutos: rojo."; exit 1; fi
-          bash chequeo-en-vivo.sh
+          bash chequeo-en-vivo.sh      # reintenta por dentro los 5xx y timeouts de Pages (3 veces, espera creciente); un 4xx sigue fallando
