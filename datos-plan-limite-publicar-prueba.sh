@@ -61,5 +61,7 @@ if ( rm -rf "$d/runner"; git clone -q "$d/origin.git" "$d/runner" 2>/dev/null; c
 echo "ok: JSON ilegible (falla y no toca nada)"
 # 7. el flujo se puede lanzar a mano: GitHub respondió 422 «Workflow does not have workflow_dispatch trigger» con la forma `workflow_dispatch: {}`; se usa la forma sin llaves, como el resto
 grep -qE '^  workflow_dispatch:[[:space:]]*$' "$AQUI/.github/workflows/datos-plan-limite-sync.yml" || falla "el flujo no declara workflow_dispatch sin llaves"
+# 15-nov: un «: » dentro de un nombre de paso sin comillas hizo inválido el YAML (GitHub: «workflow file issue») y dejó el flujo sin dispatch; ningún nombre de paso lo lleva
+! grep -E '^\s*- name:\s*[^"'"'"'].*: ' "$AQUI"/.github/workflows/*.yml >/dev/null || falla "un nombre de paso lleva «: » sin comillas (YAML inválido)"
 echo "ok: el flujo declara workflow_dispatch (se puede lanzar a mano)"
 echo PUBLICAR_PRUEBA_OK
