@@ -8,6 +8,13 @@ Ponytail (plugin de Claude Code, MIT) recorta código innecesario. Está instala
 
 **Caveman (#133, 1-nov-2026): NO instalado** (crítico en SkillSpector; detalle en el repo del motor, `docs/memoria/herramientas-evaluadas.md`). Si alguna vez se instala, los textos que ve un cliente (correos, pantallas, landing) se escriben completos y cuidados, nunca en voz corta; los reportes a Ricardo pueden ser cortos, pero siempre en español y con todo lo que pide el prompt, y las advertencias y decisiones en frases completas.
 
+## Alcance cerrado antes de empezar y suite sin nada pesado en paralelo (16-nov-2026)
+
+1. Todo el alcance de una corrida se define antes de empezar. Lo que surja a mitad va a la siguiente corrida, salvo que sea urgente (producción caída, datos o cobros en riesgo).
+2. Mientras corre la suite completa no se corre nada pesado en paralelo: ni tests dirigidos, ni Playwright, ni subagentes que ejecuten código. Solo esperar o editar documentos.
+
+Motivo: el 16-nov se sumó alcance a mitad de corrida, cada cambio de `app/` invalidó la suite y se repitió; con la Mac cargada una suite pasó de 4 a 10 minutos a 34 a 44.
+
 ## Ciclo de desarrollo (adoptado el 27-oct-2026, decisiones #44 y #45 de Ricardo; versión liviana del 31-oct-2026, decisiones #121 a #123)
 
 El documento completo es `docs/PROCESO-DESARROLLO.md` (misma versión que en el motor); acá solo se resume y se apunta, no se duplica.
