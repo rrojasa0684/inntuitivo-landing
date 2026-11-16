@@ -7,7 +7,7 @@ name: datos-plan-limite-sync
 on:
   schedule:
     - cron: "40 14 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: write
