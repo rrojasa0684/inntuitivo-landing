@@ -5,5 +5,18 @@
       "Bash(gh pr review)",
       "Bash(gh api *reviews*)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "REPL",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/revisar-repl.sh"
+          }
+        ]
+      }
+    ]
   }
 }
