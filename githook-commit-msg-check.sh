@@ -22,6 +22,7 @@ rechaza "sin la línea" "feat: z"
 rechaza "ninguna sin causa" "feat: z
 
 Verificado: ninguna"
+rechaza "asunto que empieza con Merge pero no es un merge" "Merge de cosas varias"
 # merge: los commits de preparación van sin hooks (core.hooksPath apagado solo para ellos)
 sg() { g -c core.hooksPath=/dev/null "$@"; }
 sg checkout -q -b rama; nuevo; sg commit -q -m base; sg checkout -q main; nuevo; sg commit -q -m otro

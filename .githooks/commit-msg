@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# commit-msg (21-nov-2026): todo mensaje de commit lleva una línea «Verificado: ...» (qué se corrió y qué se vio) o «Verificado: ninguna — porque ...». Exentos: los merges (de git, automáticos o con conflicto resuelto a mano).
+# commit-msg (21-nov-2026): todo mensaje de commit lleva una línea «Verificado: ...» (qué se corrió y qué se vio) o «Verificado: ninguna — porque ...». Exentos: los merges de git (los reconoce por MERGE_HEAD, no por el asunto: un commit normal que empieza con «Merge » sí lleva la línea).
 # Los commits de bots en GitHub Actions no pasan por este hook (es local). Se activa con core.hooksPath=.githooks. Nunca saltarlo. Lo prueba githook-commit-msg-check.sh.
 [ -f "$(git rev-parse --git-path MERGE_HEAD)" ] && exit 0
 cuerpo=$(grep -v '^#' "$1")
-case "$(printf '%s\n' "$cuerpo" | awk 'NF{print;exit}')" in "Merge "*) exit 0 ;; esac
 t=$(printf '%s\n' "$cuerpo" | grep -E '^Verificado: ' | tail -n 1 | sed 's/^Verificado: //')
 if [ ${#t} -ge 5 ]; then
     case "$t" in
