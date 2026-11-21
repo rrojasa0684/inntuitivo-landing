@@ -10,6 +10,25 @@ import sys
 from pathlib import Path
 
 REPO = str(Path(__file__).resolve().parents[2]).lower() + "/"      # la raíz del repo donde vive el hook (el motor o la landing: el mismo script en los dos)
+# 21-nov-2026: ssh, scp, sftp y sus parientes se bloquean COMO COMANDO (inicio, tras ; | & ( = $ ! comilla, corchete, un salto escrito como \\n, una palabra de shell como sudo/timeout/if/eval, una asignación A=1, o -e de rsync),
+# nunca dentro de un identificador ni de un texto corrido; «ssh-add -l» pasa. Aparte, un «ssh» armado con literales pegados se bloquea siempre (ver pegados).
+ENVOLTURAS = r"(?:sudo|doas|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh)"
+COMANDO = re.compile(r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)\s*(?:" + ENVOLTURAS + r"\s+(?:-\S+\s+(?:[a-z_]\w*\s+)?|\d+\s+)*)*(?:\w+=\S*\s+)*(?:[\w.~-]*/)*"
+                     r"(?!ssh-add\s+-l\s*(?:$|[;|&\n\"'`)\]]|\\n))(?:ssh(?:-[a-z]+)*|sshpass|autossh|scp|sftp)(?![\w-])", re.M)
+NOMBRES = re.compile(r"\.ssh|ssh|scp|sftp")
+FORMA = re.compile(r"ssh://|ssh\s+(?:-[a-z]|[\w.-]+@|\d+\.\d+\.)")      # ssh con opción, usuario@host, IP o URL: en cualquier posición (caffeinate ssh h, git push ssh://...)
+
+
+def pegados(codigo: str) -> bool:
+    """Un nombre de los de arriba que cruza el borde entre dos literales de texto (armado: «s» + «sh», «x» + «s» + «sh») se bloquea siempre; un literal suelto con la palabra no."""
+    trozos = [a or b for a, b in re.findall(r"\"([^\"]*)\"|'([^']*)'", codigo.lower())]
+    bordes, n = set(), 0
+    for t in trozos:
+        n += len(t)
+        bordes.add(n)
+    return any(any(m.start() < b < m.end() for b in bordes) for m in NOMBRES.finditer("".join(trozos)))
+
+
 PRIMERO = {"ssh": "ssh", "noverify": "--no-verify", "ghprreview": "gh pr review", "ghprmerge": "gh pr merge", "ghauth": "gh auth", "platformenv": "platform.env"}
 
 
@@ -57,14 +76,14 @@ def razones(codigo: str) -> list[str]:
     out: list[str] = []
     vs = vistas(codigo)
     letras = [reducido(v) for v in vs]
-    if any(re.search(r"(?<![a-z])ssh(?![a-z])", v) for v in vs[:2]) or "ssh" in letras[2]:
-        out.append("ssh")
+    if any(COMANDO.search(v) or FORMA.search(v) for v in vs) or pegados(codigo):
+        out.append("ssh, scp o sftp")
     for clave, etiqueta in PRIMERO.items():
         if clave != "ssh" and any(clave in r for r in letras):
             out.append(etiqueta)
     if any("ghapi" in r and ("reviews" in r or "merge" in r) for r in letras):
         out.append("gh api con reviews o merge")
-    if any(".ssh" in v for v in vs):
+    if any(re.search(r"(?<!\w)\.ssh(?!\w)", v) for v in vs):
         out.append("escritura en ~/.ssh")
     if rm_fuera_del_repo(codigo) or any("rmsync" in r or "rmtree" in r for r in letras):
         out.append("rm -rf fuera del repo")
