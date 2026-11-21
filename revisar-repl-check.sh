@@ -30,9 +30,61 @@ caso 0 'run("gh api repos/x/y/issues")'
 caso 0 'const environment = process.env.HOME'
 caso 0 'class Handler: pass'
 caso 0 'glass_house = press_hold = 1'
-caso 0 'run("scp x root@host:/tmp")'
+caso 0 '{"ssh_key_id": 5, "nombre": "llave"}'      # 21-nov: la cadena dentro de un identificador o de un texto pasa
+caso 0 'ssh_key_id = 3; droplet.ssh_keys = []'
+caso 0 'print("la clave ssh del servidor")'
+caso 0 'run("ssh-add -l")'
+caso 0 'print("la clave ssh del servidor", "ssh_key_id")'
+caso 0 'run("echo hola; ssh-add -l")'
 caso 0 'run("rm -rf ./out/../out/tmp")'
 caso 2 'run("ssh root@host ls")'
+caso 2 'run("scp x root@host:/tmp")'      # 21-nov: scp pasó de «debe pasar» a «bloquea»
+caso 2 'run("ls; ssh h")'
+caso 2 'run("x && scp a b")'
+caso 2 'run("echo $(ssh h)")'
+caso 2 'run("a | sftp h")'
+caso 2 'execFileSync("ssh", ["h"])'
+caso 2 'subprocess.run(["scp", "a", "b"])'
+caso 2 'run("sudo ssh h")'
+caso 2 'run("/usr/bin/ssh h")'
+caso 2 'run("ssh-add ~/k")'
+caso 2 'run("ssh-add -D")'
+caso 2 'run("ssh-add -l; ssh-add k")'
+caso 2 'run("ssh-keygen -t ed25519")'
+caso 2 'run("ls\\nssh root@host")'      # revisión Opus 21-nov
+caso 2 'run("ls\\tssh h")'      # revisión Opus 21-nov
+caso 2 'run("env A=1 ssh h")'      # revisión Opus 21-nov
+caso 2 'run("A=1 ssh h")'      # revisión Opus 21-nov
+caso 2 'run("p=ssh; $p root@host")'      # revisión Opus 21-nov
+caso 2 'run("GIT_SSH_COMMAND=ssh git fetch")'      # revisión Opus 21-nov
+caso 2 'run("ssh-copy-id root@host")'      # revisión Opus 21-nov
+caso 2 'run("sshpass -p clave ssh root@host")'      # revisión Opus 21-nov
+caso 2 'print("x"); a="s"; b="sh"; run(a+b+" h")'      # revisión Opus 21-nov
+caso 2 'run("echo"); c=["s","sh"].join("")'      # revisión Opus 21-nov
+caso 2 'run("timeout 5 ssh h")'      # revisión Opus 21-nov
+caso 2 'run("sudo -u root ssh h")'      # revisión Opus 21-nov
+caso 2 'run("nice -n 10 ssh h")'      # revisión Opus 21-nov
+caso 2 'run("eval ssh h")'      # revisión Opus 21-nov
+caso 2 'run("if ssh h; then ls; fi")'      # revisión Opus 21-nov
+caso 2 'run("! ssh h")'      # revisión Opus 21-nov
+caso 2 'run("rsync -e ssh x root@host:/srv")'      # revisión Opus 21-nov
+caso 2 'run("autossh h")'      # revisión Opus 21-nov
+caso 2 'run("cd ~/.ssh;echo k>>authorized_keys")'      # revisión Opus 21-nov
+caso 2 'run("cd ~/.ssh\\necho k >> authorized_keys")'      # revisión Opus 21-nov
+caso 2 'os.path.join(h, ".s"+"sh", "authorized_keys")'      # revisión Opus 21-nov
+caso 2 'Path.home()/(".s"+"sh")/"authorized_keys"'      # revisión Opus 21-nov
+caso 2 'run("ssh-add -l -D")'      # revisión Opus 21-nov
+caso 2 'run("ssh-add -l;ssh-add x")'      # revisión Opus 21-nov
+caso 2 'os.system(f"{x}ssh root@143.198.189.178 uptime")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run(`${x}ssh host`)'      # revisión Opus 21-nov, segunda ronda
+caso 2 'os.path.join(os.path.expanduser("~"), "." + "ssh", "authorized_keys")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("caffeinate ssh root@h uptime")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("flock /tmp/l ssh root@h")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("find . -maxdepth 0 -exec ssh root@h x \\;")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("script -q /dev/null ssh root@h")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("git push ssh://root@143.198.189.178/srv/repo main")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("git clone ssh://h/r")'      # revisión Opus 21-nov, segunda ronda
+caso 2 'run("timeout 5 ssh h")'      # revisión Opus 21-nov, segunda ronda
 caso 2 'a="s"; b="sh"; run(a+b+" host")'
 caso 2 'run("s" + "sh root@host")'
 caso 2 'run("git commit --no-verify -m x")'
