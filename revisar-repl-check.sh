@@ -123,4 +123,7 @@ caso 2 'shutil.rmtree("/Users/x")'
 caso 2 'const n=String.fromCharCode(10), sp=String.fromCharCode(32); await $("rm -f a.txt"+n+"rm"+sp+"-rf"+sp+"/Users/x")'      # revisión Opus 22-nov: un rm -f no esconde el recursivo armado después
 caso 2 'subprocess.run("rm -f " + chr(45) + "rf /Users/x", shell=True)'      # revisión Opus 22-nov (2): la opción -r armada después de «rm -f»
 caso 2 'd="-"; run("rm -f "+d+"rf /x")'
+caso 2 'subprocess.run("rm -f " + chr(45) + "fr /Users/x", shell=True)'      # revisión Opus 22-nov (ronda 2): opciones cuya primera letra no es r
+caso 2 'subprocess.run("rm -f  " + chr(45) + "rf /Users/x", shell=True)'
+caso 2 'subprocess.run("rm -v " + chr(45) + "rf /Users/x", shell=True)'
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1
