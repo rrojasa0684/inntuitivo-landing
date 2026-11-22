@@ -133,4 +133,10 @@ r /etc""")'
 caso 2 'os.system("rm -f%c /etc" % 114)'
 caso 2 'run("rm -f {-r,} /tmp/x")'      # revisión Opus 22-nov (ronda 4): expansión de llaves
 caso 2 'R=-r; run("rm -f $R /tmp/x")'      # opción escondida en una variable
+caso 2 'run("rm \\x2dr /etc")'      # 22-nov noche: opción -r escondida en hex, unicode, octal, subshell o base64
+caso 2 'run("rm \\u002dr /etc")'
+caso 2 'run("rm \\055r /etc")'
+caso 2 'run("rm $(printf '"'"'\\055r'"'"') /etc")'
+caso 2 'run("rm $(echo LXI= | base64 -d) /etc")'
+caso 0 'run("rm -f out/x.dump")'
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1

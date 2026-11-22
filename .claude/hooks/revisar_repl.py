@@ -70,8 +70,8 @@ def rm_fuera_del_repo(codigo: str) -> bool:
             if not destinos or sale_del_repo or any(_destino_fuera(d) for d in destinos):
                 return True
     # rm -rf armado de modo que ningún rm completo se ve (rm-rf/x pegado): se bloquea salvo que ya se haya visto un rm recursivo bien formado
-    # 22-nov: «rm -f archivo» bien formado no es «rm -rf pegado», PERO solo si el código no arma texto (+, chr, fromCharCode, join, plantillas, format): ahí cualquier resto de «rm -f» puede ser una opción -r escondida y se bloquea de más (revisión Opus, 3 rondas)
-    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\{|`|\w=\s*[\x27\x22]?-[a-z]*r|%[-#0 +\d.(]*[a-z]|\.format|\bf[\"']", codigo, re.I))
+    # 22-nov: «rm -f archivo» bien formado no es «rm -rf pegado», PERO solo si el código no arma texto (+, chr, fromCharCode, join, plantillas, format): ahí cualquier resto de «rm -f» puede ser una opción -r escondida y se bloquea de más (revisión Opus, 3 rondas); 22-nov noche: también \\x2d, \\u002d, octal, $(...), printf, base64 y decodificadores
+    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\{|`|\$\(|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|\\[0-7]{2,3}|printf|base64|atob|b64|unhexlify|fromhex|decode|bytes\(|\w=\s*[\x27\x22]?-[a-z]*r|%[-#0 +\d.(]*[a-z]|\.format|\bf[\"']", codigo, re.I))
     if armado and not visto and any(re.search(r"\brm[\s,\[]", v) for v in vistas(codigo)):
         return True      # código que arma texto y menciona un rm sin recursión visible: puede esconder la opción -r (concatenación, chr, variables); se bloquea de más
     return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=[^-r\s\\]|\\+[\x27\x22])", " ", v))) for v in vistas(codigo))
