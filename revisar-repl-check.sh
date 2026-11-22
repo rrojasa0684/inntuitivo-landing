@@ -126,4 +126,9 @@ caso 2 'd="-"; run("rm -f "+d+"rf /x")'
 caso 2 'subprocess.run("rm -f " + chr(45) + "fr /Users/x", shell=True)'      # revisión Opus 22-nov (ronda 2): opciones cuya primera letra no es r
 caso 2 'subprocess.run("rm -f  " + chr(45) + "rf /Users/x", shell=True)'
 caso 2 'subprocess.run("rm -v " + chr(45) + "rf /Users/x", shell=True)'
+caso 2 'os.system("""rm -f\
+r /etc""")'      # revisión Opus 22-nov (ronda 3): continuación de línea de la shell
+caso 2 'os.system("""rm -f -\
+r /etc""")'
+caso 2 'os.system("rm -f%c /etc" % 114)'
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1

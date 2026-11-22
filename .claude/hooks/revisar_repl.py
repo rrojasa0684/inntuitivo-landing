@@ -71,10 +71,10 @@ def rm_fuera_del_repo(codigo: str) -> bool:
                 return True
     # rm -rf armado de modo que ningún rm completo se ve (rm-rf/x pegado): se bloquea salvo que ya se haya visto un rm recursivo bien formado
     # 22-nov: «rm -f archivo» bien formado no es «rm -rf pegado», PERO solo si el código no arma texto (+, chr, fromCharCode, join, plantillas, format): ahí cualquier resto de «rm -f» puede ser una opción -r escondida y se bloquea de más (revisión Opus, 3 rondas)
-    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\$\{|`|%s|\.format|\bf[\"']", codigo, re.I))
+    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\$\{|`|%[-#0 +\d.(]*[a-z]|\.format|\bf[\"']", codigo, re.I))
     if armado and not visto and any(re.search(r"\brm[\s,\[]", v) for v in vistas(codigo)):
         return True      # código que arma texto y menciona un rm sin recursión visible: puede esconder la opción -r (concatenación, chr, variables); se bloquea de más
-    return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm\s+-[^\sr]*\s", " ", v))) for v in vistas(codigo))
+    return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=[^-r\s\\]|\\+[\x27\x22])", " ", v))) for v in vistas(codigo))
 
 
 def razones(codigo: str) -> list[str]:
