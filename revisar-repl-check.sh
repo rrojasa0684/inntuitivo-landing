@@ -139,4 +139,8 @@ caso 2 'run("rm \\055r /etc")'
 caso 2 'run("rm $(printf '"'"'\\055r'"'"') /etc")'
 caso 2 'run("rm $(echo LXI= | base64 -d) /etc")'
 caso 0 'run("rm -f out/x.dump")'
+caso 2 'spawnSync("rm", [o, "/x"])'      # 22-nov noche (revisión Opus): identificador suelto en la lista, variable con espacios y opción larga abreviada
+caso 2 'run("rm --recur /Users/x")'
+caso 2 'flag = "-r"
+subprocess.run(["rm", flag, "/Users/x"])'
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1
