@@ -37,6 +37,9 @@ caso 0 'run("ssh-add -l")'
 caso 0 'print("la clave ssh del servidor", "ssh_key_id")'
 caso 0 'run("echo hola; ssh-add -l")'
 caso 0 'run("rm -rf ./out/../out/tmp")'
+caso 0 'run("rm -f out/respaldo.dump")'      # 22-nov: un borrado sin recursión pasa
+caso 0 'run("rm -f \\"$RESPALDO\\"")'      # 22-nov: «rm -f» más un nombre que empieza con «r» no es el recursivo pegado
+caso 0 'run("mv -f a b; rm -f /tmp/x")'
 caso 2 'run("ssh root@host ls")'
 for c in 'timeout -s KILL ssh h' 'timeout -s KILL 5 ssh h' 'timeout -k 5 10 ssh h' 'timeout 5s ssh h' 'nice -n 10 ssh h' 'ionice -c 3 ssh h' 'env -u VAR ssh h' 'nohup nice -n 5 timeout -s KILL 9 ssh h'; do caso 2 "run(\"$c\")"; done      # 21-nov noche: opciones con argumento antes del comando
 caso 0 'run("timeout -s KILL 5 ls")'
@@ -117,4 +120,6 @@ caso 2 'run(`${"s"}sh root@host`)'
 caso 2 "run(\"rm -rf $RAIZ\")"
 caso 2 'require("fs").rmSync("/Users/x",{recursive:true})'
 caso 2 'shutil.rmtree("/Users/x")'
+caso 2 'const n=String.fromCharCode(10), sp=String.fromCharCode(32); await $("rm -f a.txt"+n+"rm"+sp+"-rf"+sp+"/Users/x")'      # revisión Opus 22-nov: un rm -f no esconde el recursivo armado después
+caso 0 'run("rm -f rfoo.txt")'
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1
