@@ -38,6 +38,9 @@ caso 0 'print("la clave ssh del servidor", "ssh_key_id")'
 caso 0 'run("echo hola; ssh-add -l")'
 caso 0 'run("rm -rf ./out/../out/tmp")'
 caso 2 'run("ssh root@host ls")'
+for c in 'timeout -s KILL ssh h' 'timeout -s KILL 5 ssh h' 'timeout -k 5 10 ssh h' 'timeout 5s ssh h' 'nice -n 10 ssh h' 'ionice -c 3 ssh h' 'env -u VAR ssh h' 'nohup nice -n 5 timeout -s KILL 9 ssh h'; do caso 2 "run(\"$c\")"; done      # 21-nov noche: opciones con argumento antes del comando
+caso 0 'run("timeout -s KILL 5 ls")'
+caso 0 'run("env -u VAR printenv")'
 caso 2 'run("scp x root@host:/tmp")'      # 21-nov: scp pasó de «debe pasar» a «bloquea»
 caso 2 'run("ls; ssh h")'
 caso 2 'run("x && scp a b")'
