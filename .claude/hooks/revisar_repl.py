@@ -14,7 +14,7 @@ REPO = str(Path(__file__).resolve().parents[2]).lower() + "/"      # la raíz de
 # nunca dentro de un identificador ni de un texto corrido; «ssh-add -l» pasa. Aparte, un «ssh» armado con literales pegados se bloquea siempre (ver pegados).
 ENVOLTURAS = r"(?:sudo|doas|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh|caffeinate|busybox|unbuffer|taskpolicy|arch|script|runuser|su|sg|strace|ltrace|tmux|screen|parallel|firejail|proxychains|torsocks|dtruss|chronic|nsenter)"
 POSICIONAL = r"(?:flock|lockf|setpriv|cpulimit)"      # envolturas con un argumento posicional antes del comando (flock /tmp/l ssh h)
-COMANDO = re.compile(r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)\s*(?:" + ENVOLTURAS + r"\s+(?:-\S+\s+(?:(?!" + ENVOLTURAS + r"\b)[a-z_]\w*\s+)?|\d+\s+)*|" + POSICIONAL + r"\s+(?:-\S+\s+)*[\w./:-]+\s+)*(?:\w+=\S*\s+)*(?:[\w.~-]*/)*"
+COMANDO = re.compile(r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)\s*(?:" + ENVOLTURAS + r"\s+(?:-\S+\s+(?:(?!" + ENVOLTURAS + r"\b)[A-Za-z_]\w*\s+)?|\d+(?:\.\d+)?[smhd]?\s+)*|" + POSICIONAL + r"\s+(?:-\S+\s+)*[\w./:-]+\s+)*(?:\w+=\S*\s+)*(?:[\w.~-]*/)*"
                      r"(?!ssh-add\s+-l\s*(?:$|[;|&\n\"'`)\]]|\\n))(?:ssh(?:-[a-z]+)*|sshpass|autossh|scp|sftp)(?![\w-])", re.M)
 NOMBRES = re.compile(r"\.ssh|ssh|scp|sftp")
 FORMA = re.compile(r"ssh://|ssh\s+(?:-[a-z]|[\w.-]+@|\d+\.\d+\.)")      # ssh con opción, usuario@host, IP o URL: en cualquier posición (caffeinate ssh h, git push ssh://...)
