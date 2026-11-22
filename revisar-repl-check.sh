@@ -131,4 +131,6 @@ r /etc""")'      # revisión Opus 22-nov (ronda 3): continuación de línea de l
 caso 2 'os.system("""rm -f -\
 r /etc""")'
 caso 2 'os.system("rm -f%c /etc" % 114)'
+caso 2 'run("rm -f {-r,} /tmp/x")'      # revisión Opus 22-nov (ronda 4): expansión de llaves
+caso 2 'R=-r; run("rm -f $R /tmp/x")'      # opción escondida en una variable
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1
