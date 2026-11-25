@@ -436,6 +436,37 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .dec-cards .tabla-real-card dl div{flex-direction:column;gap:4px}
 .dec-cards .tabla-real-card dd{text-align:left;font-weight:400}
 .dec-pie{margin-top:14px;font-size:.88rem;color:#B5A9D4;text-wrap:pretty}
+/* 25-nov-2026: comparativo simplificado ✓ ✕ —; sin media queries (solo 840 y 520 están permitidos): en pantallas angostas la tabla se desplaza dentro de su caja, con la primera columna fija y la de Inntuitivo a su lado */
+.cmp-wrap{overflow-x:auto;margin:6px 0 0;padding-top:14px;-webkit-overflow-scrolling:touch}
+.cmp-wrap:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px}
+.cmp-cap{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cmp{width:100%;min-width:560px;border-collapse:separate;border-spacing:0}
+.cmp th,.cmp td{padding:0 6px;text-align:center;border-bottom:1px solid var(--linea)}
+.cmp thead th{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-suave);font-weight:700;height:56px;border-bottom:1px solid var(--linea);min-width:68px}
+.cmp thead .cmp-th-lab{text-align:left;padding-left:12px}
+.cmp tbody th,.cmp thead .cmp-th-lab{width:clamp(112px,28vw,230px);min-width:112px;max-width:230px}
+.cmp tbody th{position:sticky;left:0;z-index:1;background:var(--fondo);text-align:left;font-weight:600;color:#fff;font-size:.9rem;line-height:1.3;padding:10px 10px;box-shadow:1px 0 0 var(--linea)}
+.cmp thead .cmp-th-lab{position:sticky;left:0;z-index:2;background:var(--fondo)}
+.cmp td{height:56px;min-width:68px}
+.cmp .cmp-inn{min-width:96px;background:rgba(255,61,127,.12);border-left:2px solid var(--rosa-claro);border-right:2px solid var(--rosa-claro)}
+.cmp thead .cmp-inn{background:var(--gradiente);color:#fff;border-radius:16px 16px 0 0;border-top:2px solid var(--rosa-claro);border-bottom:none;box-shadow:0 -4px 20px rgba(255,133,166,.18)}
+.cmp tbody tr:last-child .cmp-inn{border-bottom:2px solid var(--rosa-claro);border-radius:0 0 16px 16px}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td:not(.cmp-inn){border-bottom:1px solid var(--linea)}
+.cmp-m{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-weight:700;font-size:1rem;line-height:1}
+.cmp-si{background:#6EE7B7;color:#06281B}
+.cmp-si-inn{background:#D9104F;color:#fff}
+.cmp-no{background:rgba(255,120,140,.18);border:2px solid #FF8A9B;color:#FFB3BE;font-size:.95rem}
+.cmp-sd{width:auto;color:var(--tinta-suave);font-weight:400;font-size:1.1rem}
+.cmp-leyenda{display:flex;flex-wrap:wrap;gap:6px 22px;margin:16px 0 0;font-size:.92rem;color:var(--tinta-suave)}
+.cmp-l-si{color:#6EE7B7;font-weight:700}.cmp-l-no{color:#FF8A9B;font-weight:700}.cmp-l-sd{color:var(--tinta-suave)}
+.dec-detalle{margin-top:18px}
+.dec-detalle>summary{display:flex;align-items:center;min-height:44px;padding:8px 14px;cursor:pointer;color:var(--rosa-claro);font-weight:600;border:1px solid var(--linea);border-radius:12px;width:fit-content;max-width:100%}
+.dec-detalle>summary:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px}
+.dec-detalle-cuerpo{margin-top:18px}
+.dec-h4{font-family:'Audiowide',sans-serif;font-weight:400;font-size:.95rem;color:#fff;margin:22px 0 12px}
+.cmp-fuentes{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.cmp-fuentes li{font-size:.92rem;line-height:1.5}
+.cmp-fuentes a{display:inline-block;padding:10px 4px;color:var(--rosa-claro);text-decoration:underline}
 .precio-plan .precio-inner{padding:0;border-radius:0;background:none}
 .boton-plan{width:100%;text-align:center}
 .boton-demo{margin-top:12px}.boton-demo[hidden]{display:none}
@@ -725,7 +756,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
-<!-- baseline-auto 2026-11-11: baseline scroll_precio=2.8/día, cta_activar=1/semana (Umami, últimos 14 días, sin pruebas). -->
+<!-- baseline-auto 2026-11-25: baseline scroll_precio=142.4/día, cta_activar=0.5/semana (Umami, últimos 14 días, sin pruebas). -->
 <div class="cosmos" aria-hidden="true"></div>
 <div class="nebulosa" aria-hidden="true"></div>
 <div class="nebulosa dos" aria-hidden="true"></div>
@@ -1547,18 +1578,55 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
         </div>
       </div>
         </div>
-        <!-- #206 y #207 (7-nov-2026): tabla «Cómo llega cada herramienta a quien decide», con datos PÚBLICOS de terceros y la fuente de cada cifra; sin porcentaje propio de Inntuitivo.
-             Oculta si datos-decisores-publicos.json falta o no es válido (lo publica solo el motor); con la tabla visible «Tu plan» pasa de 2 a 3 (el número vive en #plan-num).
-             Spec: docs/memoria/tasa-decisores-comparativa.md del motor, sección 9. -->
-        <div class="decisores" id="decisores" hidden>
+<!-- 25-nov-2026: comparativo simplificado (✓ sí, ✕ no, — sin dato público) del diseño de Ricardo; una fila por capacidad. Cada ✓ o ✕ de la competencia lleva data-fuente que apunta a su fuente en «Ver el detalle y las fuentes»; sin fuente, va —.
+             Debajo, cerrado, el detalle: las fuentes de cada marca y la tabla con cifras de datos-decisores-publicos.json (#206 y #207, #208: oculta si el JSON falta o no es válido; lo publica solo el motor). Spec: docs/memoria/tasa-decisores-comparativa.md del motor, sección 9. -->
+        <div class="decisores comparativo" id="comparativo">
           <h3 class="parte-titulo">2 · Cómo llega cada herramienta a quien decide</h3>
           <p class="dec-sub">Un lead sin decisor es un correo a info@ que nadie lee. Así trabaja cada opción, con datos públicos y su fuente.</p>
-          <div class="tabla-real-tabla-wrap"><table class="tabla-real-tabla dec-t" id="dec-tabla"></table></div>
-          <div class="tabla-real-cards dec-cards" id="dec-cards"></div>
+          <div class="cmp-wrap" role="region" aria-label="Comparativo de herramientas, con desplazamiento horizontal" tabindex="0">
+            <table class="cmp">
+              <caption class="cmp-cap">Qué hace cada herramienta: sí, no o sin dato público</caption>
+              <thead><tr><th scope="col" class="cmp-th-lab">Cómo lo hace</th><th scope="col" class="cmp-inn">Inntuitivo 🚀</th><th scope="col">Apollo</th><th scope="col">Clay</th><th scope="col">Explee</th><th scope="col">Grok</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Busca empresas en la web abierta, no en una base comprada</th><td class="cmp-inn" aria-label="Inntuitivo: busca empresas en la web abierta"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: sin dato público sobre si busca empresas en la web abierta"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Clay: busca empresas en la web abierta" data-fuente="clay-web"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Explee: sin dato público sobre si busca empresas en la web abierta"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: busca empresas en la web abierta" data-fuente="grok-web"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td></tr>
+                <tr><th scope="row">Busca a quien decide, si es público</th><td class="cmp-inn" aria-label="Inntuitivo: busca a quien decide"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: busca a quien decide" data-fuente="apollo-decisor"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Clay: busca a quien decide" data-fuente="clay-decisor"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Explee: sin dato público sobre si busca a quien decide"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si busca a quien decide"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">Verifica cada correo antes del primer envío</th><td class="cmp-inn" aria-label="Inntuitivo: verifica cada correo antes del primer envío"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: verifica cada correo antes del primer envío" data-fuente="apollo-verif"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Clay: verifica cada correo antes del primer envío" data-fuente="clay-verif"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Explee: sin dato público sobre si verifica cada correo antes del primer envío"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si verifica cada correo antes del primer envío"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">Envía y da seguimiento sin que nadie lo opere</th><td class="cmp-inn" aria-label="Inntuitivo: envía y da seguimiento sin que nadie lo opere"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: envía y da seguimiento sin que nadie lo opere" data-fuente="apollo-envio"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Clay: sin dato público sobre si envía y da seguimiento sin que nadie lo opere"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Explee: envía y da seguimiento sin que nadie lo opere" data-fuente="explee-envio"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Grok: sin dato público sobre si envía y da seguimiento sin que nadie lo opere"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">Pausa el envío si suben los rebotes o las quejas</th><td class="cmp-inn" aria-label="Inntuitivo: pausa el envío si suben los rebotes o las quejas"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: pausa el envío si suben los rebotes o las quejas" data-fuente="apollo-pausa"><span class="cmp-m cmp-si" aria-hidden="true">✓</span></td><td aria-label="Clay: sin dato público sobre si pausa el envío si suben los rebotes o las quejas"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Explee: sin dato público sobre si pausa el envío si suben los rebotes o las quejas"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si pausa el envío si suben los rebotes o las quejas"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">Cada dato con su fuente</th><td class="cmp-inn" aria-label="Inntuitivo: muestra la fuente de cada dato"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: sin dato público sobre si muestra la fuente de cada dato"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Clay: sin dato público sobre si muestra la fuente de cada dato"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Explee: sin dato público sobre si muestra la fuente de cada dato"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si muestra la fuente de cada dato"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">En español, nativo</th><td class="cmp-inn" aria-label="Inntuitivo: trabaja en español nativo"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: sin dato público sobre si trabaja en español nativo"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Clay: sin dato público sobre si trabaja en español nativo"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Explee: sin dato público sobre si trabaja en español nativo"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si trabaja en español nativo"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+                <tr><th scope="row">Precio fijo, usuarios ilimitados</th><td class="cmp-inn" aria-label="Inntuitivo: tiene precio fijo con usuarios ilimitados"><span class="cmp-m cmp-si cmp-si-inn" aria-hidden="true">✓</span></td><td aria-label="Apollo: no tiene precio fijo con usuarios ilimitados" data-fuente="apollo-precio"><span class="cmp-m cmp-no" aria-hidden="true">✕</span></td><td aria-label="Clay: sin dato público sobre si tiene precio fijo con usuarios ilimitados"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Explee: sin dato público sobre si tiene precio fijo con usuarios ilimitados"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td><td aria-label="Grok: sin dato público sobre si tiene precio fijo con usuarios ilimitados"><span class="cmp-m cmp-sd" aria-hidden="true">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="cmp-leyenda"><span><span class="cmp-l-si" aria-hidden="true">✓</span> Sí</span> <span><span class="cmp-l-no" aria-hidden="true">✕</span> No</span> <span><span class="cmp-l-sd" aria-hidden="true">—</span> Sin dato público</span></p>
           <p class="dec-pie">Cifras públicas de terceros, con métricas y mercados distintos; no son un benchmark nuestro. Fuentes y fechas en cada dato. ¿Ves un dato viejo? <a href="mailto:info@inntuitivo.com?subject=Dato%20desactualizado%20de%20decisores">Avísanos</a>.</p>
+          <details class="dec-detalle">
+            <summary>Ver el detalle y las fuentes</summary>
+            <div class="dec-detalle-cuerpo">
+              <h4 class="dec-h4">Fuente de cada marca de la competencia</h4>
+              <ul class="cmp-fuentes">
+                                <li id="fuente-clay-web"><strong>Clay — Busca en la web abierta.</strong> <a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a><span class="dec-meta">«Claygent is Clay's AI agent with access to web research.» Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-grok-web"><strong>Grok — Busca en la web abierta.</strong> <a href="https://docs.x.ai/developers/tools/web-search" target="_blank" rel="noopener noreferrer">docs.x.ai/…/web-search ↗</a><span class="dec-meta">«enables Grok to search the web in real-time and browse web pages to find information» Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-apollo-decisor"><strong>Apollo — Busca a quien decide.</strong> <a href="https://docs.apollo.io/" target="_blank" rel="noopener noreferrer">docs.apollo.io ↗</a> · <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a><span class="dec-meta">Tutorial «Find people with filters» en su documentación; su página de producto cita buscar «by role and title to find decision-makers». Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-clay-decisor"><strong>Clay — Busca a quien decide.</strong> <a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a><span class="dec-meta">Ejemplo de uso en su página: «Find the best contact at this company based on past roles and content they've published». Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-apollo-verif"><strong>Apollo — Verifica cada correo.</strong> <a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a><span class="dec-meta">«Automated verification and bounce protection helps keep bad data out of your sends». Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-clay-verif"><strong>Clay — Verifica cada correo.</strong> <a href="https://www.clay.com/waterfall-enrichment" target="_blank" rel="noopener noreferrer">clay.com/waterfall-enrichment ↗</a><span class="dec-meta">«cross-checks 200+ data providers to find verified emails» (la verificación viene de proveedores de datos). Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-apollo-envio"><strong>Apollo — Envía y da seguimiento.</strong> <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a><span class="dec-meta">«Agents will research, build lists, write outreach, follow up, and book meetings». Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-explee-envio"><strong>Explee — Envía y da seguimiento.</strong> <a href="https://testingcatalog.com/explee-launches-autogtm-ai-agent-for-outbound-sales/" target="_blank" rel="noopener noreferrer">testingcatalog.com ↗</a><span class="dec-meta">«a 24/7 AI sales agent that converts a website URL into a running outbound pipeline»; «follow-ups handled without human involvement». Artículo patrocinado del 29 may 2026 (su sitio oficial bloquea la lectura automática). Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-apollo-pausa"><strong>Apollo — Pausa si suben los rebotes.</strong> <a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a><span class="dec-meta">«Sequence autopause when bounce rates spike» (la fuente habla de rebotes, no de quejas). Consultado el 25 nov 2026.</span></li>
+                <li id="fuente-apollo-precio"><strong>Apollo — Precio fijo, usuarios ilimitados.</strong> <a href="https://www.apollo.io/pricing" target="_blank" rel="noopener noreferrer">apollo.io/pricing ↗</a><span class="dec-meta">«Apollo uses credits as the currency to perform activities throughout the platform»; «All seats on an Apollo account are on the same plan». Cobra por plan, asientos y créditos. Consultado el 25 nov 2026.</span></li>
+              </ul>
+              <div class="decisores-dato" id="decisores" hidden>
+                <h4 class="dec-h4">Cifras públicas de terceros</h4>
+                <div class="tabla-real-tabla-wrap"><table class="tabla-real-tabla dec-t" id="dec-tabla"></table></div>
+                <div class="tabla-real-cards dec-cards" id="dec-cards"></div>
+              </div>
+            </div>
+          </details>
         </div>
         <div class="precio-plan" id="activar">
-          <h3 class="parte-titulo"><span id="plan-num">2</span> · Tu plan</h3>
+          <h3 class="parte-titulo"><span id="plan-num">3</span> · Tu plan</h3>
       <div class="precio-inner">
         <div>
           <span class="oferta">Un precio por agente 🚀</span>
@@ -2114,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var el = document.getElementById('dia-ejemplo-envios'), n = d && d.correos_por_dia;
     if (el && typeof n === 'number' && Math.floor(n) === n && n >= 1 && n <= 1000) el.textContent = 'Hasta ' + n + ' emails personalizados enviados en tu nombre';
   }).catch(function () {});
-  // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre y «Tu plan» es el 2. #208: solo se publican las filas con dato con fuente en al menos 2 de las 4 herramientas de la competencia; con menos de 2 filas, el bloque se oculta.
+  // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre. 25-nov: «Tu plan» es siempre el 3 porque el comparativo simplificado (#comparativo) está siempre. #208: solo se publican las filas con dato con fuente en al menos 2 de las 4 herramientas de la competencia; con menos de 2 filas, el bloque se oculta.
   fetch('datos-decisores-publicos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
     var bloque = document.getElementById('decisores'), tabla = document.getElementById('dec-tabla'), cards = document.getElementById('dec-cards');
     if (!bloque || !tabla || !cards || !d || !Array.isArray(d.columnas) || !Array.isArray(d.filas) || !d.columnas.length || !d.filas.length) return;
@@ -2180,7 +2248,6 @@ document.addEventListener('DOMContentLoaded', function () {
       card.appendChild(h); card.appendChild(dl); cards.appendChild(card);
     });
     bloque.hidden = false;
-    var num = document.getElementById('plan-num'); if (num) num.textContent = '3';
   }).catch(function () {});
   document.querySelectorAll('a[href="#activar"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_ver_precio'); });   // clic ver precio

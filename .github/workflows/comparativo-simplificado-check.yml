@@ -1,0 +1,29 @@
+name: comparativo-simplificado-check
+
+# 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio: fuentes, aria-label, desborde en 360/390/430 px, áreas táctiles y contraste, con un navegador real.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "comparativo-simplificado-check.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/comparativo-simplificado-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node comparativo-simplificado-check.mjs
