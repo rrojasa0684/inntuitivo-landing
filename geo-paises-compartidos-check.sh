@@ -16,11 +16,11 @@ fail=0
 paginas=(onboarding.html)  # 5-nov (#175): index.html ya no usa el selector (se retiró el formulario de la muestra)
 
 for pagina in "${paginas[@]}"; do
-  if ! grep -q '<script src="geo-chips.js"></script>' "$pagina"; then
+  if ! grep -Eq '<script src="geo-chips.js(\?v=[0-9a-f]+)?"></script>' "$pagina"; then
     echo "::error::$pagina no cita <script src=\"geo-chips.js\"> -- dejó de usar el selector compartido."
     fail=1
   fi
-  if ! grep -q '<link rel="stylesheet" href="geo-chips.css">' "$pagina"; then
+  if ! grep -Eq '<link rel="stylesheet" href="geo-chips.css(\?v=[0-9a-f]+)?">' "$pagina"; then
     echo "::error::$pagina no cita <link rel=\"stylesheet\" href=\"geo-chips.css\"> -- dejó de usar el estilo compartido."
     fail=1
   fi
