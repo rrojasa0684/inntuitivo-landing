@@ -3,7 +3,7 @@
 //  - falta «Ver las fuentes» (el desplegable de la sección 2);
 //  - la página pide algo de datos-decisores o de /datos/decisores-publicos (ya no se muestran);
 //  - la página desborda horizontalmente a 360, 390, 430 o 1280 px.
-// 26-nov-2026, comparativo en móvil (360x780, 390x844, 414x896 y 1280x800): pista de deslizar si alguna columna asoma cortada; Inntuitivo y Apollo completas al inicio en celular; primera columna fija al deslizar; el botón de volver arriba no tapa ninguna celda; UN solo borde en «Ver las fuentes», centrado y con aire entre texto e ícono; ninguna etiqueta de fila pasa de 3 líneas; nada visible entre el borde superior y la cabecera fija (opaca); los anclajes respetan la altura real de la cabecera; en 1280 no hay pista y las etiquetas siguen largas.
+// 25-nov-2026, comparativo en móvil (360x780, 390x844, 414x896 y 1280x800): pista de deslizar si alguna columna asoma cortada; Inntuitivo y Apollo completas al inicio en celular; primera columna fija al deslizar; el botón de volver arriba no tapa ninguna celda; UN solo borde en «Ver las fuentes», centrado y con aire entre texto e ícono; ninguna etiqueta de fila pasa de 3 líneas; nada visible entre el borde superior y la cabecera fija (opaca); los anclajes respetan la altura real de la cabecera; en 1280 no hay pista y las etiquetas siguen largas.
 // Uso: node chequeo-en-vivo-navegador.mjs <base>. Salida: NAVEGADOR_OK o NAVEGADOR_FALLA y la lista (exit 1).
 import { chromium } from 'playwright';
 const base = (process.argv[2] || 'https://www.inntuitivo.com').replace(/\/$/, '');
@@ -23,7 +23,7 @@ try {
     if (r.desborda) fallas.push(`@${w}: la página desborda horizontalmente`);
     await ctx.close();
   }
-  // --- comparativo en móvil y escritorio (26-nov) ---
+  // --- comparativo en móvil y escritorio (25-nov) ---
   for (const [w, h] of [[360, 780], [390, 844], [414, 896], [1280, 800]]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 500, serviceWorkers: 'block' });
     const page = await ctx.newPage();
@@ -31,6 +31,7 @@ try {
     await page.waitForTimeout(500);
     const e = `@${w}x${h}`;
     try {
+      if (w === 1280) { const css = await page.evaluate(() => document.documentElement.outerHTML); if (/\b100vw\b/.test(css)) fallas.push(`${e}: el CSS usa 100vw (con barra de desplazamiento ensancha la página); usar sombra o 100vmax`); }
     if (!(await page.$('.cmp-wrap'))) { fallas.push(`${e}: no hay tabla comparativa`); await ctx.close(); continue; }
     const irA = (y) => page.evaluate((yy) => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, yy); }, y);
     const topTabla = () => page.evaluate(() => document.querySelector('.cmp-wrap').getBoundingClientRect().top + scrollY);
@@ -39,7 +40,7 @@ try {
     const ini = await page.evaluate(() => {
       const wr = document.querySelector('.cmp-wrap').getBoundingClientRect(), caja = document.querySelector('.cmp-caja'), pista = document.querySelector('.cmp-pista');
       const ths = [...document.querySelectorAll('.cmp thead th')].map((t) => { const r = t.getBoundingClientRect(); return { n: t.innerText.trim().split(/\s/)[0].toLowerCase(), completa: r.left >= wr.left - 0.5 && r.right <= wr.right + 0.5, algoVisible: r.left < wr.right - 0.5 && r.right > wr.left + 0.5 }; });
-      const ps = getComputedStyle(pista), pistaVisible = ps.display !== 'none' && pista.getBoundingClientRect().height > 0 && /Desliza para ver Clay, Explee y Grok/.test(pista.textContent) && caja.classList.contains('cmp-scroll');
+      const pistaVisible = !pista.hidden && getComputedStyle(pista).display !== 'none' && pista.getBoundingClientRect().height > 0 && /Desliza para ver Clay, Explee y Grok/.test(pista.textContent) && caja.classList.contains('cmp-scroll');
       const lineas = [...document.querySelectorAll('.cmp tbody th')].map((th) => { const sp = [...th.querySelectorAll('span')].find((x) => getComputedStyle(x).display !== 'none') || th; const rects = [...(function () { const r = document.createRange(); r.selectNodeContents(sp); return r.getClientRects(); })()]; return new Set(rects.map((q) => Math.round(q.top))).size; });
       const largo = getComputedStyle(document.querySelector('.cmp .lab-largo')).display !== 'none';
       return { ths, pistaVisible, lineas, largo, scrolla: document.querySelector('.cmp-wrap').scrollWidth > document.querySelector('.cmp-wrap').clientWidth + 1, corte: ths.some((t) => ['apollo', 'clay', 'explee', 'grok'].includes(t.n) && t.algoVisible && !t.completa) };
@@ -59,7 +60,7 @@ try {
     if (ini.scrolla) {
       const fij = await page.evaluate(async () => { const wrp = document.querySelector('.cmp-wrap'); wrp.scrollLeft = wrp.scrollWidth; await new Promise((r) => setTimeout(r, 300));
         const wr = wrp.getBoundingClientRect(), th = document.querySelector('.cmp tbody th').getBoundingClientRect(), hd = document.querySelector('.cmp thead .cmp-th-lab').getBoundingClientRect(), bg = getComputedStyle(document.querySelector('.cmp tbody th')).backgroundColor;
-        const pista = getComputedStyle(document.querySelector('.cmp-pista')).display; const grok = [...document.querySelectorAll('.cmp thead th')].pop().getBoundingClientRect();
+        const pp = document.querySelector('.cmp-pista'), pista = pp.hidden ? 'none' : getComputedStyle(pp).display; const grok = [...document.querySelectorAll('.cmp thead th')].pop().getBoundingClientRect();
         const r = { fijaTh: Math.abs(th.left - wr.left) <= 1, fijaHd: Math.abs(hd.left - wr.left) <= 1, bgOpaco: !/rgba\(.*,\s*0(\.\d+)?\)$/.test(bg) && bg !== 'transparent', pistaFin: pista, grokCompleta: grok.right <= wr.right + 1 && grok.left >= wr.left }; wrp.scrollLeft = 0; return r; });
       if (!fij.fijaTh || !fij.fijaHd || !fij.bgOpaco) fallas.push(`${e}: la primera columna no queda fija y opaca al deslizar (${JSON.stringify(fij)})`);
       if (fij.pistaFin !== 'none') fallas.push(`${e}: la pista no desaparece al llegar al final`);
@@ -76,10 +77,11 @@ try {
     // cabecera fija: opaca, a todo el ancho y sin nada visible entre el borde superior y ella
     await irA((await topTabla()) - 260); await page.waitForTimeout(500);
     const nv = await page.evaluate(() => { const nav = document.querySelector('nav'), r = nav.getBoundingClientRect(), bg = getComputedStyle(nav, '::before').backgroundColor, bgn = getComputedStyle(nav).backgroundColor; const malos = [];
-      for (const y of [1, Math.round(r.bottom / 2), Math.round(r.bottom) - 2]) for (const x of [1, Math.round(innerWidth * 0.3), Math.round(innerWidth * 0.7), innerWidth - 2]) { const el = document.elementFromPoint(x, y); if (!el || !(nav.contains(el) || el === nav)) malos.push(`(${x},${y}) ${el && el.tagName + '.' + el.className}`); }
-      return { top: r.top, bg, bgn, malos, navH: Math.round(r.height), prop: getComputedStyle(document.documentElement).getPropertyValue('--nav-h') }; });
+      for (const y of [1, Math.round(r.bottom / 2), Math.round(r.bottom) - 2]) for (const x of [Math.round(r.left) + 1, Math.round(r.left + r.width * 0.3), Math.round(r.left + r.width * 0.7), Math.round(r.right) - 2]) { const el = document.elementFromPoint(x, y); if (!el || !(nav.contains(el) || el === nav)) malos.push(`(${x},${y}) ${el && el.tagName + '.' + el.className}`); }
+      const sombra = getComputedStyle(nav, '::before').boxShadow; return { top: r.top, sombra, bg, bgn, malos, navH: Math.round(r.height), prop: getComputedStyle(document.documentElement).getPropertyValue('--nav-h') }; });
     if (Math.abs(nv.top) > 1) fallas.push(`${e}: la cabecera fija no está pegada al borde superior (top ${nv.top})`);
     if (!/rgb\(13, 7, 34\)/.test(nv.bgn) || !/rgb\(13, 7, 34\)/.test(nv.bg)) fallas.push(`${e}: la cabecera no es opaca (${nv.bgn} / ${nv.bg})`);
+    if (!/rgb\(13, 7, 34\)/.test(nv.sombra)) fallas.push(`${e}: la franja opaca de la cabecera no llega de borde a borde (sombra de relleno ausente)`);
     if (nv.malos.length) fallas.push(`${e}: hay contenido visible junto o sobre la cabecera fija: ${nv.malos.join('; ')}`);
     if (Math.abs(parseFloat(nv.prop) - nv.navH) > 1) fallas.push(`${e}: --nav-h (${nv.prop}) no es la altura real de la cabecera (${nv.navH})`);
     // anclajes (#activar y #prueba, los de la cabecera): el destino queda justo bajo la cabecera, sin taparse
@@ -95,8 +97,7 @@ try {
       const conBorde = (el) => ['Top', 'Right', 'Bottom', 'Left'].some((l) => parseFloat(getComputedStyle(el)['border' + l + 'Width']) > 0 && getComputedStyle(el)['border' + l + 'Style'] !== 'none');
       let cajas = 0; for (let el = sum; el && el !== d.parentElement; el = el.parentElement) if (conBorde(el)) { const q = el.getBoundingClientRect(); if (q.width > 40 && q.height > 30) cajas++; }
       const rg = document.createRange(); rg.selectNodeContents(sum); const tr = rg.getBoundingClientRect(), a = getComputedStyle(sum, '::after');
-      const iconoIzq = sr.right - 2 - parseFloat(getComputedStyle(sum, '::after').fontSize) * 0.8;
-      return { cajas, centradoV: Math.abs((tr.top + tr.bottom) / 2 - (sr.top + sr.bottom) / 2), aire: sr.right - parseFloat(getComputedStyle(sum).paddingRight) - tr.right, ancho: Math.abs(dr.width - d.parentElement.getBoundingClientRect().width), iconoTop: parseFloat(a.top), alto: sr.height, hijosBorde: [...sum.children].filter(conBorde).length }; });
+      return { cajas, centradoV: Math.abs((tr.top + tr.bottom) / 2 - (sr.top + sr.bottom) / 2), aire: (sr.right - parseFloat(a.right) - parseFloat(a.width)) - tr.right, ancho: Math.abs(dr.width - d.parentElement.getBoundingClientRect().width), iconoTop: parseFloat(a.top), alto: sr.height, hijosBorde: [...sum.children].filter(conBorde).length }; });
     if (bd.cajas !== 1 || bd.hijosBorde) fallas.push(`${e}: «Ver las fuentes» tiene ${bd.cajas} caja(s) con borde (debe ser 1)`);
     if (bd.centradoV > 3) fallas.push(`${e}: «Ver las fuentes» no está centrado (desvío ${bd.centradoV.toFixed(1)} px)`);
     if (bd.aire < 8) fallas.push(`${e}: el ícono está pegado al texto de «Ver las fuentes» (${bd.aire.toFixed(1)} px de aire)`);
