@@ -448,7 +448,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .cmp-caja{position:relative}
 .cmp-pista{margin:0 0 6px;font-size:.88rem;color:var(--tinta-suave)}
 .cmp-caja::after{content:"";position:absolute;top:14px;right:0;bottom:0;width:26px;pointer-events:none;background:linear-gradient(90deg,rgba(24,14,49,0),#180E31);opacity:0;transition:opacity .2s}
-.cmp-caja.cmp-scroll:not(.cmp-fin)::after{opacity:1}
+.cmp-caja.cmp-scroll::after{opacity:1}
 .cmp .lab-corto{display:none}
 @media (max-width:520px){
   .cmp{min-width:0;width:auto}
@@ -2308,7 +2308,11 @@ if(location.hash==='#muestra'){var p=document.getElementById('prueba');if(p)p.sc
   medir(); addEventListener('resize',medir); addEventListener('load',medir);
   if(nav&&'ResizeObserver' in window) new ResizeObserver(medir).observe(nav);
   var caja=document.querySelector('.cmp-caja'),w=caja&&caja.querySelector('.cmp-wrap'),pi=document.querySelector('.cmp-pista'); if(!w) return;
-  function pista(){ caja.classList.toggle('cmp-scroll',w.scrollWidth>w.clientWidth+1); caja.classList.toggle('cmp-fin',w.scrollLeft+w.clientWidth>=w.scrollWidth-2); pi.hidden=!(caja.classList.contains('cmp-scroll')&&!caja.classList.contains('cmp-fin')); }
+  /* 25-nov: la pista y el degradado salen solo si hay al menos una columna de competidor que no se ve completa a la derecha (medido con el ancho real del contenedor); se van al llegar al final */
+  var cols=[].slice.call(w.querySelectorAll('thead th:not(.cmp-th-lab):not(.cmp-inn)'));
+  function pista(){ var lim=w.getBoundingClientRect().left+w.clientWidth+0.5, ocultas=cols.filter(function(c){ return c.getBoundingClientRect().right>lim; }).map(function(c){ return c.textContent.trim(); });
+    caja.classList.toggle('cmp-scroll',ocultas.length>0); pi.hidden=!ocultas.length;
+    if(ocultas.length) pi.textContent='Desliza para ver '+(ocultas.length>1?ocultas.slice(0,-1).join(', ')+' y '+ocultas[ocultas.length-1]:ocultas[0])+' →'; }
   w.addEventListener('scroll',pista,{passive:true}); addEventListener('resize',pista); addEventListener('load',pista); pista();
   if('IntersectionObserver' in window) new IntersectionObserver(function(es){ document.body.classList.toggle('cmp-en-pantalla',es[0].isIntersecting); }).observe(w);
 })();
