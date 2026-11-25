@@ -109,7 +109,7 @@ if [ "${CHEQUEO_NAVEGADOR:-si}" != "no" ]; then
             [ "${#fallas[@]}" -gt 0 ] || fallas+=("el chequeo con navegador falló: $nav")
         fi
     else
-        fallas+=("no hay Playwright para el chequeo con navegador (npm ci y npx playwright install chromium)")
+        fallas+=("no hay Playwright para el chequeo con navegador (npm ci y npx playwright install chromium webkit)")
     fi
 fi
 

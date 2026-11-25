@@ -28,9 +28,10 @@ try {
     await ctx.close();
   }
   // --- comparativo en móvil y escritorio (25-nov) ---
-  for (const [w, h] of [[360, 780], [390, 844], [414, 896], [1280, 800]]) {
+  for (let [w, h] of [[360, 780], [390, 844], [414, 896], [1280, 800]]) {
     const ctx = await browser.newContext(opts(w, h));
     const page = await ctx.newPage();
+    h = page.viewportSize().height; // el perfil del iPhone 13 trae su propio alto
     await page.goto(base + '/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
     const e = `${motor}@${w}x${h}`;
@@ -44,7 +45,7 @@ try {
     const ini = await page.evaluate(() => {
       const wr = document.querySelector('.cmp-wrap').getBoundingClientRect(), caja = document.querySelector('.cmp-caja'), pista = document.querySelector('.cmp-pista');
       const ths = [...document.querySelectorAll('.cmp thead th')].map((t) => { const r = t.getBoundingClientRect(); return { n: t.innerText.trim().split(/\s/)[0].toLowerCase(), completa: r.left >= wr.left - 0.5 && r.right <= wr.right + 0.5, algoVisible: r.left < wr.right - 0.5 && r.right > wr.left + 0.5 }; });
-      const pistaVisible = !pista.hidden && getComputedStyle(pista).display !== 'none' && pista.getBoundingClientRect().height > 0 && /Desliza para ver Clay, Explee y Grok/.test(pista.textContent) && caja.classList.contains('cmp-scroll');
+      const pistaVisible = !pista.hidden && getComputedStyle(pista).display !== 'none' && pista.getBoundingClientRect().height > 0 && /^Desliza para ver .+ →$/.test(pista.textContent) && caja.classList.contains('cmp-scroll');
       const lineas = [...document.querySelectorAll('.cmp tbody th')].map((th) => { const sp = [...th.querySelectorAll('span')].find((x) => getComputedStyle(x).display !== 'none') || th; const rects = [...(function () { const r = document.createRange(); r.selectNodeContents(sp); return r.getClientRects(); })()]; return new Set(rects.map((q) => Math.round(q.top))).size; });
       const largo = getComputedStyle(document.querySelector('.cmp .lab-largo')).display !== 'none';
       return { ths, pistaVisible, lineas, largo, scrolla: document.querySelector('.cmp-wrap').scrollWidth > document.querySelector('.cmp-wrap').clientWidth + 1, corte: ths.some((t) => ['apollo', 'clay', 'explee', 'grok'].includes(t.n) && t.algoVisible && !t.completa) };
@@ -102,6 +103,7 @@ try {
       let cajas = 0; for (let el = sum; el && el !== d.parentElement; el = el.parentElement) if (conBorde(el)) { const q = el.getBoundingClientRect(); if (q.width > 40 && q.height > 30) cajas++; }
       const rg = document.createRange(); rg.selectNodeContents(sum); const tr = rg.getBoundingClientRect(), a = getComputedStyle(sum, '::after');
       return { cajas, centradoV: Math.abs((tr.top + tr.bottom) / 2 - (sr.top + sr.bottom) / 2), aire: (sr.right - parseFloat(a.right) - parseFloat(a.width)) - tr.right, ancho: Math.abs(dr.width - d.parentElement.getBoundingClientRect().width), iconoTop: parseFloat(a.top), alto: sr.height, hijosBorde: [...sum.children].filter(conBorde).length }; });
+    if (![bd.aire, bd.iconoTop, bd.alto, bd.centradoV].every(Number.isFinite)) fallas.push(`${e}: no se pudo medir «Ver las fuentes» (${JSON.stringify(bd)})`);
     if (bd.cajas !== 1 || bd.hijosBorde) fallas.push(`${e}: «Ver las fuentes» tiene ${bd.cajas} caja(s) con borde (debe ser 1)`);
     if (bd.centradoV > 3) fallas.push(`${e}: «Ver las fuentes» no está centrado (desvío ${bd.centradoV.toFixed(1)} px)`);
     if (bd.aire < 8) fallas.push(`${e}: el ícono está pegado al texto de «Ver las fuentes» (${bd.aire.toFixed(1)} px de aire)`);

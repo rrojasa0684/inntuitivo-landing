@@ -27,3 +27,8 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx playwright install --with-deps chromium webkit
       - run: node comparativo-simplificado-check.mjs
+      - name: Pista de deslizar y chequeo del navegador contra el sitio local (antes de publicar)
+        run: |
+          python3 -m http.server 8099 --bind 127.0.0.1 >/dev/null 2>&1 &
+          sleep 2
+          node chequeo-en-vivo-navegador.mjs http://127.0.0.1:8099
