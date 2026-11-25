@@ -12,13 +12,15 @@ from pathlib import Path
 REPO = str(Path(__file__).resolve().parents[2]).lower() + "/"      # la raíz del repo donde vive el hook (el motor o la landing: el mismo script en los dos)
 # 21-nov-2026: ssh, scp, sftp y sus parientes se bloquean COMO COMANDO (inicio, tras ; | & ( = $ ! comilla, corchete, un salto escrito como \\n, una palabra de shell como sudo/timeout/if/eval, una asignación A=1, o -e de rsync),
 # nunca dentro de un identificador ni de un texto corrido; «ssh-add -l» pasa. Aparte, un «ssh» armado con literales pegados se bloquea siempre (ver pegados).
-ENVOLTURAS = r"(?:sudo|doas|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh|caffeinate|busybox|unbuffer|taskpolicy|arch|script|runuser|su|sg|strace|ltrace|tmux|screen|parallel|firejail|proxychains|torsocks|dtruss|chronic|nsenter)"
+ENVOLTURAS = r"(?:sudo|doas|fakeroot|builtin|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh|caffeinate|busybox|unbuffer|taskpolicy|arch|script|runuser|su|sg|strace|ltrace|tmux|screen|parallel|firejail|proxychains|torsocks|dtruss|chronic|nsenter)"
 POSICIONAL = r"(?:flock|lockf|setpriv|cpulimit)"      # envolturas con un argumento posicional antes del comando (flock /tmp/l ssh h)
-PREFIJO = (r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)\s*(?:" + ENVOLTURAS + r"\s+(?:-\S+\s+(?:(?!" + ENVOLTURAS + r"\b)[A-Za-z_]\w*\s+)?|\d+(?:\.\d+)?[smhd]?\s+)*|" + POSICIONAL + r"\s+(?:-\S+\s+)*[\w./:-]+\s+)*(?:\w+=\S*\s+)*(?:[\w.~-]*/)*")
+REDIR = r"(?:\d*[<>]+[&\w./-]*\s+)*"      # 24-nov noche: redirecciones antes del comando (2>/dev/null rm, >x rm, <x rm, &>x rm)
+PREFIJO = (r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)\s*" + REDIR + r"(?:" + ENVOLTURAS + r"\s+(?:-\S+\s+(?:(?!" + ENVOLTURAS + r"\b)[A-Za-z_]\w*\s+)?|\d+(?:\.\d+)?[smhd]?\s+)*|" + POSICIONAL + r"\s+(?:-\S+\s+)*[\w./:-]+\s+)*(?:\w+=\S*\s+)*(?:[\w.~-]*/)*")
 COMANDO = re.compile(PREFIJO + r"(?!ssh-add\s+-l\s*(?:$|[;|&\n\"'`)\]]|\\n))(?:ssh(?:-[a-z]+)*|sshpass|autossh|scp|sftp)(?![\w-])", re.M)
 # 24-nov-2026: rm cuenta solo COMO COMANDO (mismo prefijo que ssh, envolturas incluidas); «as rm», «rm.estado(...)» o un «rm» dentro de un grep ya no bloquean.
 RM_ARGS = re.compile(PREFIJO + r"rm(?![\w.])[\s,\[]+([^;&|\n]*)", re.M)
-RM_SUELTO = re.compile(PREFIJO + r"rm(?![\w.])[\s,\[]", re.M)
+RM_SUELTO = re.compile(r"\brm(?![\w.])[\s,\[]")      # 24-nov noche: en código que arma texto el rm cuenta sin prefijo, como antes del 24-nov
+DESCARTADO = re.compile(r"(?:\bas\s+|\b[eaf]?grep\s+(?:-\S+\s+)*)$")      # el prefijo solo descarta falsos positivos: «as rm», grep de rm; nunca deja pasar un rm real
 NOMBRES = re.compile(r"\.ssh|ssh|scp|sftp")
 FORMA = re.compile(r"ssh://|ssh\s+(?:-[a-z]|[\w.-]+@|\d+\.\d+\.)")      # ssh con opción, usuario@host, IP o URL: en cualquier posición (caffeinate ssh h, git push ssh://...)
 
@@ -75,7 +77,7 @@ def rm_fuera_del_repo(codigo: str) -> bool:
     # rm -rf armado de modo que ningún rm completo se ve (rm-rf/x pegado): se bloquea salvo que ya se haya visto un rm recursivo bien formado
     # 22-nov: «rm -f archivo» bien formado no es «rm -rf pegado», PERO solo si el código no arma texto (+, chr, fromCharCode, join, plantillas, format): ahí cualquier resto de «rm -f» puede ser una opción -r escondida y se bloquea de más (revisión Opus, 3 rondas); 22-nov noche: también \\x2d, \\u002d, octal, $(...), printf, base64 y decodificadores
     armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\{|`|\$\(|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|\\[0-7]{2,3}|printf|base64|atob|b64|unhexlify|fromhex|decode|bytes\(|\w\s*=\s*[\x27\x22]?-[a-z]*r|[\x27\x22]rm[\x27\x22]\s*,\s*\[?\s*[a-z_$]\w*\s*[,\]]|%[-#0 +\d.(]*[a-z]|\.format|\bf[\"']", codigo, re.I))
-    if armado and not visto and any(RM_SUELTO.search(v) for v in vistas(codigo)):
+    if armado and not visto and any(not DESCARTADO.search(v[max(0, m.start() - 80):m.start()]) for v in vistas(codigo) for m in RM_SUELTO.finditer(v)):
         return True      # código que arma texto y menciona un rm sin recursión visible: puede esconder la opción -r (concatenación, chr, variables); se bloquea de más
     return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=[^-r\s\\]|\\+[\x27\x22])", " ", v))) for v in vistas(codigo))
 
