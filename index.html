@@ -422,19 +422,7 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .parte-titulo{font-family:'Audiowide',sans-serif;font-weight:400;font-size:1.05rem;color:#fff;margin:0 0 18px;letter-spacing:.02em}
 .precio-plan{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
 .decisores{border-top:1px solid var(--linea);margin-top:32px;padding-top:28px}
-.decisores[hidden]{display:none}
 .decisores .dec-sub{color:#B5A9D4;font-size:.96rem;line-height:1.6;max-width:60ch;margin:0 0 18px;text-wrap:pretty}
-.dec-t{min-width:880px}
-.dec-t th,.dec-t td{font-size:.9rem}
-.dec-t tbody th{white-space:normal;min-width:130px;max-width:170px}
-.dec-t td.col-inntuitivo{font-weight:400}
-.dec-dato{margin:0 0 10px;line-height:1.45}
-.dec-dato:last-child{margin-bottom:0}
-.dec-fuente{display:inline-block;margin-left:6px;font-size:.78rem;color:var(--rosa-claro);text-decoration:underline;white-space:nowrap}
-.dec-meta{display:block;margin-top:3px;font-size:.76rem;color:var(--tinta-suave);opacity:.85;font-weight:400}
-.dec-ni{color:var(--tinta-suave);opacity:.7;font-style:italic;font-weight:400}
-.dec-cards .tabla-real-card dl div{flex-direction:column;gap:4px}
-.dec-cards .tabla-real-card dd{text-align:left;font-weight:400}
 .dec-pie{margin-top:14px;font-size:.88rem;color:#B5A9D4;text-wrap:pretty}
 /* 25-nov-2026: comparativo simplificado ✓ ✕ —; sin media queries (solo 840 y 520 están permitidos): en pantallas angostas la tabla se desplaza dentro de su caja, con la primera columna fija y la de Inntuitivo a su lado */
 .cmp-wrap{overflow-x:auto;margin:6px 0 0;padding-top:14px;-webkit-overflow-scrolling:touch}
@@ -460,13 +448,20 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 .cmp-leyenda{display:flex;flex-wrap:wrap;gap:6px 22px;margin:16px 0 0;font-size:.92rem;color:var(--tinta-suave)}
 .cmp-l-si{color:#6EE7B7;font-weight:700}.cmp-l-no{color:#FF8A9B;font-weight:700}.cmp-l-sd{color:var(--tinta-suave)}
 .dec-detalle{margin-top:18px}
-.dec-detalle>summary{display:flex;align-items:center;min-height:44px;padding:8px 14px;cursor:pointer;color:var(--rosa-claro);font-weight:600;border:1px solid var(--linea);border-radius:12px;width:fit-content;max-width:100%}
-.dec-detalle>summary:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px}
-.dec-detalle-cuerpo{margin-top:18px}
-.dec-h4{font-family:'Audiowide',sans-serif;font-weight:400;font-size:.95rem;color:#fff;margin:22px 0 12px}
-.cmp-fuentes{list-style:none;margin:0;padding:0;display:grid;gap:14px}
-.cmp-fuentes li{font-size:.92rem;line-height:1.5}
-.cmp-fuentes a{display:inline-block;padding:10px 4px;color:var(--rosa-claro);text-decoration:underline}
+details.dec-detalle:not(.iq-fit)>summary{display:flex;align-items:center;min-height:44px;padding:10px 34px 10px 0;color:var(--rosa-claro);font-weight:600}
+details.dec-detalle:not(.iq-fit)>summary::after{top:50%;transform:translateY(-50%);right:2px}
+details.dec-detalle[open]:not(.iq-fit)>summary::after{transform:translateY(-50%) rotate(45deg)}
+details.dec-detalle>summary:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px}
+.dec-detalle-cuerpo{padding:0 0 16px}
+.dec-h4{font-family:'Audiowide',sans-serif;font-weight:400;font-size:.95rem;color:#fff;margin:18px 0 8px}
+details.dec-detalle .fu-pie{margin:18px 0 0;padding:14px 0 0;border-top:1px solid var(--linea);font-size:.9rem;color:var(--tinta-suave)}
+.cmp-fuentes{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cmp-fuentes li{font-size:.92rem;line-height:1.5;overflow-wrap:anywhere;color:var(--tinta-suave)}
+.cmp-fuentes .fu-cap{color:#fff;font-weight:600}
+.cmp-fuentes .fu-marca{display:inline-block;padding:0 8px;border:1px solid var(--linea);border-radius:999px;font-size:.82rem;color:var(--tinta)}
+.cmp-fuentes .fu-enl{display:block}
+.cmp-fuentes a{display:inline-block;min-height:44px;box-sizing:border-box;padding:11px 0;margin-right:10px;color:var(--rosa-claro);text-decoration:underline}
+.cmp-fuentes .fu-fecha,.cmp-fuentes .fu-nota{font-size:.86rem}
 .precio-plan .precio-inner{padding:0;border-radius:0;background:none}
 .boton-plan{width:100%;text-align:center}
 .boton-demo{margin-top:12px}.boton-demo[hidden]{display:none}
@@ -481,8 +476,6 @@ h2{font-family:'Audiowide',sans-serif;font-weight:400;font-size:clamp(1.35rem,2.
 /* 1-oct-2026: separadores de fila dentro de la columna Inntuitivo, mismo grosor (1px) que las otras columnas y un tono suave sobre el fondo resaltado; no tocan el borde, el encabezado ni el total. */
 .precio-unif .tabla-real-tabla tbody tr:not(.fila-gancho) td.col-inntuitivo{border-bottom:1px solid rgba(255,133,166,.32)}
 .precio-unif .tabla-real-tabla .fila-gancho td.col-inntuitivo{color:var(--rosa-claro);box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),inset 0 -2px 0 var(--rosa-claro),0 4px 20px rgba(255,133,166,.18)}
-/* 6-nov-2026: la celda de Inntuitivo de la ÚLTIMA fila visible de la tabla de decisores cierra igual que el total del bloque 1: borde inferior de 2px en --rosa-claro y esquinas inferiores de 16px (las filas se filtran solas con la regla de #208, por eso es :last-child y no una fila fija). */
-.precio-unif .decisores .dec-t tbody tr:last-child td.col-inntuitivo{border-bottom:none;border-radius:0 0 16px 16px;box-shadow:inset 2px 0 0 var(--rosa-claro),inset -2px 0 0 var(--rosa-claro),inset 0 -2px 0 var(--rosa-claro),0 4px 20px rgba(255,133,166,.18)}
 @media (max-width:840px){
   .precio-unif .tabla-real-card.col-inntuitivo{border:2px solid var(--rosa-claro)}
   .precio-unif .tabla-real-card.col-inntuitivo .fila-gancho dd{color:var(--rosa-claro)}
@@ -1579,7 +1572,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
       </div>
         </div>
 <!-- 25-nov-2026: comparativo simplificado (✓ sí, ✕ no, — sin dato público) del diseño de Ricardo; una fila por capacidad. Cada ✓ o ✕ de la competencia lleva data-fuente que apunta a su fuente en «Ver el detalle y las fuentes»; sin fuente, va —.
-             Debajo, cerrado, el detalle: las fuentes de cada marca y la tabla con cifras de datos-decisores-publicos.json (#206 y #207, #208: oculta si el JSON falta o no es válido; lo publica solo el motor). Spec: docs/memoria/tasa-decisores-comparativa.md del motor, sección 9. -->
+             Debajo, cerrado, «Ver las fuentes»: una línea por cada marca ✓ o ✕ de la competencia, agrupada por herramienta. 26-nov: se quitó la tabla de cifras de terceros y su publicación. -->
         <div class="decisores comparativo" id="comparativo">
           <h3 class="parte-titulo">2 · Cómo llega cada herramienta a quien decide</h3>
           <p class="dec-sub">Un lead sin decisor es un correo a info@ que nadie lee. Así trabaja cada opción, con datos públicos y su fuente.</p>
@@ -1601,27 +1594,32 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
           </div>
           <p class="cmp-leyenda"><span><span class="cmp-l-si" aria-hidden="true">✓</span> Sí</span> <span><span class="cmp-l-no" aria-hidden="true">✕</span> No</span> <span><span class="cmp-l-sd" aria-hidden="true">—</span> Sin dato público</span></p>
           <p class="micro">Las marcas de Inntuitivo valen cuando tu agente busca solo.</p>
-          <p class="dec-pie">Cifras públicas de terceros, con métricas y mercados distintos; no son un benchmark nuestro. Fuentes y fechas en cada dato. ¿Ves un dato viejo? <a href="mailto:info@inntuitivo.com?subject=Dato%20desactualizado%20de%20decisores">Avísanos</a>.</p>
+          <p class="dec-pie">Fuentes públicas, consultadas el 25 nov 2026. ¿Ves un dato desactualizado? <a href="mailto:info@inntuitivo.com?subject=Dato%20desactualizado%20de%20decisores">Avísanos</a>.</p>
           <details class="dec-detalle">
-            <summary>Ver el detalle y las fuentes</summary>
+            <summary>Ver las fuentes</summary>
             <div class="dec-detalle-cuerpo">
-              <h4 class="dec-h4">Fuente de cada marca de la competencia</h4>
-              <ul class="cmp-fuentes">
-                                <li id="fuente-clay-web"><strong>Clay — Busca en la web abierta.</strong> <a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a><span class="dec-meta">«Claygent is Clay's AI agent with access to web research.» Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-grok-web"><strong>Grok — Busca en la web abierta.</strong> <a href="https://docs.x.ai/developers/tools/web-search" target="_blank" rel="noopener noreferrer">docs.x.ai/…/web-search ↗</a><span class="dec-meta">«enables Grok to search the web in real-time and browse web pages to find information» Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-apollo-decisor"><strong>Apollo — Busca a quien decide.</strong> <a href="https://docs.apollo.io/" target="_blank" rel="noopener noreferrer">docs.apollo.io ↗</a> · <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a><span class="dec-meta">Tutorial «Find people with filters» en su documentación; su página de producto cita buscar «by role and title to find decision-makers». Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-clay-decisor"><strong>Clay — Busca a quien decide.</strong> <a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a><span class="dec-meta">Ejemplo de uso en su página: «Find the best contact at this company based on past roles and content they've published». Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-apollo-verif"><strong>Apollo — Verifica cada correo.</strong> <a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a><span class="dec-meta">«Automated verification and bounce protection helps keep bad data out of your sends». Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-apollo-envio"><strong>Apollo — Envía y da seguimiento.</strong> <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a><span class="dec-meta">«Agents will research, build lists, write outreach, follow up, and book meetings». Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-explee-envio"><strong>Explee — Envía y da seguimiento.</strong> <a href="https://testingcatalog.com/explee-launches-autogtm-ai-agent-for-outbound-sales/" target="_blank" rel="noopener noreferrer">testingcatalog.com ↗</a><span class="dec-meta">«a 24/7 AI sales agent that converts a website URL into a running outbound pipeline»; «follow-ups handled without human involvement». Artículo patrocinado del 29 may 2026 (su sitio oficial bloquea la lectura automática). Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-apollo-pausa"><strong>Apollo — Pausa si suben los rebotes.</strong> <a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a><span class="dec-meta">«Sequence autopause when bounce rates spike» (la fuente habla de rebotes, no de quejas). Consultado el 25 nov 2026.</span></li>
-                <li id="fuente-apollo-precio"><strong>Apollo — Precio fijo, usuarios ilimitados.</strong> <a href="https://www.apollo.io/pricing" target="_blank" rel="noopener noreferrer">apollo.io/pricing ↗</a><span class="dec-meta">«Apollo uses credits as the currency to perform activities throughout the platform»; «All seats on an Apollo account are on the same plan». Cobra por plan, asientos y créditos. Consultado el 25 nov 2026.</span></li>
-              </ul>
-              <div class="decisores-dato" id="decisores" hidden>
-                <h4 class="dec-h4">Cifras públicas de terceros</h4>
-                <div class="tabla-real-tabla-wrap"><table class="tabla-real-tabla dec-t" id="dec-tabla"></table></div>
-                <div class="tabla-real-cards dec-cards" id="dec-cards"></div>
-              </div>
+                <h4 class="dec-h4">Apollo</h4>
+                <ul class="cmp-fuentes" role="list">
+                  <li id="fuente-apollo-decisor"><span class="fu-cap">Busca a quien decide</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://docs.apollo.io/" target="_blank" rel="noopener noreferrer">docs.apollo.io ↗</a> · <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                  <li id="fuente-apollo-verif"><span class="fu-cap">Verifica cada correo antes del primer envío</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                  <li id="fuente-apollo-envio"><span class="fu-cap">Envía y da seguimiento sin que nadie lo opere</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                  <li id="fuente-apollo-pausa"><span class="fu-cap">Pausa el envío si suben los rebotes o las quejas</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span> <span class="fu-nota">La fuente habla de rebotes, no de quejas.</span></li>
+                  <li id="fuente-apollo-precio"><span class="fu-cap">Precio fijo, usuarios ilimitados</span> <span class="fu-marca">No</span> <span class="fu-enl"><a href="https://www.apollo.io/pricing" target="_blank" rel="noopener noreferrer">apollo.io/pricing ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span> <span class="fu-nota">Cobra por plan, asientos y créditos.</span></li>
+                </ul>
+                <h4 class="dec-h4">Clay</h4>
+                <ul class="cmp-fuentes" role="list">
+                  <li id="fuente-clay-web"><span class="fu-cap">Busca empresas en la web abierta</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                  <li id="fuente-clay-decisor"><span class="fu-cap">Busca a quien decide</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                </ul>
+                <h4 class="dec-h4">Explee</h4>
+                <ul class="cmp-fuentes" role="list">
+                  <li id="fuente-explee-envio"><span class="fu-cap">Envía y da seguimiento sin que nadie lo opere</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://testingcatalog.com/explee-launches-autogtm-ai-agent-for-outbound-sales/" target="_blank" rel="noopener noreferrer">testingcatalog.com ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span> <span class="fu-nota">Fuente patrocinada: artículo patrocinado del 29 may 2026 (su sitio oficial bloquea la lectura automática).</span></li>
+                </ul>
+                <h4 class="dec-h4">Grok</h4>
+                <ul class="cmp-fuentes" role="list">
+                  <li id="fuente-grok-web"><span class="fu-cap">Busca empresas en la web abierta</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://docs.x.ai/developers/tools/web-search" target="_blank" rel="noopener noreferrer">docs.x.ai/…/web-search ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
+                </ul>
+                <p class="fu-pie">— significa sin dato público: no hay fuente que citar.</p>
             </div>
           </details>
         </div>
@@ -2181,73 +2179,6 @@ document.addEventListener('DOMContentLoaded', function () {
   fetch('datos-plan-limite.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
     var el = document.getElementById('dia-ejemplo-envios'), n = d && d.correos_por_dia;
     if (el && typeof n === 'number' && Math.floor(n) === n && n >= 1 && n <= 1000) el.textContent = 'Hasta ' + n + ' emails personalizados enviados en tu nombre';
-  }).catch(function () {});
-  // #206 y #207: la tabla de decisores se muestra SOLO si datos-decisores-publicos.json es válido (toda cifra con su URL https); si falta o no es válido, la sección queda como siempre. 25-nov: «Tu plan» es siempre el 3 porque el comparativo simplificado (#comparativo) está siempre. #208: solo se publican las filas con dato con fuente en al menos 2 de las 4 herramientas de la competencia; con menos de 2 filas, el bloque se oculta.
-  fetch('datos-decisores-publicos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-    var bloque = document.getElementById('decisores'), tabla = document.getElementById('dec-tabla'), cards = document.getElementById('dec-cards');
-    if (!bloque || !tabla || !cards || !d || !Array.isArray(d.columnas) || !Array.isArray(d.filas) || !d.columnas.length || !d.filas.length) return;
-    if (d.columnas[0].id !== 'inntuitivo') return;
-    // #211: solo se publican fuentes de los dominios aprobados (la misma lista que DOMINIOS_APROBADOS del motor); un dato de otro dominio se descarta y, si la celda se queda sin datos, dice «No informado».
-    var APROBADOS = ['dev.to', 'bouncezero.io', 'www.clay.com', 'docs.x.ai'];
-    var aprobado = function (u) { try { var p = new URL(u); return p.protocol === 'https:' && !p.username && (p.port === '' || p.port === '443') && APROBADOS.indexOf(p.hostname) !== -1; } catch (e) { return false; } };
-    d.filas.forEach(function (f) {
-      if (!f || !f.celdas) return;
-      d.columnas.forEach(function (c) {
-        var ce = f.celdas[c.id];
-        if (!ce || ce.propio === true || !Array.isArray(ce.datos)) return;
-        ce.datos = ce.datos.filter(function (x) { return x && (!/^https:\/\/[^\s]+$/.test(x.url || '') || aprobado(x.url)); });      // un dato SIN url https se deja pasar: la validación de abajo oculta todo el bloque (cifra sin fuente)
-        if (!ce.datos.length) { ce.estado = 'no_informado'; }
-      });
-    });
-    var ok = d.filas.every(function (f) {
-      return f && f.atributo && f.celdas && d.columnas.every(function (c) {
-        var ce = f.celdas[c.id];
-        if (!ce || (ce.estado !== 'informado' && ce.estado !== 'no_informado') || !Array.isArray(ce.datos)) return false;
-        if (ce.estado === 'informado' && !ce.datos.length) return false;
-        return ce.datos.every(function (x) { return x && typeof x.texto === 'string' && x.texto && ((ce.propio === true && c.id === 'inntuitivo') || (typeof x.url === 'string' && /^https:\/\/[^\s]+$/.test(x.url) && x.midio && x.fecha_consulta)); });
-      });
-    });
-    if (!ok) return;
-    // #208: una fila se publica solo si al menos 2 de las 4 herramientas de la competencia (todas menos Inntuitivo) tienen dato con fuente; con menos de 2 filas el bloque no se muestra y «Tu plan» sigue siendo el 2.
-    var filas = d.filas.filter(function (f) {
-      return d.columnas.filter(function (c) { return c.id !== 'inntuitivo' && f.celdas[c.id].estado === 'informado'; }).length >= 2;
-    });
-    if (filas.length < 2) return;
-    var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    var fmt = function (iso) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? parseInt(m[3], 10) + ' ' + meses[parseInt(m[2], 10) - 1] + ' ' + m[1] : ''; };
-    var el = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-    var celda = function (ce) {
-      var caja = document.createDocumentFragment();
-      if (ce.estado !== 'informado') { caja.appendChild(el('span', 'dec-ni', 'No informado')); return caja; }
-      ce.datos.forEach(function (x) {
-        var p = el('p', 'dec-dato', x.texto);
-        if (ce.propio !== true) {
-          var host = ''; try { host = new URL(x.url).hostname.replace(/^www\./, ''); } catch (e) {}
-          var a = el('a', 'dec-fuente', 'Fuente: ' + host + ' ↗'); a.href = x.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-          p.appendChild(document.createTextNode(' ')); p.appendChild(a);
-          p.appendChild(el('span', 'dec-meta', 'Midió: ' + x.midio + ' · consultado el ' + fmt(x.fecha_consulta)));
-        }
-        caja.appendChild(p);
-      });
-      return caja;
-    };
-    var thead = el('thead'), trh = el('tr');
-    trh.appendChild(el('th', '', 'Cómo lo hace')).scope = 'col';
-    d.columnas.forEach(function (c) { var th = el('th', c.id === 'inntuitivo' ? 'col-inntuitivo' : '', c.nombre + (c.id === 'inntuitivo' ? ' 🚀' : '')); th.scope = 'col'; trh.appendChild(th); });
-    thead.appendChild(trh); tabla.appendChild(thead);
-    var tbody = el('tbody');
-    filas.forEach(function (f) {
-      var tr = el('tr'), th = el('th', '', f.atributo); th.scope = 'row'; tr.appendChild(th);
-      d.columnas.forEach(function (c) { var td = el('td', c.id === 'inntuitivo' ? 'col-inntuitivo' : ''); td.appendChild(celda(f.celdas[c.id])); tr.appendChild(td); });
-      tbody.appendChild(tr);
-    });
-    tabla.appendChild(tbody);
-    d.columnas.forEach(function (c) {
-      var card = el('div', 'tabla-real-card' + (c.id === 'inntuitivo' ? ' col-inntuitivo' : '')), h = el('h3', '', c.nombre + (c.id === 'inntuitivo' ? ' 🚀' : '')), dl = el('dl');
-      filas.forEach(function (f) { var row = el('div'), dt = el('dt', '', f.atributo), dd = el('dd'); dd.appendChild(celda(f.celdas[c.id])); row.appendChild(dt); row.appendChild(dd); dl.appendChild(row); });
-      card.appendChild(h); card.appendChild(dl); cards.appendChild(card);
-    });
-    bloque.hidden = false;
   }).catch(function () {});
   document.querySelectorAll('a[href="#activar"]').forEach(function (a) {
     a.addEventListener('click', function () { track('cta_ver_precio'); });   // clic ver precio
