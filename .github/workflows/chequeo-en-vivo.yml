@@ -36,7 +36,7 @@ jobs:
       - name: Playwright para el chequeo con navegador (25-nov-2026)
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Prueba del propio chequeo
         run: bash chequeo-en-vivo-prueba.sh
       - name: Prueba de la publicación idempotente de datos-plan-limite (15-nov-2026)

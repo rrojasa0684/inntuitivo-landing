@@ -2,7 +2,7 @@
 //  1. Estático: 8 filas × 5 columnas; cada celda con aria-label; todo ✓ o ✕ de la competencia con data-fuente que apunta a su fuente en el detalle (enlace https y fecha de consulta); Inntuitivo con ✓ en todas; el detalle cerrado por defecto. Se prueba también que el chequeo FALLA si falta una fuente o un aria-label.
 //  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre.
 // Uso: node comparativo-simplificado-check.mjs. Salida: COMPARATIVO_OK o error (exit 1).
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
 
@@ -66,7 +66,8 @@ const servidor = createServer((req, res) => {
 }).listen(0, '127.0.0.1');
 await new Promise((ok) => servidor.once('listening', ok));
 const base = `http://127.0.0.1:${servidor.address().port}`;
-const browser = await chromium.launch();
+for (const [motor, tipo] of [['chromium', chromium], ['webkit', webkit]]) {
+const browser = await tipo.launch();
 try {
   for (const w of [360, 390, 430, 1280]) {
     const page = await browser.newPage({ viewport: { width: w, height: 900 } });
@@ -93,7 +94,7 @@ try {
         altoMin: Math.min(...celdas.map((c) => c.height)), anchoMin: Math.min(...celdas.map((c) => c.width)), sumAlto: sum.getBoundingClientRect().height, sumBorde: getComputedStyle(sum).borderTopWidth, sumFondo: getComputedStyle(sum).backgroundColor, sumAncho: Math.round(sum.getBoundingClientRect().width), detAncho: Math.round(document.querySelector('.dec-detalle').getBoundingClientRect().width), contAncho: Math.round(document.querySelector('.comparativo').getBoundingClientRect().width), masTransf: getComputedStyle(sum, '::after').transform, mas: (() => { const a = getComputedStyle(sum, '::after'); return { top: parseFloat(a.top), right: parseFloat(a.right), pos: a.position, h: sum.getBoundingClientRect().height }; })(), bajos,
         filas: document.querySelectorAll('.cmp tbody tr').length, detalleCerrado: !document.querySelector('.dec-detalle').open, tablaWidth: tabla.getBoundingClientRect().width, wrapW: wr.width };
     });
-    const e = `@${w}`;
+    const e = `${motor}@${w}`;
     if (r.desborda) fallas.push(`${e}: la página desborda horizontalmente`);
     if (w <= 430 && !r.scrollea) fallas.push(`${e}: la tabla no se desplaza dentro de su caja`);
     if (w <= 430 && r.sticky !== 'sticky') fallas.push(`${e}: la primera columna no es fija`);
@@ -117,6 +118,8 @@ try {
     if (ab.desborda) fallas.push(`${e}: con el detalle abierto la página desborda`);
     await page.close();
   }
-} finally { await browser.close(); servidor.close(); }
+} finally { await browser.close(); }
+}
+servidor.close();
 if (fallas.length) { console.error('COMPARATIVO_FALLA\n' + fallas.join('\n')); process.exit(1); }
 console.log('COMPARATIVO_OK');

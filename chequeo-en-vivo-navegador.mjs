@@ -5,31 +5,35 @@
 //  - la página desborda horizontalmente a 360, 390, 430 o 1280 px.
 // 25-nov-2026, comparativo en móvil (360x780, 390x844, 414x896 y 1280x800): pista de deslizar si alguna columna asoma cortada; Inntuitivo y Apollo completas al inicio en celular; primera columna fija al deslizar; el botón de volver arriba no tapa ninguna celda; UN solo borde en «Ver las fuentes», centrado y con aire entre texto e ícono; ninguna etiqueta de fila pasa de 3 líneas; nada visible entre el borde superior y la cabecera fija (opaca); los anclajes respetan la altura real de la cabecera; en 1280 no hay pista y las etiquetas siguen largas.
 // Uso: node chequeo-en-vivo-navegador.mjs <base>. Salida: NAVEGADOR_OK o NAVEGADOR_FALLA y la lista (exit 1).
-import { chromium } from 'playwright';
+import { chromium, webkit, devices } from 'playwright';
 const base = (process.argv[2] || 'https://www.inntuitivo.com').replace(/\/$/, '');
-const fallas = [], browser = await chromium.launch();
+const fallas = [];
+for (const [motor, tipo] of [['chromium', chromium], ['webkit', webkit]]) {
+const browser = await tipo.launch();
+// WebKit en 390 usa el perfil del iPhone 13; el resto, ventana con ese ancho
+const opts = (w, h, extra = {}) => (motor === 'webkit' && w === 390 ? { ...devices['iPhone 13'], serviceWorkers: 'block', ...extra } : { viewport: { width: w, height: h }, hasTouch: w < 500, serviceWorkers: 'block', ...extra });
 try {
   for (const w of [360, 390, 430, 1280]) {
-    const ctx = await browser.newContext({ viewport: { width: w, height: 900 }, serviceWorkers: 'block' });
+    const ctx = await browser.newContext(opts(w, 900));
     const page = await ctx.newPage(), pedidos = [];
     page.on('request', (r) => pedidos.push(r.url()));
     await page.goto(base + '/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(600);
     const r = await page.evaluate(() => ({ t: document.body.innerText, desborda: document.documentElement.scrollWidth > innerWidth }));
-    for (const x of ['Cifras públicas de terceros', 'De dónde sale el decisor']) if (r.t.includes(x)) fallas.push(`@${w}: el sitio publicado muestra «${x}»`);
-    if (!r.t.includes('Ver las fuentes')) fallas.push(`@${w}: falta «Ver las fuentes» en la sección 2`);
+    for (const x of ['Cifras públicas de terceros', 'De dónde sale el decisor']) if (r.t.includes(x)) fallas.push(`${motor}@${w}: el sitio publicado muestra «${x}»`);
+    if (!r.t.includes('Ver las fuentes')) fallas.push(`${motor}@${w}: falta «Ver las fuentes» en la sección 2`);
     const viejo = pedidos.filter((u) => /datos-decisores|datos\/decisores-publicos/.test(u));
-    if (viejo.length) fallas.push(`@${w}: la página todavía pide ${viejo.join(', ')}`);
-    if (r.desborda) fallas.push(`@${w}: la página desborda horizontalmente`);
+    if (viejo.length) fallas.push(`${motor}@${w}: la página todavía pide ${viejo.join(', ')}`);
+    if (r.desborda) fallas.push(`${motor}@${w}: la página desborda horizontalmente`);
     await ctx.close();
   }
   // --- comparativo en móvil y escritorio (25-nov) ---
   for (const [w, h] of [[360, 780], [390, 844], [414, 896], [1280, 800]]) {
-    const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 500, serviceWorkers: 'block' });
+    const ctx = await browser.newContext(opts(w, h));
     const page = await ctx.newPage();
     await page.goto(base + '/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
-    const e = `@${w}x${h}`;
+    const e = `${motor}@${w}x${h}`;
     try {
       if (w === 1280) { const css = await page.evaluate(() => document.documentElement.outerHTML); if (/\b100vw\b/.test(css)) fallas.push(`${e}: el CSS usa 100vw (con barra de desplazamiento ensancha la página); usar sombra o 100vmax`); }
     if (!(await page.$('.cmp-wrap'))) { fallas.push(`${e}: no hay tabla comparativa`); await ctx.close(); continue; }
@@ -105,6 +109,33 @@ try {
     } catch (err) { fallas.push(`${e}: el chequeo no pudo medir la tabla (${String(err.message).split('\n')[0].slice(0, 120)})`); }
     await ctx.close();
   }
+  // --- barrido de anchos: la pista aparece si y solo si hay una columna de competidor sin verse completa a la derecha (25-nov) ---
+  for (const w of [360, 390, 414, 480, 520, 560, 600, 650, 700, 768, 1280]) {
+    const ctx = await browser.newContext(opts(w, 800));
+    const page = await ctx.newPage();
+    try {
+      await page.goto(base + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(500);
+      await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, document.querySelector('.cmp-wrap').getBoundingClientRect().top + scrollY - 200); }); await page.waitForTimeout(400);
+      // WebKit no devuelve la opacidad de un pseudo-elemento (cadena vacía): ahí vale la clase; la opacidad la cubre Chromium
+      const medir = () => page.evaluate(() => { const wr = document.querySelector('.cmp-wrap'), lim = wr.getBoundingClientRect().left + wr.clientWidth + 0.5, pi = document.querySelector('.cmp-pista'), caja = document.querySelector('.cmp-caja');
+        const ocultas = [...document.querySelectorAll('.cmp thead th')].filter((t) => !t.matches('.cmp-th-lab, .cmp-inn') && t.getBoundingClientRect().right > lim).map((t) => t.textContent.trim());
+        return { ocultas, pista: !pi.hidden && getComputedStyle(pi).display !== 'none' && pi.getBoundingClientRect().height > 0, texto: pi.textContent, grad: caja.classList.contains('cmp-scroll') && (() => { const o = parseFloat(getComputedStyle(caja, '::after').opacity); return Number.isNaN(o) || o > 0.5; })(), wrapAncho: wr.clientWidth }; });
+      const ini = await medir(), e = `${motor}@${w}`;
+      if (ini.ocultas.length && !ini.pista) fallas.push(`${e}: hay columnas ocultas (${ini.ocultas.join(', ')}) y no hay pista`);
+      if (!ini.ocultas.length && ini.pista) fallas.push(`${e}: la pista se ve sin columnas ocultas`);
+      if (ini.grad !== ini.ocultas.length > 0) fallas.push(`${e}: el degradado ${ini.grad ? 'se ve' : 'falta'} con ${ini.ocultas.length} columna(s) oculta(s)`);
+      if (ini.pista) for (const n of ini.ocultas) if (!ini.texto.includes(n)) fallas.push(`${e}: la pista no nombra a ${n} («${ini.texto}»)`);
+      if (ini.pista && /Desliza para ver/.test(ini.texto) && ini.ocultas.some((n) => !ini.texto.includes(n))) fallas.push(`${e}: texto de pista incompleto`);
+      if (ini.ocultas.length) {
+        await page.evaluate(() => { const wr = document.querySelector('.cmp-wrap'); wr.scrollLeft = wr.scrollWidth; }); await page.waitForTimeout(350);
+        const fin = await medir();
+        if (fin.ocultas.length || fin.pista || fin.grad) fallas.push(`${e}: al llegar al final quedan ${fin.ocultas.length} oculta(s), pista ${fin.pista}, degradado ${fin.grad}`);
+      }
+    } catch (err) { fallas.push(`${motor}@${w}: el barrido no pudo medir (${String(err.message).split('\n')[0].slice(0, 120)})`); }
+    await ctx.close();
+  }
 } finally { await browser.close(); }
+}
+
 if (fallas.length) { console.error('NAVEGADOR_FALLA\n' + fallas.map((f) => '  - ' + f).join('\n')); process.exit(1); }
 console.log('NAVEGADOR_OK');
