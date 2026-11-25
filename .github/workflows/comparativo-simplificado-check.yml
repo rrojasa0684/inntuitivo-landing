@@ -3,11 +3,17 @@ name: comparativo-simplificado-check
 # 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio: fuentes, aria-label, desborde en 360/390/430 px, áreas táctiles y contraste, con un navegador real.
 
 on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "comparativo-simplificado-check.mjs"
+      - "chequeo-en-vivo-navegador.mjs"
   push:
     branches: [main]
     paths:
       - "index.html"
       - "comparativo-simplificado-check.mjs"
+      - "chequeo-en-vivo-navegador.mjs"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/comparativo-simplificado-check.yml"

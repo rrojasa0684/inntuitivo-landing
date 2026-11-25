@@ -14,10 +14,10 @@ const browser = await tipo.launch();
 const opts = (w, h, extra = {}) => (motor === 'webkit' && w === 390 ? { ...devices['iPhone 13'], serviceWorkers: 'block', ...extra } : { viewport: { width: w, height: h }, hasTouch: w < 500, serviceWorkers: 'block', ...extra });
 try {
   for (const w of [360, 390, 430, 1280]) {
-    const ctx = await browser.newContext(opts(w, 900));
+    const ctx = await browser.newContext(opts(w, 900)); await ctx.route('https://analytics.inntuitivo.com/**', (r) => r.abort());
     const page = await ctx.newPage(), pedidos = [];
     page.on('request', (r) => pedidos.push(r.url()));
-    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await page.goto(base + '/?nc=' + Date.now(), { waitUntil: 'networkidle' });
     await page.waitForTimeout(600);
     const r = await page.evaluate(() => ({ t: document.body.innerText, desborda: document.documentElement.scrollWidth > innerWidth }));
     for (const x of ['Cifras públicas de terceros', 'De dónde sale el decisor']) if (r.t.includes(x)) fallas.push(`${motor}@${w}: el sitio publicado muestra «${x}»`);
@@ -29,10 +29,10 @@ try {
   }
   // --- comparativo en móvil y escritorio (25-nov) ---
   for (let [w, h] of [[360, 780], [390, 844], [414, 896], [1280, 800]]) {
-    const ctx = await browser.newContext(opts(w, h));
+    const ctx = await browser.newContext(opts(w, h)); await ctx.route('https://analytics.inntuitivo.com/**', (r) => r.abort());
     const page = await ctx.newPage();
     h = page.viewportSize().height; // el perfil del iPhone 13 trae su propio alto
-    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    await page.goto(base + '/?nc=' + Date.now(), { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
     const e = `${motor}@${w}x${h}`;
     try {
@@ -113,10 +113,10 @@ try {
   }
   // --- barrido de anchos: la pista aparece si y solo si hay una columna de competidor sin verse completa a la derecha (25-nov) ---
   for (const w of [360, 390, 414, 480, 520, 560, 600, 650, 700, 768, 1280]) {
-    const ctx = await browser.newContext(opts(w, 800));
+    const ctx = await browser.newContext(opts(w, 800)); await ctx.route('https://analytics.inntuitivo.com/**', (r) => r.abort());
     const page = await ctx.newPage();
     try {
-      await page.goto(base + '/', { waitUntil: 'networkidle' }); await page.waitForTimeout(500);
+      await page.goto(base + '/?nc=' + Date.now(), { waitUntil: 'networkidle' }); await page.waitForTimeout(500);
       await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; scrollTo(0, document.querySelector('.cmp-wrap').getBoundingClientRect().top + scrollY - 200); }); await page.waitForTimeout(400);
       // WebKit no devuelve la opacidad de un pseudo-elemento (cadena vacía): ahí vale la clase; la opacidad la cubre Chromium
       const medir = () => page.evaluate(() => { const wr = document.querySelector('.cmp-wrap'), lim = wr.getBoundingClientRect().left + wr.clientWidth + 0.5, pi = document.querySelector('.cmp-pista'), caja = document.querySelector('.cmp-caja');

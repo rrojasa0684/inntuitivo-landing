@@ -37,6 +37,8 @@ if [ -d "$AQUI/node_modules/playwright" ]; then
     servir "$TMP/js"
     if salida="$(CHEQUEO_NAVEGADOR=si bash "$AQUI/chequeo-en-vivo.sh" "http://127.0.0.1:$PUERTO" 2>&1)"; then echo "FALLO: el navegador no cazó la tabla dibujada por JavaScript"; echo "$salida"; exit 1; fi
     grep -q "el sitio publicado muestra «Cifras públicas de terceros»" <<<"$salida" && echo "ok: falla como debe (tabla dibujada por JavaScript, con navegador)" || { echo "FALLO: otra razón"; echo "$salida"; exit 1; }
+else
+    echo "OMITIDA: la prueba del navegador (sin node_modules/playwright; en CI sí corre)"
 fi
 sitio "$TMP/roto"; printf '<a href="/no-existe.html">x</a>' > "$TMP/roto/index.html"; espera falla "enlace roto" "$TMP/roto"
 sitio "$TMP/retirada"; printf 'ok' > "$TMP/retirada/activar.html";            espera falla "activar.html debería dar 404" "$TMP/retirada"
