@@ -98,9 +98,9 @@ fi
 # la sección 2 tiene que traer «Ver las fuentes». Después, la misma revisión con un navegador de contexto nuevo (la tabla vieja la dibujaba JavaScript): chequeo-en-vivo-navegador.mjs, si hay Playwright (CHEQUEO_NAVEGADOR=no la salta, solo para la prueba con un sitio de juguete).
 sc="$(curl -s --max-time 20 -L -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$BASE/?nc=$(date +%s)" || true)"
 for prohibido in 'Cifras públicas de terceros' 'De dónde sale el decisor' 'datos-decisores-publicos'; do
-    printf '%s' "$sc" | grep -Fq "$prohibido" && fallas+=("la portada publicada trae «${prohibido}» (quitado el 25-nov)")
+    grep -Fq -- "$prohibido" <<<"$sc" && fallas+=("la portada publicada trae «${prohibido}» (quitado el 25-nov)")
 done
-printf '%s' "$sc" | grep -Fq 'Ver las fuentes' || fallas+=("la portada publicada no trae «Ver las fuentes» en la sección 2")
+grep -Fq 'Ver las fuentes' <<<"$sc" || fallas+=("la portada publicada no trae «Ver las fuentes» en la sección 2")
 if [ "${CHEQUEO_NAVEGADOR:-si}" != "no" ]; then
     AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     if [ -d "$AQUI/node_modules/playwright" ] && command -v node >/dev/null 2>&1; then
