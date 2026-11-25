@@ -63,6 +63,7 @@ try {
       const page = await browser.newPage({ viewport: { width: w, height: h } });
       await page.goto(base + '/', { waitUntil: 'networkidle' });
       await page.waitForTimeout(400);
+      await page.evaluate(() => document.querySelectorAll('details.dec-detalle').forEach((d) => { d.open = true; })); // 25-nov: el detalle va en un desplegable cerrado
       const r = await page.evaluate(() => {
         const b = document.getElementById('decisores');
         const filas = document.querySelectorAll('#dec-tabla tbody tr').length, cols = document.querySelectorAll('#dec-tabla thead th').length;
@@ -80,7 +81,7 @@ try {
       });
       const etiqueta = `${nombre} @${w}`;
       if (visible !== r.vis) fallas.push(`${etiqueta}: visible=${r.vis}, se esperaba ${visible}`);
-      if (r.plan !== (visible ? '3' : '2')) fallas.push(`${etiqueta}: «Tu plan» es el ${r.plan}`);
+      if (r.plan !== '3') fallas.push(`${etiqueta}: «Tu plan» es el ${r.plan}`);
       if (r.desborda) fallas.push(`${etiqueta}: la página desborda horizontalmente`);
       if (visible) {
         const datos = esp.reduce((n, f) => n + COMP.reduce((m, c) => m + (f.celdas[c].estado === 'informado' ? f.celdas[c].datos.length : 0), 0), 0);
