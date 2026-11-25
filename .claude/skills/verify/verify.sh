@@ -6,6 +6,7 @@ T0=$(date +%s); fallos=0
 for c in breakpoints-check.sh cta-activacion-fuera-de-sitio-check.sh cta-color-por-accion-check.sh geo-paises-compartidos-check.sh precio-competencia-check.sh textos-actuales-check.sh pipefail-grep-check.sh demo-onboarding-check.sh readme-nombres-check.sh ops/avisar-lista-check.sh; do
   t=$(date +%s); echo "$ bash $c"; if bash "$c" >/tmp/verify.$$ 2>&1; then echo "  -> rc=0 ($(( $(date +%s) - t )) s)"; else echo "  -> FALLA ($(( $(date +%s) - t )) s)"; tail -n 5 /tmp/verify.$$ | sed 's/^/    /'; fallos=$((fallos+1)); fi
 done
+echo "$ python3 ops/version-cache.py --check"; if python3 ops/version-cache.py --check >/tmp/verify.$$ 2>&1; then echo "  -> rc=0"; else echo "  -> FALLA"; sed 's/^/    /' /tmp/verify.$$; fallos=$((fallos+1)); fi
 echo "$ enlaces internos de las páginas (href locales deben existir)"; n=0
 for p in $(ls *.html panel/*.html 2>/dev/null | LC_ALL=C sort); do
   for h in $(grep -oE 'href="[^"#?]+' "$p" | sed 's/href="//' | grep -vE '^(https?:|mailto:|tel:|javascript:|data:|//)|[+{}$\x27]' | LC_ALL=C sort -u); do

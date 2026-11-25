@@ -94,6 +94,25 @@ if [ "$CODIGO" = "200" ]; then
     printf '%s' "$CUERPO" | grep -Eq '"correos_por_dia"[[:space:]]*:[[:space:]]*[0-9]+[[:space:]]*[,}]' || fallas+=("datos-plan-limite.json no trae correos_por_dia como entero")
 fi
 
+# 6 (25-nov-2026): la tabla de «Cifras públicas de terceros» se quitó y no puede volver a convivir con la página nueva. Se pide la portada SIN caché (parámetro único y Cache-Control: no-cache) y no puede traer esa tabla, su texto ni su JSON;
+# la sección 2 tiene que traer «Ver las fuentes». Después, la misma revisión con un navegador de contexto nuevo (la tabla vieja la dibujaba JavaScript): chequeo-en-vivo-navegador.mjs, si hay Playwright (CHEQUEO_NAVEGADOR=no la salta, solo para la prueba con un sitio de juguete).
+sc="$(curl -s --max-time 20 -L -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$BASE/?nc=$(date +%s)" || true)"
+for prohibido in 'Cifras públicas de terceros' 'De dónde sale el decisor' 'datos-decisores-publicos'; do
+    printf '%s' "$sc" | grep -Fq "$prohibido" && fallas+=("la portada publicada trae «${prohibido}» (quitado el 25-nov)")
+done
+printf '%s' "$sc" | grep -Fq 'Ver las fuentes' || fallas+=("la portada publicada no trae «Ver las fuentes» en la sección 2")
+if [ "${CHEQUEO_NAVEGADOR:-si}" != "no" ]; then
+    AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -d "$AQUI/node_modules/playwright" ] && command -v node >/dev/null 2>&1; then
+        if ! nav="$(cd "$AQUI" && node chequeo-en-vivo-navegador.mjs "$BASE" 2>&1)"; then
+            while IFS= read -r l; do case "$l" in "  - "*) fallas+=("navegador: ${l#  - }") ;; esac; done <<<"$nav"
+            [ "${#fallas[@]}" -gt 0 ] || fallas+=("el chequeo con navegador falló: $nav")
+        fi
+    else
+        fallas+=("no hay Playwright para el chequeo con navegador (npm ci y npx playwright install chromium)")
+    fi
+fi
+
 if [ "${#fallas[@]}" -gt 0 ]; then
     echo "CHEQUEO_EN_VIVO_FALLA"
     printf '  - %s\n' "${fallas[@]}"
