@@ -40,6 +40,14 @@ caso 0 'run("rm -rf ./out/../out/tmp")'
 caso 0 'run("rm -f out/respaldo.dump")'      # 22-nov: un borrado sin recursión pasa
 caso 0 'run("rm -f \\"$RESPALDO\\"")'      # 22-nov: «rm -f» más un nombre que empieza con «r» no es el recursivo pegado
 caso 0 'run("mv -f a b; rm -f /tmp/x")'
+caso 0 'run("docker run --rm -v \"$(pwd)\":/x img")'      # 25-nov: --rm de docker run no es un borrado
+caso 0 'run("docker compose run --rm app pytest")'
+caso 2 'run("docker run --rm -rf /")'
+caso 2 'run("docker run --rm -v /:/h img rm -r /h")'
+caso 2 'run("rm -r foo/$D")'
+caso 2 'run("rm -r `pwd`")'
+caso 2 'run("alias d=rm; d -rf /")'
+caso 2 'run("R=$(which rm); $R -rf /")'
 caso 2 'run("ssh root@host ls")'
 for c in 'timeout -s KILL ssh h' 'timeout -s KILL 5 ssh h' 'timeout -k 5 10 ssh h' 'timeout 5s ssh h' 'nice -n 10 ssh h' 'ionice -c 3 ssh h' 'env -u VAR ssh h' 'nohup nice -n 5 timeout -s KILL 9 ssh h'; do caso 2 "run(\"$c\")"; done      # 21-nov noche: opciones con argumento antes del comando
 caso 0 'run("timeout -s KILL 5 ls")'

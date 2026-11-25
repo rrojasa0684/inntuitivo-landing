@@ -53,7 +53,7 @@ def reducido(txt: str) -> str:
 def _destino_fuera(d: str) -> bool:
     """Un destino de rm es seguro solo si, normalizado (~ y «..» resueltos), queda bajo el repo o es relativo sin salir hacia arriba."""
     d = os.path.expanduser(d)
-    if d.startswith("$"):
+    if "$" in d or "`" in d:      # 25-nov: destino con variable o sustitución (rm -r "$D", foo/$D, `pwd`): no se resuelve con certeza, se bloquea
         return True
     n = os.path.normpath(d)
     if d.startswith("/"):
@@ -82,7 +82,19 @@ def rm_fuera_del_repo(codigo: str) -> bool:
     return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=[^-r\s\\]|\\+[\x27\x22])", " ", v))) for v in vistas(codigo))
 
 
+# 25-nov-2026: «--rm» como opción de docker run / container run / compose run no borra archivos; se neutraliza SOLO ahí (el «rm» interno de la imagen sigue viéndose). «docker rm» no se toca.
+DOCKER_RUN = re.compile(r"((?<![\w/.-])docker(?:-compose|\s+compose|\s+container)?\s+run\b(?:[^;&|\n]*?\s)?)--rm(?!\s*-[a-z]*r)(?=\s|$|[\"'])", re.I)      # si le sigue una opción con «r» (--rm -rf /) no se neutraliza: el reducido lo sigue viendo
+
+
+def sin_opcion_docker(codigo: str) -> str:
+    previo = None
+    while previo != codigo:      # una sola «--rm» por pasada: se repite hasta que no cambie (varios docker run en el mismo texto)
+        previo, codigo = codigo, DOCKER_RUN.sub(r"\1--autoclean", codigo, count=1)
+    return codigo
+
+
 def razones(codigo: str) -> list[str]:
+    codigo = sin_opcion_docker(codigo)
     out: list[str] = []
     vs = vistas(codigo)
     letras = [reducido(v) for v in vs]
@@ -95,7 +107,9 @@ def razones(codigo: str) -> list[str]:
         out.append("gh api con reviews o merge")
     if any(re.search(r"(?<!\w)\.ssh(?!\w)", v) for v in vs):
         out.append("escritura en ~/.ssh")
-    if rm_fuera_del_repo(codigo) or any("rmsync" in r or "rmtree" in r for r in letras):
+    alias_rm = any(re.search(r"(?:\balias\s+\w+|\b\w+)=[\"']?(?:[\w./-]*/)?rm[\"']?(?:\s|[;&|)]|\\+[ntr]|$)|\b\w+=\s*[\"']?(?:\$\(|`)[^;\n)]*\brm(?![\w.])", v) for v in vs)      # 25-nov: un alias o variable que apunta a rm (también R=$(which rm), «R=rm&&», «R=rm\n») esconde el comando
+    docker_rm = any(re.search(r"\bdocker\b[^;&|\n]*\brun\b[^;&|\n]*\s(?:\S*/)?rm\s+(?:-\S+\s+)*(?:-[a-z]*r|--recursive)", v) for v in vs)      # 25-nov revisión Opus: «docker run -v /:/h img rm -r /h» borra el equipo a través del volumen
+    if rm_fuera_del_repo(codigo) or alias_rm or docker_rm or any("rmsync" in r or "rmtree" in r for r in letras):
         out.append("rm -rf fuera del repo")
     return sorted(set(out))
 
