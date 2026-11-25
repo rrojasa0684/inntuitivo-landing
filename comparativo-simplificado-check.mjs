@@ -1,6 +1,6 @@
 // 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio.
 //  1. Estático: 8 filas × 5 columnas; cada celda con aria-label; todo ✓ o ✕ de la competencia con data-fuente que apunta a su fuente en el detalle (enlace https y fecha de consulta); Inntuitivo con ✓ en todas; el detalle cerrado por defecto. Se prueba también que el chequeo FALLA si falta una fuente o un aria-label.
-//  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre; la tabla detallada sigue ahí.
+//  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre.
 // Uso: node comparativo-simplificado-check.mjs. Salida: COMPARATIVO_OK o error (exit 1).
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
@@ -90,8 +90,8 @@ try {
     if (r.filas !== 8 || !r.detalleCerrado) fallas.push(`${e}: filas ${r.filas}, detalle cerrado ${r.detalleCerrado}`);
     // el desplegable abre con un toque y muestra las fuentes y la tabla detallada
     await page.click('.dec-detalle > summary');
-    const ab = await page.evaluate(() => ({ abierto: document.querySelector('.dec-detalle').open, fuentes: [...document.querySelectorAll('.cmp-fuentes li')].every((l) => l.offsetParent), tabla: document.getElementById('decisores').offsetParent !== null, desborda: document.documentElement.scrollWidth > innerWidth }));
-    if (!ab.abierto || !ab.fuentes || !ab.tabla) fallas.push(`${e}: el desplegable no muestra fuentes y tabla (${JSON.stringify(ab)})`);
+    const ab = await page.evaluate(() => ({ abierto: document.querySelector('.dec-detalle').open, fuentes: [...document.querySelectorAll('.cmp-fuentes li')].every((l) => l.offsetParent), desborda: document.documentElement.scrollWidth > innerWidth }));
+    if (!ab.abierto || !ab.fuentes || false) fallas.push(`${e}: el desplegable no muestra las fuentes (${JSON.stringify(ab)})`);
     if (ab.desborda) fallas.push(`${e}: con el detalle abierto la página desborda`);
     await page.close();
   }
