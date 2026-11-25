@@ -1,7 +1,7 @@
 name: datos-plan-limite-sync
 
 # 15-nov-2026: la publicación vive en datos-plan-limite-publicar.sh (idempotente, con su prueba) y el chequeo en vivo reintenta los 5xx pasajeros de Pages.
-# 10-nov-2026 (#227): el día de ejemplo de la landing dice «Hasta N emails…» y N es el límite diario calculado del plan. Se publica SOLA, igual que la tabla de decisores: se baja lo que sirve la API,
+# 10-nov-2026 (#227): el día de ejemplo de la landing dice «Hasta N emails…» y N es el límite diario calculado del plan. Se publica SOLA, igual que los precios: se baja lo que sirve la API,
 # se VALIDA (entero de 1 a 1000) y, si cambió el número, se publica en main y se espera a Pages para correr el chequeo en vivo. API caída o dato inválido -> no se toca nada (el JSON anterior sigue).
 
 on:

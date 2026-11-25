@@ -454,13 +454,13 @@ details.dec-detalle[open]:not(.iq-fit)>summary::after{transform:translateY(-50%)
 details.dec-detalle>summary:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px}
 .dec-detalle-cuerpo{padding:0 0 16px}
 .dec-h4{font-family:'Audiowide',sans-serif;font-weight:400;font-size:.95rem;color:#fff;margin:18px 0 8px}
-.fu-pie{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--linea);font-size:.9rem;color:var(--tinta-suave)}
+details.dec-detalle .fu-pie{margin:18px 0 0;padding:14px 0 0;border-top:1px solid var(--linea);font-size:.9rem;color:var(--tinta-suave)}
 .cmp-fuentes{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .cmp-fuentes li{font-size:.92rem;line-height:1.5;overflow-wrap:anywhere;color:var(--tinta-suave)}
 .cmp-fuentes .fu-cap{color:#fff;font-weight:600}
 .cmp-fuentes .fu-marca{display:inline-block;padding:0 8px;border:1px solid var(--linea);border-radius:999px;font-size:.82rem;color:var(--tinta)}
 .cmp-fuentes .fu-enl{display:block}
-.cmp-fuentes a{display:inline-block;padding:10px 0;margin-right:10px;color:var(--rosa-claro);text-decoration:underline}
+.cmp-fuentes a{display:inline-block;min-height:44px;box-sizing:border-box;padding:11px 0;margin-right:10px;color:var(--rosa-claro);text-decoration:underline}
 .cmp-fuentes .fu-fecha,.cmp-fuentes .fu-nota{font-size:.86rem}
 .precio-plan .precio-inner{padding:0;border-radius:0;background:none}
 .boton-plan{width:100%;text-align:center}
@@ -1599,7 +1599,7 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
             <summary>Ver las fuentes</summary>
             <div class="dec-detalle-cuerpo">
                 <h4 class="dec-h4">Apollo</h4>
-                <ul class="cmp-fuentes">
+                <ul class="cmp-fuentes" role="list">
                   <li id="fuente-apollo-decisor"><span class="fu-cap">Busca a quien decide</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://docs.apollo.io/" target="_blank" rel="noopener noreferrer">docs.apollo.io ↗</a> · <a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
                   <li id="fuente-apollo-verif"><span class="fu-cap">Verifica cada correo antes del primer envío</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.apollo.io/product/email-deliverability" target="_blank" rel="noopener noreferrer">apollo.io/product/email-deliverability ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
                   <li id="fuente-apollo-envio"><span class="fu-cap">Envía y da seguimiento sin que nadie lo opere</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.apollo.io/product" target="_blank" rel="noopener noreferrer">apollo.io/product ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
@@ -1607,16 +1607,16 @@ nav.flotando{box-shadow:0 4px 24px rgba(0,0,0,.45)}
                   <li id="fuente-apollo-precio"><span class="fu-cap">Precio fijo, usuarios ilimitados</span> <span class="fu-marca">No</span> <span class="fu-enl"><a href="https://www.apollo.io/pricing" target="_blank" rel="noopener noreferrer">apollo.io/pricing ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span> <span class="fu-nota">Cobra por plan, asientos y créditos.</span></li>
                 </ul>
                 <h4 class="dec-h4">Clay</h4>
-                <ul class="cmp-fuentes">
+                <ul class="cmp-fuentes" role="list">
                   <li id="fuente-clay-web"><span class="fu-cap">Busca empresas en la web abierta</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
                   <li id="fuente-clay-decisor"><span class="fu-cap">Busca a quien decide</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://www.clay.com/claygent" target="_blank" rel="noopener noreferrer">clay.com/claygent ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
                 </ul>
                 <h4 class="dec-h4">Explee</h4>
-                <ul class="cmp-fuentes">
+                <ul class="cmp-fuentes" role="list">
                   <li id="fuente-explee-envio"><span class="fu-cap">Envía y da seguimiento sin que nadie lo opere</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://testingcatalog.com/explee-launches-autogtm-ai-agent-for-outbound-sales/" target="_blank" rel="noopener noreferrer">testingcatalog.com ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span> <span class="fu-nota">Fuente patrocinada: artículo patrocinado del 29 may 2026 (su sitio oficial bloquea la lectura automática).</span></li>
                 </ul>
                 <h4 class="dec-h4">Grok</h4>
-                <ul class="cmp-fuentes">
+                <ul class="cmp-fuentes" role="list">
                   <li id="fuente-grok-web"><span class="fu-cap">Busca empresas en la web abierta</span> <span class="fu-marca">Sí</span> <span class="fu-enl"><a href="https://docs.x.ai/developers/tools/web-search" target="_blank" rel="noopener noreferrer">docs.x.ai/…/web-search ↗</a></span> <span class="fu-fecha">Consultado el 25 nov 2026.</span></li>
                 </ul>
                 <p class="fu-pie">— significa sin dato público: no hay fuente que citar.</p>

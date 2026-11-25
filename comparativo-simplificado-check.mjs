@@ -23,7 +23,10 @@ const revisar = (html) => {
         const id = (/data-fuente="([^"]+)"/.exec(td) || [])[1];
         if (!id) f.push(`✓/✕ de la competencia sin fuente: ${(/aria-label="([^"]+)"/.exec(td) || [])[1]}`);
         else {
-          const li = new RegExp(`<li id="fuente-${id}">[\\s\\S]*?</li>`).exec(html);
+          const det = (/<details class="dec-detalle">[\s\S]*?<\/details>/.exec(html) || [''])[0];
+          const li = new RegExp(`<li id="fuente-${id}">[\\s\\S]*?</li>`).exec(det);
+          const marcaTabla = /cmp-si\b/.test(td) ? 'Sí' : 'No', marcaFuente = li && (/<span class="fu-marca">([^<]+)<\/span>/.exec(li[0]) || [])[1];
+          if (li && marcaTabla !== marcaFuente) f.push(`la marca de «${id}» dice ${marcaTabla} en la tabla y ${marcaFuente} en las fuentes`);
           if (!li) f.push(`la fuente «${id}» no está en el detalle`);
           else if (!/href="https:\/\/[^"\s]+"/.test(li[0]) || !/Consultado el \d{1,2} [a-z]{3} \d{4}/.test(li[0])) f.push(`la fuente «${id}» sin enlace https o sin fecha`);
         }
@@ -49,6 +52,8 @@ const sinFuente = HTML.replace(/ data-fuente="apollo-precio"/, '');
 if (!revisar(sinFuente).length) fallas.push('el chequeo no detectó una celda ✕ sin fuente');
 const sinAria = HTML.replace(/(<td aria-label=")Apollo: no tiene precio fijo con usuarios ilimitados"/, '<td data-x="');
 if (!revisar(sinAria).length) fallas.push('el chequeo no detectó una celda sin aria-label');
+const invertida = HTML.replace(/(id="fuente-apollo-precio">[\s\S]*?fu-marca">)No/, '$1Sí');
+if (!revisar(invertida).length) fallas.push('el chequeo no detectó una marca invertida entre tabla y fuentes');
 const sinLi = HTML.replace(/<li id="fuente-clay-web">/, '<li id="x-clay-web">');
 if (!revisar(sinLi).length) fallas.push('el chequeo no detectó una fuente ausente del detalle');
 
@@ -76,6 +81,7 @@ try {
         return capas.reverse().reduce((acc, c) => [0, 1, 2].map((i) => c[i] * c[3] + acc[i] * (1 - c[3])), [0, 0, 0]);
       };
       const contraste = (el) => { const f = fondo(el), t = rgba(getComputedStyle(el).color), a = lum(f), b = lum(t.slice(0, 3)); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
+      window.__contraste = contraste;
       const wrap = document.querySelector('.cmp-wrap'), tabla = document.querySelector('.cmp');
       const wr = wrap.getBoundingClientRect(), inn = document.querySelector('.cmp tbody .cmp-inn').getBoundingClientRect();
       const th = document.querySelector('.cmp tbody th');
@@ -84,7 +90,7 @@ try {
       const bajos = textos.map((q) => [q, contraste(document.querySelector(q))]).filter(([, c]) => c < 4.5).map(([q, c]) => `${q} ${c.toFixed(2)}`);
       const celdas = [...document.querySelectorAll('.cmp tbody td')].map((td) => td.getBoundingClientRect());
       return { desborda: document.documentElement.scrollWidth > innerWidth, scrollea: wrap.scrollWidth > wrap.clientWidth, sticky: getComputedStyle(th).position, innVisible: inn.left >= wr.left && inn.right <= wr.right + 1,
-        altoMin: Math.min(...celdas.map((c) => c.height)), anchoMin: Math.min(...celdas.map((c) => c.width)), sumAlto: sum.getBoundingClientRect().height, sumBorde: getComputedStyle(sum).borderTopWidth, sumFondo: getComputedStyle(sum).backgroundColor, sumAncho: Math.round(sum.getBoundingClientRect().width), detAncho: Math.round(document.querySelector('.dec-detalle').getBoundingClientRect().width), contAncho: Math.round(document.querySelector('.comparativo').getBoundingClientRect().width), mas: (() => { const a = getComputedStyle(sum, '::after'); return { top: parseFloat(a.top), right: parseFloat(a.right), pos: a.position, h: sum.getBoundingClientRect().height }; })(), bajos,
+        altoMin: Math.min(...celdas.map((c) => c.height)), anchoMin: Math.min(...celdas.map((c) => c.width)), sumAlto: sum.getBoundingClientRect().height, sumBorde: getComputedStyle(sum).borderTopWidth, sumFondo: getComputedStyle(sum).backgroundColor, sumAncho: Math.round(sum.getBoundingClientRect().width), detAncho: Math.round(document.querySelector('.dec-detalle').getBoundingClientRect().width), contAncho: Math.round(document.querySelector('.comparativo').getBoundingClientRect().width), masTransf: getComputedStyle(sum, '::after').transform, mas: (() => { const a = getComputedStyle(sum, '::after'); return { top: parseFloat(a.top), right: parseFloat(a.right), pos: a.position, h: sum.getBoundingClientRect().height }; })(), bajos,
         filas: document.querySelectorAll('.cmp tbody tr').length, detalleCerrado: !document.querySelector('.dec-detalle').open, tablaWidth: tabla.getBoundingClientRect().width, wrapW: wr.width };
     });
     const e = `@${w}`;
@@ -100,12 +106,14 @@ try {
     if (r.bajos.length) fallas.push(`${e}: contraste bajo 4.5:1 en ${r.bajos.join(', ')}`);
     if (r.filas !== 8 || !r.detalleCerrado) fallas.push(`${e}: filas ${r.filas}, detalle cerrado ${r.detalleCerrado}`);
     // el desplegable abre con un toque y muestra las fuentes y la tabla detallada
-    await page.click('.dec-detalle > summary');
+    await page.click('.dec-detalle > summary'); await page.waitForTimeout(350);
     const ab = await page.evaluate(() => { const d = document.querySelector('.dec-detalle'), sum = d.querySelector(':scope > summary'), a = getComputedStyle(sum, '::after'), h = sum.getBoundingClientRect().height;
       return { abierto: d.open, fuentes: [...d.querySelectorAll('.cmp-fuentes li')].every((l) => l.offsetParent), desborda: document.documentElement.scrollWidth > innerWidth || d.scrollWidth > d.clientWidth + 1,
-        sumAlto: h, masTop: parseFloat(a.top), masGira: a.transform !== 'none', grupos: d.querySelectorAll('h4.dec-h4').length, lineas: d.querySelectorAll('.cmp-fuentes li').length, sumBorde: getComputedStyle(sum).borderTopWidth }; });
+        sumAlto: h, masTop: parseFloat(a.top), masTransf: a.transform, grupos: d.querySelectorAll('h4.dec-h4').length, lineas: d.querySelectorAll('.cmp-fuentes li').length, sumBorde: getComputedStyle(sum).borderTopWidth, contrasteBajo: ['.cmp-fuentes li', '.fu-cap', '.fu-marca', '.fu-fecha', '.cmp-fuentes a', '.fu-pie'].map((q) => [q, window.__contraste(d.querySelector(q))]).filter(([, c]) => c < 4.5).map(([q, c]) => q + ' ' + c.toFixed(2)), enlaceAlto: Math.min(...[...d.querySelectorAll('.cmp-fuentes a')].map((x) => x.getBoundingClientRect().height)) }; });
     if (!ab.abierto || !ab.fuentes || ab.lineas !== 9 || ab.grupos !== 4) fallas.push(`${e}: el desplegable no muestra las 9 fuentes en 4 grupos (${JSON.stringify(ab)})`);
-    if (ab.sumAlto < 44 || Math.abs(ab.masTop - ab.sumAlto / 2) > 4 || !ab.masGira || ab.sumBorde !== '0px') fallas.push(`${e}: abierto, el título/«−» se descuadra (${JSON.stringify(ab)})`);
+    if (ab.sumAlto < 44 || Math.abs(ab.masTop - ab.sumAlto / 2) > 4 || ab.masTransf === r.masTransf || ab.sumBorde !== '0px') fallas.push(`${e}: abierto, el título/«−» se descuadra (${JSON.stringify(ab)})`);
+    if (ab.contrasteBajo.length) fallas.push(`${e}: abierto, contraste bajo 4.5:1 en ${ab.contrasteBajo.join(', ')}`);
+    if (ab.enlaceAlto < 44) fallas.push(`${e}: un enlace de fuente mide ${ab.enlaceAlto} px de alto (mínimo 44)`);
     if (ab.desborda) fallas.push(`${e}: con el detalle abierto la página desborda`);
     await page.close();
   }
