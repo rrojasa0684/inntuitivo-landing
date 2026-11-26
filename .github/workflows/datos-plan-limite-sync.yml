@@ -37,7 +37,7 @@ jobs:
         id: pub
         if: steps.bajar.outputs.ok == '1'
         run: bash datos-plan-limite-publicar.sh nuevo.json
-      - name: "Playwright para el chequeo con navegador (25-nov-2026, code review: sin esto el chequeo salía rojo en cada cambio del límite)"
+      - name: Playwright para el chequeo con navegador (25-nov-2026, code review; sin esto el chequeo salía rojo en cada cambio del límite)
         if: steps.pub.outputs.publicado == '1'
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
