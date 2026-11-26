@@ -27,7 +27,7 @@ on:
 jobs:
   en-vivo:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04      # WebKit de Playwright 1.47.2 no se instala en ubuntu-26.04 (ops/workflows-check.sh lo exige)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
