@@ -9,11 +9,15 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import sys
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 
 URL = "https://api.inntuitivo.com/github/aviso"
+MALOS = ("failure", "timed_out", "startup_failure")
+SIN_BARRER = ("avisar-motor.yml", "houston-arreglo.yml")
 
 
 def cuerpo(env, ahora: datetime, error: str | None) -> bytes:
@@ -30,7 +34,9 @@ def firma(clave: str, datos: bytes) -> str:
 
 def causa(env, abrir=urllib.request.urlopen) -> str | None:
     """Trabajo y paso que fallaron en la corrida (solo si el resultado es malo y hay token y número de corrida); None si no se puede leer."""
-    if env.get("AVISO_RESULTADO") not in ("failure", "timed_out", "startup_failure") or not env.get("AVISO_RUN_ID") or not env.get("GH_TOKEN"):
+    if env.get("AVISO_ERROR"):
+        return env["AVISO_ERROR"]
+    if env.get("AVISO_RESULTADO") not in MALOS or not env.get("AVISO_RUN_ID") or not env.get("GH_TOKEN"):
         return None
     try:
         req = urllib.request.Request(f"https://api.github.com/repos/{env['GITHUB_REPOSITORY']}/actions/runs/{env['AVISO_RUN_ID']}/jobs", headers={"Authorization": f"Bearer {env['GH_TOKEN']}", "Accept": "application/vnd.github+json", "User-Agent": "inntuitivo-aviso"})
@@ -59,9 +65,37 @@ def avisar(env=os.environ, ahora: datetime | None = None, abrir=urllib.request.u
     return 0
 
 
+def barrer(env=os.environ, abrir=urllib.request.urlopen, raiz: Path = Path(".github/workflows")) -> int:
+    """25-nov, solo en el latido: reenvía las corridas fallidas más recientes de cada flujo (hasta 2 seguidas, la vieja primero). Cubre el flujo que GitHub no puede leer (YAML inválido): su corrida sale con la ruta por nombre,
+    nunca dispara el aviso y su horario deja de correr, así que el motor se quedaba con el último «ok»."""
+    enviados = 0
+    for f in sorted(raiz.glob("*.yml")):
+        if f.name in SIN_BARRER:
+            continue
+        try:
+            nombre = re.search(r"^name:[ \t]*(.+?)[ \t]*$", f.read_text(encoding="utf-8"), re.M).group(1)
+            req = urllib.request.Request(f"https://api.github.com/repos/{env['GITHUB_REPOSITORY']}/actions/workflows/{f.name}/runs?branch=main&status=completed&per_page=2",
+                                         headers={"Authorization": f"Bearer {env['GH_TOKEN']}", "Accept": "application/vnd.github+json", "User-Agent": "inntuitivo-aviso"})
+            malas = []
+            for r in json.loads(abrir(req, timeout=10).read().decode("utf-8"))["workflow_runs"]:      # la más nueva primero
+                if r.get("conclusion") not in MALOS:
+                    break
+                malas.append(r)
+            for r in reversed(malas):
+                avisar({**env, "AVISO_FLUJO": nombre, "AVISO_RESULTADO": r["conclusion"], "AVISO_RAMA": "main", "AVISO_SHA": r.get("head_sha", ""), "AVISO_HORA": r.get("updated_at", ""), "AVISO_RUN_ID": str(r.get("id", "")),
+                        "AVISO_ERROR": "GitHub no pudo leer el archivo del flujo" if str(r.get("name", "")).startswith(".github/") else ""}, None, abrir)
+                enviados += 1
+        except Exception as ex:  # noqa: BLE001 -- un flujo que no se puede leer no frena los demás
+            print(f"aviso: no se pudo revisar {f.name} ({type(ex).__name__})")
+    return enviados
+
+
 if __name__ == "__main__":
     try:
-        sys.exit(avisar())
+        avisar()
+        if os.environ.get("AVISO_FLUJO") == "latido":
+            barrer()
+        sys.exit(0)
     except Exception as ex:  # noqa: BLE001
         print(f"aviso: error inesperado ({type(ex).__name__})")
         sys.exit(0)

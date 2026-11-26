@@ -3,6 +3,7 @@ name: comparativo-simplificado-check
 # 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio: fuentes, aria-label, desborde en 360/390/430 px, áreas táctiles y contraste, con un navegador real.
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "index.html"
@@ -23,7 +24,7 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04      # WebKit de Playwright 1.47.2 no se instala en ubuntu-26.04 (ops/workflows-check.sh lo exige)
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
