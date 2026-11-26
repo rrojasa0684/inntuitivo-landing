@@ -70,8 +70,9 @@ for (const [motor, tipo] of [['chromium', chromium], ['webkit', webkit]]) {
 const browser = await tipo.launch();
 try {
   for (const w of [360, 390, 430, 1280]) {
-    const page = await browser.newPage({ viewport: { width: w, height: 900 } });
-    await page.goto(base + '/', { waitUntil: 'networkidle' });
+    const ctx = await browser.newContext({ viewport: { width: w, height: 900 } }); await ctx.route('https://analytics.inntuitivo.com/**', (r) => r.abort());
+    const page = await ctx.newPage();
+    await page.goto(base + '/?nc=' + Date.now(), { waitUntil: 'networkidle' });
     await page.waitForTimeout(400);
     const r = await page.evaluate(() => {
       const lum = (c) => { const v = c.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
