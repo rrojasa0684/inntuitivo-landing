@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # 20-nov-2026: comprueba el hook de Code Mode (REPL) de esta landing: está registrado en .claude/settings.json con matcher REPL, el script corre y la lógica deja pasar lo normal y bloquea lo prohibido aunque
-# venga armado (concatenación, variables, plantillas). Mismos casos que tests/test_hook_revisar_repl.py del motor. Salida: REVISAR_REPL_OK.
+# venga armado (concatenación, variables, plantillas). Corre TODAS las listas de casos de tests/test_hook_revisar_repl.py del motor desde su copia idéntica (.claude/hooks/casos_del_motor.py; el test del motor
+# exige que sea igual) y además los casos sueltos de abajo. Salida: REVISAR_REPL_OK.
 set -u
 cd "$(dirname "$0")"
 RAIZ=$(pwd)
@@ -151,4 +152,27 @@ caso 2 'spawnSync("rm", [o, "/x"])'      # 22-nov noche (revisión Opus): identi
 caso 2 'run("rm --recur /Users/x")'
 caso 2 'flag = "-r"
 subprocess.run(["rm", flag, "/Users/x"])'
+python3 - <<'PY' || fallas=$((fallas+1))
+# las listas de casos del motor, evaluadas con la raíz de esta landing (pytest se sustituye: aquí solo interesan las listas)
+import json, subprocess, sys
+from pathlib import Path
+from unittest.mock import MagicMock
+sys.modules["pytest"] = MagicMock()
+m = {"__file__": str(Path.cwd() / "tests" / "casos.py"), "__name__": "casos"}
+exec(compile(Path(".claude/hooks/casos_del_motor.py").read_text(encoding="utf-8"), "casos_del_motor", "exec"), m)
+listas = {0: ["DEBEN_PASAR", "FALSOS_POSITIVOS_RM", "DOCKER_RM_PASA", "REVIEW_25NOV_PASA"],
+          2: ["DEBEN_BLOQUEARSE", "SIGUEN_BLOQUEADOS_RM", "HUECOS_RM_24NOV", "DOCKER_RM_BLOQUEA", "REVISION_25NOV_BLOQUEA", "REVIEW_25NOV_BLOQUEA"]}
+sin_lista = {k for k, v in m.items() if k.isupper() and isinstance(v, list)} - {n for v in listas.values() for n in v}
+mal, n = [f"lista del motor que este chequeo no corre: {k}" for k in sorted(sin_lista)], 0
+for esperado, nombres in listas.items():
+    for nombre in nombres:
+        for caso in m[nombre]:
+            codigo = caso if isinstance(caso, str) else caso[0]
+            rc = subprocess.run(["bash", ".claude/hooks/revisar-repl.sh"], input=json.dumps({"tool_input": {"code": codigo}}), capture_output=True, text=True, timeout=30).returncode
+            n += 1
+            if rc != esperado:
+                mal.append(f"esperaba {esperado} y salió {rc}: {codigo[:150]!r}")
+print("\n".join("FALLA: " + x for x in mal) or f"casos del motor: {n} ok")
+sys.exit(1 if mal or n < 200 else 0)
+PY
 [ "$fallas" = 0 ] && echo "REVISAR_REPL_OK" || exit 1
