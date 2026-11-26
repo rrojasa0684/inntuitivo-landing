@@ -1,5 +1,5 @@
 // 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio.
-//  1. Estático: 8 filas × 5 columnas; cada celda con aria-label; todo ✓ o ✕ de la competencia con data-fuente que apunta a su fuente en el detalle (enlace https y fecha de consulta); Inntuitivo con ✓ en todas; el detalle cerrado por defecto. Se prueba también que el chequeo FALLA si falta una fuente o un aria-label.
+//  1. Estático: 9 filas × 5 columnas; cada celda con aria-label; un — «en parte» lleva fuente marcada «Parcial»; todo ✓ o ✕ de la competencia con data-fuente que apunta a su fuente en el detalle (enlace https y fecha de consulta); Inntuitivo con ✓ en todas; el detalle cerrado por defecto. Se prueba también que el chequeo FALLA si falta una fuente o un aria-label.
 //  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre.
 // Uso: node comparativo-simplificado-check.mjs. Salida: COMPARATIVO_OK o error (exit 1).
 import { chromium, webkit } from 'playwright';
@@ -11,7 +11,10 @@ const revisar = (html) => {
   const f = [];
   const bloque = (/<table class="cmp">[\s\S]*?<\/table>/.exec(html) || [''])[0];
   const filas = bloque.match(/<tbody>[\s\S]*<\/tbody>/) ? bloque.match(/<tr>[\s\S]*?<\/tr>/g).slice(1) : [];
-  if (filas.length !== 8) f.push(`${filas.length} filas (se esperaban 8)`);
+  if (filas.length !== 9) f.push(`${filas.length} filas (se esperaban 9)`);
+  for (const x of ['Envía y da seguimiento en automático', 'Arma las listas y escribe cada correo sin que nadie lo opere']) if (!bloque.includes(`<span class="lab-largo">${x}</span>`)) f.push(`falta la fila «${x}»`);
+  const dosPaginas = (/<li id="fuente-apollo-listas">[\s\S]*?<\/li>/.exec(html) || [''])[0];
+  if (!dosPaginas.includes('/magazine/apollo-launches-agents"') || !dosPaginas.includes('/insights/what-tasks-can-an-ai-sdr-handle-autonomously-without-human-involvement"')) f.push('Apollo «en parte» debe citar sus dos páginas que no coinciden');
   for (const tr of filas) {
     const tds = tr.match(/<td\b[^>]*>[\s\S]*?<\/td>/g) || [];
     if (tds.length !== 5) f.push(`fila con ${tds.length} celdas (se esperaban 5)`);
@@ -19,18 +22,21 @@ const revisar = (html) => {
       if (!/aria-label="[^"]{8,}"/.test(td)) f.push(`celda sin aria-label: ${td.slice(0, 60)}`);
       const marca = /cmp-(si|no)\b/.test(td);
       if (i === 0 && !/cmp-si-inn/.test(td)) f.push('Inntuitivo sin ✓ en una fila');
-      if (i > 0 && marca) {
-        const id = (/data-fuente="([^"]+)"/.exec(td) || [])[1];
+      const id = (/data-fuente="([^"]+)"/.exec(td) || [])[1];
+      const parcial = /aria-label="[^"]*: en parte/.test(td);
+      if (i > 0 && parcial && (marca || !id)) f.push(`«en parte» va con — y con fuente: ${(/aria-label="([^"]+)"/.exec(td) || [])[1]}`);
+      if (i > 0 && !marca && id && !parcial) f.push(`una celda «sin dato» lleva fuente sin decir «en parte»: ${id}`);
+      if (i > 0 && (marca || id)) {
         if (!id) f.push(`✓/✕ de la competencia sin fuente: ${(/aria-label="([^"]+)"/.exec(td) || [])[1]}`);
         else {
           const det = (/<details class="dec-detalle">[\s\S]*?<\/details>/.exec(html) || [''])[0];
           const li = new RegExp(`<li id="fuente-${id}">[\\s\\S]*?</li>`).exec(det);
-          const marcaTabla = /cmp-si\b/.test(td) ? 'Sí' : 'No', marcaFuente = li && (/<span class="fu-marca">([^<]+)<\/span>/.exec(li[0]) || [])[1];
+          const marcaTabla = /cmp-si\b/.test(td) ? 'Sí' : /cmp-no\b/.test(td) ? 'No' : 'Parcial', marcaFuente = li && (/<span class="fu-marca">([^<]+)<\/span>/.exec(li[0]) || [])[1];
           if (li && marcaTabla !== marcaFuente) f.push(`la marca de «${id}» dice ${marcaTabla} en la tabla y ${marcaFuente} en las fuentes`);
           if (!li) f.push(`la fuente «${id}» no está en el detalle`);
           else if (!/href="https:\/\/[^"\s]+"/.test(li[0]) || !/Consultado el \d{1,2} [a-z]{3} \d{4}/.test(li[0])) f.push(`la fuente «${id}» sin enlace https o sin fecha`);
         }
-      } else if (i > 0 && !/data-fuente/.test(td) === false) f.push('una celda «sin dato» lleva fuente');
+      }
     });
   }
   if (/<details class="dec-detalle"[^>]*\bopen\b/.test(html)) f.push('el detalle debe estar cerrado por defecto');
@@ -41,9 +47,9 @@ const revisar = (html) => {
   const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'], orden = (x) => { const m = /(\d+) (\w+) (\d+)/.exec(x); return m ? +m[3] * 10000 + MES.indexOf(m[2]) * 100 + +m[1] : 0; };
   if (!pie) f.push('falta el pie «Fuentes públicas, consultadas el …»');
   else if (fechas.length && orden(pie) !== Math.max(...fechas.map(orden))) f.push(`la fecha del pie (${pie}) no es la de la fuente más reciente`);
-  if (!/— significa sin dato público/.test(html)) f.push('falta la línea que explica «—»');
+  if (!/— significa sin dato público[^<]*solo en parte/.test(html)) f.push('falta la línea que explica «—»');
   if (!/<span class="fu-nota">Fuente patrocinada[^<]*<\/span>/.test(html)) f.push('la fuente patrocinada de Explee no lo dice en su línea');
-  if (!/✓<\/span> Sí/.test(html) || !/✕<\/span> No/.test(html) || !/—<\/span> Sin dato público/.test(html)) f.push('falta la leyenda');
+  if (!/✓<\/span> Sí/.test(html) || !/✕<\/span> No/.test(html) || !/—<\/span> Sin dato público, o solo en parte/.test(html)) f.push('falta la leyenda');
   return f;
 };
 const fallas = revisar(HTML).map((x) => `estático: ${x}`);
@@ -57,6 +63,9 @@ if (!revisar(invertida).length) fallas.push('el chequeo no detectó una marca in
 const sinLi = HTML.replace(/<li id="fuente-clay-web">/, '<li id="x-clay-web">');
 if (!revisar(sinLi).length) fallas.push('el chequeo no detectó una fuente ausente del detalle');
 
+if (!revisar(HTML.replace(/ data-fuente="apollo-listas"/, '')).length) fallas.push('el chequeo no detectó un «en parte» sin fuente');
+if (!revisar(HTML.replace(/(id="fuente-apollo-listas"[\s\S]*?fu-marca">)Parcial/, '$1Sí')).length) fallas.push('el chequeo no detectó un «en parte» marcado como Sí en las fuentes');
+if (!revisar(HTML.replace('/magazine/apollo-launches-agents"', '/x"')).length) fallas.push('el chequeo no detectó la falta de una de las dos páginas de Apollo');
 const servidor = createServer((req, res) => {
   const ruta = new URL(req.url, 'http://x').pathname;
   const f = new URL('.' + (ruta === '/' ? '/index.html' : ruta), import.meta.url);
@@ -106,13 +115,13 @@ try {
     if (Math.abs(r.detAncho - r.contAncho) > 2 || r.sumAncho < r.detAncho - 50) fallas.push(`${e}: el desplegable no ocupa el ancho del contenedor (${r.detAncho} de ${r.contAncho}; el título ${r.sumAncho})`);
     if (Math.abs(r.mas.top - r.mas.h / 2) > 4 || r.mas.right > 24) fallas.push(`${e}: el «+» no está en la línea del título, a la derecha (top ${r.mas.top}, alto ${r.mas.h}, right ${r.mas.right})`);
     if (r.bajos.length) fallas.push(`${e}: contraste bajo 4.5:1 en ${r.bajos.join(', ')}`);
-    if (r.filas !== 8 || !r.detalleCerrado) fallas.push(`${e}: filas ${r.filas}, detalle cerrado ${r.detalleCerrado}`);
+    if (r.filas !== 9 || !r.detalleCerrado) fallas.push(`${e}: filas ${r.filas}, detalle cerrado ${r.detalleCerrado}`);
     // el desplegable abre con un toque y muestra las fuentes y la tabla detallada
     await page.click('.dec-detalle > summary'); await page.waitForTimeout(350);
     const ab = await page.evaluate(() => { const d = document.querySelector('.dec-detalle'), sum = d.querySelector(':scope > summary'), a = getComputedStyle(sum, '::after'), h = sum.getBoundingClientRect().height;
       return { abierto: d.open, fuentes: [...d.querySelectorAll('.cmp-fuentes li')].every((l) => l.offsetParent), desborda: document.documentElement.scrollWidth > innerWidth || d.scrollWidth > d.clientWidth + 1,
         sumAlto: h, masTop: parseFloat(a.top), masTransf: a.transform, grupos: d.querySelectorAll('h4.dec-h4').length, lineas: d.querySelectorAll('.cmp-fuentes li').length, sumBorde: getComputedStyle(sum).borderTopWidth, contrasteBajo: ['.cmp-fuentes li', '.fu-cap', '.fu-marca', '.fu-fecha', '.cmp-fuentes a', '.fu-pie'].map((q) => [q, window.__contraste(d.querySelector(q))]).filter(([, c]) => c < 4.5).map(([q, c]) => q + ' ' + c.toFixed(2)), enlaceAlto: Math.min(...[...d.querySelectorAll('.cmp-fuentes a')].map((x) => x.getBoundingClientRect().height)) }; });
-    if (!ab.abierto || !ab.fuentes || ab.lineas !== 9 || ab.grupos !== 4) fallas.push(`${e}: el desplegable no muestra las 9 fuentes en 4 grupos (${JSON.stringify(ab)})`);
+    if (!ab.abierto || !ab.fuentes || ab.lineas !== 14 || ab.grupos !== 4) fallas.push(`${e}: el desplegable no muestra las 14 fuentes en 4 grupos (${JSON.stringify(ab)})`);
     if (ab.sumAlto < 44 || Math.abs(ab.masTop - ab.sumAlto / 2) > 4 || ab.masTransf === r.masTransf || ab.sumBorde !== '0px') fallas.push(`${e}: abierto, el título/«−» se descuadra (${JSON.stringify(ab)})`);
     if (ab.contrasteBajo.length) fallas.push(`${e}: abierto, contraste bajo 4.5:1 en ${ab.contrasteBajo.join(', ')}`);
     if (ab.enlaceAlto < 44) fallas.push(`${e}: un enlace de fuente mide ${ab.enlaceAlto} px de alto (mínimo 44)`);
