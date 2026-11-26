@@ -1,6 +1,6 @@
 // 25-nov-2026: comparativo simplificado ✓ ✕ — de #precio.
 //  1. Estático: 9 filas × 5 columnas; cada celda con aria-label; un — «en parte» lleva fuente marcada «Parcial»; todo ✓ o ✕ de la competencia con data-fuente que apunta a su fuente en el detalle (enlace https y fecha de consulta); Inntuitivo con ✓ en todas; el detalle cerrado por defecto. Se prueba también que el chequeo FALLA si falta una fuente o un aria-label.
-//  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre.
+//  2. Navegador (360, 390, 430 y 1280 px): sin desborde horizontal de la página; en celular la tabla se desplaza dentro de su caja, con la primera columna fija y Inntuitivo visible al entrar; áreas de 44 px o más; contraste de texto 4.5:1 o más; el desplegable abre; cada etiqueta corta mide de 1 a 3 líneas en 360, 390 y 430 px.
 // Uso: node comparativo-simplificado-check.mjs. Salida: COMPARATIVO_OK o error (exit 1).
 import { chromium, webkit } from 'playwright';
 import { createServer } from 'node:http';
@@ -42,13 +42,19 @@ const revisar = (html) => {
   if (/<details class="dec-detalle"[^>]*\bopen\b/.test(html)) f.push('el detalle debe estar cerrado por defecto');
   if (!/<summary>Ver las fuentes<\/summary>/.test(html)) f.push('falta «Ver las fuentes»');
   if (/dec-tabla|dec-cards|datos-decisores|Cifras públicas de terceros<\/h4>/.test(html)) f.push('quedó código o texto de la tabla de cifras');
-  const fechas = [...html.matchAll(/Consultado el (\d{1,2}) ([a-z]{3}) (\d{4})/g)].map((m) => m[0].slice(13));
-  const pie = (/<p class="dec-pie">Fuentes públicas, consultadas el ([^.]+)\. ¿Ves un dato desactualizado\? <a href="mailto:/.exec(html) || [])[1];
+  const fechas = [...html.matchAll(/Consultado el (\d{1,2}) ([a-z]{3}) (\d{4})/g)].map((m) => m[0].slice(14));
+  const pie = (/<p class="dec-pie">Fuentes públicas, consultadas ((?:el|entre el) [^.]+)\. ¿Ves un dato desactualizado\? <a href="mailto:/.exec(html) || [])[1];
   const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'], orden = (x) => { const m = /(\d+) (\w+) (\d+)/.exec(x); return m ? +m[3] * 10000 + MES.indexOf(m[2]) * 100 + +m[1] : 0; };
   if (!pie) f.push('falta el pie «Fuentes públicas, consultadas el …»');
-  else if (fechas.length && orden(pie) !== Math.max(...fechas.map(orden))) f.push(`la fecha del pie (${pie}) no es la de la fuente más reciente`);
+  else if (fechas.length) { // el pie dice la verdad: un solo día, o el rango exacto de la fuente más antigua a la más reciente
+    const o = [...fechas].sort((a, b) => orden(a) - orden(b)), a = o[0], z = o[o.length - 1], [da, ...ra] = a.split(' ');
+    const esperado = a === z ? `el ${z}` : ra.join(' ') === z.split(' ').slice(1).join(' ') ? `entre el ${da} y el ${z}` : `entre el ${a} y el ${z}`;
+    if (pie !== esperado) f.push(`el pie dice «consultadas ${pie}» y las fuentes dicen «consultadas ${esperado}»`);
+  }
   if (!/— significa sin dato público[^<]*solo en parte/.test(html)) f.push('falta la línea que explica «—»');
-  if (!/<span class="fu-nota">Fuente patrocinada[^<]*<\/span>/.test(html)) f.push('la fuente patrocinada de Explee no lo dice en su línea');
+  const patrocinadas = (html.match(/<li id="fuente-[^"]+">[\s\S]*?<\/li>/g) || []).filter((li) => /href="https:\/\/(www\.)?testingcatalog\.com\//.test(li));
+  if (!patrocinadas.length) f.push('no se encontró la fuente patrocinada de Explee');
+  for (const li of patrocinadas) if (!/<span class="fu-nota">Fuente patrocinada[^<]*<\/span>/.test(li)) f.push(`fuente patrocinada sin decirlo en su línea: ${(/id="([^"]+)"/.exec(li) || [])[1]}`);
   if (!/✓<\/span> Sí/.test(html) || !/✕<\/span> No/.test(html) || !/—<\/span> Sin dato público, o solo en parte/.test(html)) f.push('falta la leyenda');
   return f;
 };
@@ -66,6 +72,12 @@ if (!revisar(sinLi).length) fallas.push('el chequeo no detectó una fuente ausen
 if (!revisar(HTML.replace(/ data-fuente="apollo-listas"/, '')).length) fallas.push('el chequeo no detectó un «en parte» sin fuente');
 if (!revisar(HTML.replace(/(id="fuente-apollo-listas"[\s\S]*?fu-marca">)Parcial/, '$1Sí')).length) fallas.push('el chequeo no detectó un «en parte» marcado como Sí en las fuentes');
 if (!revisar(HTML.replace('/magazine/apollo-launches-agents"', '/x"')).length) fallas.push('el chequeo no detectó la falta de una de las dos páginas de Apollo');
+const sinNota = HTML.replace(/(<li id="fuente-explee-listas">[\s\S]*?) <span class="fu-nota">Fuente patrocinada[^<]*<\/span>/, '$1');
+if (sinNota === HTML || !revisar(sinNota).some((x) => x.includes('fuente-explee-listas'))) fallas.push('el chequeo no detectó una de las dos líneas patrocinadas sin su nota');
+for (const falso of ['el 26 nov 2026', 'entre el 24 y el 26 nov 2026']) {
+  const mal = HTML.replace(/(Fuentes públicas, consultadas )[^.]+\./, `$1${falso}.`);
+  if (mal === HTML || !revisar(mal).some((x) => x.startsWith('el pie dice'))) fallas.push(`el chequeo no detectó un pie falso («${falso}»)`);
+}
 const servidor = createServer((req, res) => {
   const ruta = new URL(req.url, 'http://x').pathname;
   const f = new URL('.' + (ruta === '/' ? '/index.html' : ruta), import.meta.url);
@@ -82,7 +94,7 @@ try {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 } }); await ctx.route('https://analytics.inntuitivo.com/**', (r) => r.abort());
     const page = await ctx.newPage();
     await page.goto(base + '/?nc=' + Date.now(), { waitUntil: 'networkidle' });
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(400); await page.evaluate(() => document.fonts.ready);
     const r = await page.evaluate(() => {
       const lum = (c) => { const v = c.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
       const rgba = (s) => { const m = s.match(/[\d.]+/g).map(Number); return [m[0], m[1], m[2], m.length > 3 ? m[3] : 1]; };
@@ -116,6 +128,19 @@ try {
     if (Math.abs(r.mas.top - r.mas.h / 2) > 4 || r.mas.right > 24) fallas.push(`${e}: el «+» no está en la línea del título, a la derecha (top ${r.mas.top}, alto ${r.mas.h}, right ${r.mas.right})`);
     if (r.bajos.length) fallas.push(`${e}: contraste bajo 4.5:1 en ${r.bajos.join(', ')}`);
     if (r.filas !== 9 || !r.detalleCerrado) fallas.push(`${e}: filas ${r.filas}, detalle cerrado ${r.detalleCerrado}`);
+    // versión móvil: cada etiqueta corta ocupa de 1 a 3 líneas (alto / interlineado); la prueba negativa fuerza 4 en una
+    if (w <= 430) {
+      const m = await page.evaluate(() => {
+        const els = [...document.querySelectorAll('.cmp tbody .lab-corto')];
+        const medir = (el) => Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight));
+        const lineas = els.map((el) => [el.textContent, medir(el)]);
+        const antes = els[0].innerHTML; els[0].innerHTML = 'a<br>b<br>c<br>d'; const forzada = medir(els[0]); els[0].innerHTML = antes;
+        return { lineas, forzada };
+      });
+      if (m.lineas.length !== 6) fallas.push(`${e}: ${m.lineas.length} etiquetas cortas (se esperaban 6)`);
+      for (const [t, n] of m.lineas) if (!(n >= 1 && n <= 3)) fallas.push(`${e}: la etiqueta corta «${t}» mide ${n} líneas (de 1 a 3)`);
+      if (m.forzada !== 4) fallas.push(`${e}: el chequeo no detectó una etiqueta de 4 líneas (midió ${m.forzada})`);
+    }
     // el desplegable abre con un toque y muestra las fuentes y la tabla detallada
     await page.click('.dec-detalle > summary'); await page.waitForTimeout(350);
     const ab = await page.evaluate(() => { const d = document.querySelector('.dec-detalle'), sum = d.querySelector(':scope > summary'), a = getComputedStyle(sum, '::after'), h = sum.getBoundingClientRect().height;
