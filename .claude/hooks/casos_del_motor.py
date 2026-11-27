@@ -816,3 +816,13 @@ def test_26nov_los_casos_de_tiempo_que_salen_por_la_puerta_barata_lo_dicen(codig
     """Lote 25-nov: estas entradas no llegan a las reglas que su test nombra; salen por el tope de cadena o de valor y aquí se afirma esa razón."""
     r = _correr(codigo)
     assert r.returncode == 2 and "demasiado largo" in r.stderr, (codigo[:60], r.stderr)
+
+
+@pytest.mark.parametrize("codigo", ['write("a.md","x"); ' + "a" * 39000, "$`x`;" + "|a" * 19000, "git clone " + "-a," * 40 + "!", "git remote add " + "-a," * 40 + "!", 'write("a.md","x");' + "await $`cd ${a}`;" * 2000],
+                         ids=["palabra-larga-tras-write", "tuberias", "git-clone-comas", "git-remote-comas", "muchas-variables"])
+def test_26nov_entradas_que_colgaban_las_reglas_nuevas(codigo):
+    """Cierre 26-nov: cinco formas que hacían crecer sin control el tiempo de las reglas nuevas (un hook que agota su tiempo deja pasar todo)."""
+    import time
+    t = time.time()
+    _correr(codigo)
+    assert time.time() - t < 5
