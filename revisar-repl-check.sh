@@ -160,8 +160,8 @@ from unittest.mock import MagicMock
 sys.modules["pytest"] = MagicMock()
 m = {"__file__": str(Path.cwd() / "tests" / "casos.py"), "__name__": "casos"}
 exec(compile(Path(".claude/hooks/casos_del_motor.py").read_text(encoding="utf-8"), "casos_del_motor", "exec"), m)
-listas = {0: ["DEBEN_PASAR", "FALSOS_POSITIVOS_RM", "DOCKER_RM_PASA", "REVIEW_25NOV_PASA"],
-          2: ["DEBEN_BLOQUEARSE", "SIGUEN_BLOQUEADOS_RM", "HUECOS_RM_24NOV", "DOCKER_RM_BLOQUEA", "REVISION_25NOV_BLOQUEA", "REVIEW_25NOV_BLOQUEA"]}
+listas = {0: ["DEBEN_PASAR", "FALSOS_POSITIVOS_RM", "DOCKER_RM_PASA", "REVIEW_25NOV_PASA", "LEGITIMOS_26NOV"],
+          2: ["DEBEN_BLOQUEARSE", "SIGUEN_BLOQUEADOS_RM", "HUECOS_RM_24NOV", "DOCKER_RM_BLOQUEA", "REVISION_25NOV_BLOQUEA", "REVIEW_25NOV_BLOQUEA", "HUECOS_26NOV", "NO_ABRE_26NOV"]}
 sin_lista = {k for k, v in m.items() if k.isupper() and isinstance(v, list)} - {n for v in listas.values() for n in v}
 mal, n = [f"lista del motor que este chequeo no corre: {k}" for k in sorted(sin_lista)], 0
 for esperado, nombres in listas.items():

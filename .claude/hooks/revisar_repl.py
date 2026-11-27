@@ -14,11 +14,11 @@ from pathlib import Path
 REPO = str(Path(__file__).resolve().parents[2]).lower() + "/"      # la raíz del repo donde vive el hook (el motor o la landing: el mismo script en los dos)
 # 21-nov-2026: ssh, scp, sftp y sus parientes se bloquean COMO COMANDO (inicio, tras ; | & ( = $ ! comilla, corchete, un salto escrito como \\n, una palabra de shell como sudo/timeout/if/eval, una asignación A=1, o -e de rsync),
 # nunca dentro de un identificador ni de un texto corrido; «ssh-add -l» pasa. Aparte, un «ssh» armado con literales pegados se bloquea siempre (ver pegados).
-ENVOLTURAS = r"(?:sudo|doas|fakeroot|builtin|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|elif|coproc|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh|caffeinate|busybox|unbuffer|taskpolicy|arch|script|runuser|su|sg|strace|ltrace|tmux|screen|parallel|firejail|proxychains|torsocks|dtruss|chronic|nsenter)"
+ENVOLTURAS = r"(?:uv[ \t]+run|uvx|npx|sudo|doas|fakeroot|builtin|env|exec|command|nohup|xargs|time|timeout|nice|eval|if|elif|coproc|then|else|do|while|until|setsid|watch|stdbuf|sshpass|rsync|ionice|chroot|bash|sh|zsh|caffeinate|busybox|unbuffer|taskpolicy|arch|script|runuser|su|sg|strace|ltrace|tmux|screen|parallel|firejail|proxychains|torsocks|dtruss|chronic|nsenter)"
 POSICIONAL = r"(?:flock|lockf|setpriv|cpulimit)"      # envolturas con un argumento posicional antes del comando (flock /tmp/l ssh h)
 REDIR = r"(?:\d*[<>]+[&\w./-]*[ \t]+){0,130}"      # 24-nov noche: redirecciones antes del comando (2>/dev/null rm, >x rm, <x rm, &>x rm)
-PREFIJO = (r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)[ \t]*" + REDIR + r"(?:" + ENVOLTURAS + r"[ \t]+(?:-\S+[ \t]+(?:(?!" + ENVOLTURAS + r"\b)[A-Za-z_]\w*[ \t]+)?|\d+(?:\.\d+)?[smhd]?[ \t]+){0,130}|" + POSICIONAL + r"[ \t]+(?:-\S+[ \t]+)*[\w./:-]+[ \t]+){0,130}(?:\w+=\S{0,1000}[ \t]+){0,130}(?:[\w.~-]*/)*")
-COMANDO = re.compile(PREFIJO + r"(?!ssh-add\s+-l\s*(?:$|[;|&\n\"'`)\]]|\\n))(?:ssh(?:-[a-z]+)*|sshpass|autossh|scp|sftp)(?![\w-])", re.M)
+PREFIJO = (r"(?:^|[;|&(`\"'\[,{}=$!)]|\\[ntr]|\s-e\s)[ \t]*" + REDIR + r"(?:(?:[\w.~-]*/){0,20}" + ENVOLTURAS + r"[ \t]+(?:-\S+[ \t]+(?:(?!" + ENVOLTURAS + r"\b)[A-Za-z_]\w*[ \t]+)?|\d+(?:\.\d+)?[smhd]?[ \t]+){0,130}|" + POSICIONAL + r"[ \t]+(?:-\S+[ \t]+)*[\w./:-]+[ \t]+){0,130}(?:\w+=\S{0,1000}[ \t]+){0,130}(?:[\w.~-]*/)*")
+COMANDO = re.compile(PREFIJO + r"(?!ssh-add\s+-l\s*(?:$|[;|&\n\"'`)\]]|\\n))(?:ssh(?:-[a-z]+)*|sshpass|autossh|scp|sftp)(?![\w-])(?!:(?![/\w]))", re.M)      # «ssh:» como clave de un objeto no es un comando
 # 24-nov-2026: rm cuenta solo COMO COMANDO (mismo prefijo que ssh, envolturas incluidas); «as rm», «rm.estado(...)» o un «rm» dentro de un grep ya no bloquean.
 # 25-nov (code review): cuenta todo rm que no sea la cola de «--rm» u otra palabra, tras cualquier envoltorio (uv run, npx, docker exec); «)» y el acento grave también lo cierran ($(which rm) -r x)
 RM_ARGS = re.compile(r"(?<![\w-])rm(?![\w.])[\s,\[)`]+([^;&|\n]*)", re.M)
@@ -41,6 +41,159 @@ CADENA_LARGA = re.compile(r"(?:(?<![^ \t])(?:" + ENVOLTURAS + r"|-(?![\d.]+,)[^ 
 CADENA_CON_ARGUMENTOS = re.compile(r"(?:(?<![^ \t])(?:" + ENVOLTURAS + r"|\d+(?:\.\d+)?[smhd]?|-(?![\d.]+,)[^ \t\n]*(?:[ \t]+(?!(?:" + ENVOLTURAS + r")(?![\w-]))[A-Za-z_]\w*(?![^ \t]))?|\w+=[^ \t\n]*|\d*[<>]+[&\w./-]*)[ \t]+){121}")      # cuenta además los números y el argumento de cada opción; solo bloquea si el código nombra ssh, scp, sftp o rm
 NOMBRES = re.compile(r"\.ssh|ssh|scp|sftp")
 FORMA = re.compile(r"ssh://|ssh\s+(?:-[a-z]|[\w.-]+@|\d+\.\d+\.)")      # ssh con opción, usuario@host, IP o URL: en cualquier posición (caffeinate ssh h, git push ssh://...)
+HOST_CON_OPCION = (r"\bssh[ \t]+[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}(?![\w.-])", r"(?<![\w-])-[lo](?![a-z-])")      # «ssh host.dominio ... -l u», tras cualquier envoltorio
+REPO_REMOTO = re.compile(r"\bgit(?:[ \t]+-c[ \t]+\S+)?[ \t,]+(?:(?:clone|push|pull|fetch|ls-remote)(?:[ \t,]+-\S+)*|remote[ \t,]+(?:add|set-url)(?:[ \t,]+-\S+)*[ \t,]+[\w.-]+)[ \t,]+[\w.-]{2,}:(?!//)")      # host:ruta sin usuario; un refspec (HEAD:main) va después del remoto
+
+# 26-nov-2026, bloqueos indebidos. Dos órdenes de lectura exactas (las pide CLAUDE.md), solo dentro de $`...` (o en un registro que nadie usa).
+LECTURAS = r"(?:ssh-add -l|ssh-add --apple-use-keychain -q ~/\.ssh/id_ed25519|git config (?:--get )?core\.hooksPath)"
+EJEMPLO = re.compile(r"""(?<![\w-])platform\.env\.example(?=[\s"');|&]|\Z)""")
+RECORTA_EJEMPLO = re.compile(r"\b(?:sed|cut|tr|awk|xargs|rev|basename)\b|%")
+_AVISO = r"(?:--no-verify|escritura en ~/\.ssh|ssh, scp o sftp|rm -rf fuera del repo|platform\.env|montaje de / o de la carpeta personal en docker|gh pr merge|gh pr review|gh auth)"
+AVISOS = re.compile(r"""(["'])""" + _AVISO + r"(?:, " + _AVISO + r""")+\1""")      # una lista de dos o más razones de este hook, copiada como dato
+REGISTRO = re.compile(r"\bconst[ \t]+(\w+)[ \t]*=[ \t]*\[\s{0,20}\{")
+RECORTE = re.compile(r"\.(?:slice|substr\w*|substring|split|replace\w*|match\w*|exec|at|charAt)\(|\[\s*-?\d*\s*:")
+# la salida de una búsqueda que puede acabar ejecutándose
+SALIDA_EJECUTADA = re.compile(r"\|[ \t]*(?:\S*/)?(?:(?:ba|z|da|k)?sh|xargs|eval|source|python3?|node|perl|ruby)\b|\$`\s*\$\{|\beval\b|\$\(")
+# Órdenes que solo valen dentro de una plantilla $`...` (se ejecuta en el acto: ninguna variable la guarda para recortarla), en posición de comando y fuera de comillas y comentarios.
+POSICION = r"(?:\A|(?<=[;&|\n])(?<!\\[;&|\n]))([ \t]*)"
+FIN_ORDEN = r"(?=(?:[ \t]+[12]?>(?:&[12]|/dev/null))*[ \t]*(?:[;&|\n]|\Z))"
+RUTA = r"(?!-)(?![\w./-]*\.\.)(?:(?:/private)?/tmp/claude-[\w./-]+|[\w.][\w./-]*)"
+CITADO = r"""|\\.|'[^']*'|"(?:[^"\\]|\\.)*"|(?<![^ \t\n;&|])#[^\n]*"""      # comillas y comentarios de la shell se saltan enteros
+INOFENSIVAS = [(re.compile("(?:" + POSICION + a + ")" + CITADO), b) for a, b in (
+    (r"rm(?:[ \t]+-[fv]+)+(?:[ \t]+" + RUTA + r")+" + FIN_ORDEN, r"\1true"),      # archivos sueltos, sin recursión y escritos enteros
+    (r"docker(?:[ \t]+(?:network|container))?[ \t]+rm(?:[ \t]+(?:-f|--force))*(?:[ \t]+\w[\w.-]*)+" + FIN_ORDEN, r"\1true"),
+    (r"git[ \t]+rm(?:[ \t]+(?:-q|-f|--quiet|--cached))*(?:[ \t]+" + RUTA + r")+" + FIN_ORDEN, r"\1true"),
+    (r"(docker(?:[ \t]+compose|[ \t]+container)?[ \t]+run(?:[ \t]+-[itd]+)*[ \t]+)--rm(?![\w-])", r"\1\2--autoclean"),
+    (LECTURAS + FIN_ORDEN, r"\1true"),
+)]
+BUSCA = (re.compile("(?:" + POSICION + r"""((?:git[ \t]+)?[ef]?grep(?:[ \t]+-[nrEiclwhvPFq]+)*[ \t]+)(?:"[^"\\$`\n]*"|'[^'\n]*'))""" + CITADO), r'\1\2"x"')      # el patrón de una búsqueda; sin -o ni rg, que devuelven el texto pedido
+# Texto que solo es dato: el patrón de tools.Grep, el encargo de tools.Agent, lo que busca .includes() y lo que se escribe en un .md o .txt.
+DATO = r"""(?:"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\$]|\\.|\$(?!\{))*`)"""
+BUSQUEDA = re.compile(r"(\btools\.Grep\(\{\s{0,20}pattern\s{0,20}:\s{0,20}|\.includes\(\s{0,20})" + DATO + r"(?=\s*[,})])")
+AGENTE = re.compile(r"\btools\.Agent\(\{")
+CAMPO = re.compile(r"(\s*(\w+)\s*:\s*)(" + DATO + r")(?=\s*[,}])(\s*,)?")
+DOCUMENTO = re.compile(r"""(\b(?:write|edit)\(\s{0,20}(?:[\w$]{1,60}\s{0,5}\+\s{0,5})?(?:"[^"\n]{0,300}\.(?:md|txt)"|'[^'\n]{0,300}\.(?:md|txt)'|`[^`\n]{0,300}\.(?:md|txt)`))((?:\s{0,20},\s{0,20}""" + DATO + r"""){1,2})(?=\s{0,20}\))""")
+# Lo escrito en un documento solo es dato si TODO el resto del código está en estas dos listas cerradas: nada más puede copiarlo, moverlo, redirigirlo ni ejecutarlo.
+LLAMADAS = {"write", "edit", "tools.Skill", "Promise.all", "console.log"}
+METODOS = {"nothrow", "text", "timeout", "quiet"}
+ORDEN_SEGURA = re.compile(r"(?:TZ=[\w/]+[ \t]+)?(?:cd|tail|head|cut|wc|ls|df|uptime|date|grep|git[ \t]+(?:status|log|diff|add|commit|rev-parse)|docker[ \t]+ps|docker[ \t]+run(?![^\n]*(?:[ \t]-v|--volume|--mount|--priv))"
+                          r"|bash[ \t]+(?:ops/(?:mac-poda-docker|cierre-sin-pendiente|abierto-entre-sesiones-check|readme-nombres-check)\.sh|\.claude/skills/verify/verify\.sh)|python3[ \t]+ops/boveda_escribir\.py)(?![\w./-])")
+# lector mínimo de JavaScript: comentarios, textos, plantillas y expresiones regulares; una comilla suelta significa que no se entendió
+JS = re.compile(r"""//[^\n]*|/\*.*?(?:\*/|\Z)|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`|[(,=:\[!&|?{};][ \t]*/(?![/*])(?:[^/\\\n\[]|\\.|\[(?:[^\]\\\n]|\\.){0,100}\]){1,200}/|(["'`])""", re.S)
+
+
+def textos(codigo: str) -> list[tuple[int, int]]:
+    """Dónde empieza y termina cada comentario, texto o plantilla; lista vacía y None si no se puede asegurar (comilla suelta o plantilla anidada)."""
+    out = []
+    for m in JS.finditer(codigo):
+        if m.group(1) or (m.group(0)[0] == "`" and m.group(0).count("{") != m.group(0).count("}")):
+            return None
+        out.append(m.span())
+    return out
+
+
+def _cambiar_codigo(patron: re.Pattern, nuevo, codigo: str) -> str:
+    """patron.sub solo donde la coincidencia es código: nunca si empieza dentro de un texto, una plantilla o un comentario."""
+    spans = textos(codigo)
+    if spans is None:
+        return codigo
+    inicios = [a for a, _ in spans]
+
+    def uno(m: re.Match) -> str:
+        i = bisect_right(inicios, m.start()) - 1
+        dentro = i >= 0 and (inicios[i] < m.start() < spans[i][1])
+        return m.group(0) if dentro else m.expand(nuevo) if isinstance(nuevo, str) else nuevo(m)
+
+    return patron.sub(uno, codigo)
+
+
+def _plantilla(cuerpo: str, busca: bool, ejemplo: bool) -> str:
+    # una barra seguida de algo que JavaScript puede volver comilla, barra o salto cambia lo que ve la shell: no se exime nada
+    if "<<" in cuerpo or "$'" in cuerpo or re.search(r"\\(?![sSdDwWbB.|()\[\]{}^*+?/ -])|\(\)\s*\{|\b(?:alias|function)\b", cuerpo) or re.search(r'"[^"\n]*\$\([^")\n]*"', cuerpo):
+        return cuerpo
+    for patron, nuevo in INOFENSIVAS + ([BUSCA] if busca else []):
+        cuerpo = patron.sub(lambda x: x.expand(nuevo) if x.lastindex else x.group(0), cuerpo)
+    if not ejemplo:
+        return cuerpo
+    return "".join(t if RECORTA_EJEMPLO.search(t) else EJEMPLO.sub("ejemplo-de-entorno", t) for t in re.split(r"([;&\n])", cuerpo))      # por orden (la tubería incluida): nada que lo recorte
+
+
+def _plantillas(codigo: str) -> str:
+    busca, ejemplo = not SALIDA_EJECUTADA.search(codigo), not RECORTE.search(codigo)
+    partes, previo = [], 0
+    for a, b in textos(codigo) or []:
+        if codigo[a] == "`" and codigo[a - 1:a] == "$" and not re.match(r"[\w$]", codigo[a - 2:a - 1]):
+            partes.append(codigo[previo:a + 1] + _plantilla(codigo[a + 1:b - 1], busca, ejemplo))
+            previo = b - 1
+    return "".join(partes) + codigo[previo:]
+
+
+def _registros_sin_uso(codigo: str) -> str:
+    """const x = [{...}] que nada vuelve a nombrar: las órdenes de lectura y las listas de razones de este hook que guarde son solo dato."""
+    spans = textos(codigo) or []
+    for m in reversed(list(REGISTRO.finditer(codigo))[:20]):
+        if any(a < m.start() < b for a, b in spans) or len(re.findall(r"\b" + m.group(1) + r"\b", codigo)) != 1:
+            continue
+        fin = next((f.start() for f in re.compile(r"\}\s{0,20}\]").finditer(codigo, m.end()) if not any(a < f.start() < b for a, b in spans)), None)
+        if fin is not None:
+            dentro = AVISOS.sub('"x"', re.sub(r"(?<=[;&|] )" + LECTURAS + r"(?=[ \t]*(?:;|&&|\|\|))", "true", codigo[m.end():fin]))
+            codigo = codigo[:m.end()] + dentro + codigo[fin:]
+    return codigo
+
+
+def _campos_agente(codigo: str) -> str:
+    spans = textos(codigo)
+    if spans is None:
+        return codigo
+    partes, previo = [], 0
+    for m in AGENTE.finditer(codigo):
+        if any(a < m.start() < b for a, b in spans):
+            continue
+        i = m.end()
+        while i >= previo and (c := CAMPO.match(codigo, i)):
+            if c.group(2) in ("prompt", "description"):
+                partes.append(codigo[previo:c.start(3)] + '"x"')
+                previo = c.end(3)
+            i = c.end()
+    return "".join(partes) + codigo[previo:]
+
+
+def solo_lo_seguro(codigo: str) -> bool:
+    """El código (ya sin lo escrito en documentos) solo escribe, edita y corre órdenes de la lista cerrada en $`...`."""
+    spans = textos(codigo)
+    if spans is None or re.search(r"\b(?:write|edit|tools|Promise|console)\b[ \t]*=", codigo):
+        return False
+    resto, previo = [], 0
+    for a, b in spans:
+        resto.append(codigo[previo:a] + "S")
+        previo = b
+        if codigo[a] != "`":
+            continue
+        if codigo[a - 1:a] != "$":
+            if re.search(r"[\w.)\]]$", codigo[max(0, a - 1):a]):      # otra etiqueta de plantilla
+                return False
+            continue
+        cuerpo = codigo[a + 1:b - 1]
+        for nombre in re.findall(r"\$\{(\w+)\}", cuerpo):      # una variable armada aquí solo puede ser una ruta escrita entera
+            if any(not re.match(r"""(["'`])[\w./ ~-]*\1""", v) for v in re.findall(r"\b" + nombre + r"[ \t]*=[ \t]*([^;\n]+)", codigo)):
+                return False
+        cuerpo = re.sub(r"\$\{\w+\}", "V", cuerpo)
+        if re.search(r"\\|\$|`|--output", cuerpo):
+            return False
+        cuerpo = re.sub(r"2>(?:&1|/dev/null)", "", re.sub(r"'[^']*'|\"[^\"]*\"", "q", cuerpo))
+        if "<" in cuerpo or ">" in cuerpo or any(t.strip() and not ORDEN_SEGURA.match(t.strip()) for t in re.split(r"[;&|\n]", cuerpo)):
+            return False
+    fuera = "".join(resto) + codigo[previo:]
+    return all(n in LLAMADAS or ("." in n and n.rsplit(".", 1)[1] in METODOS) for n in re.findall(r"([\w$.\])]+)[ \t]*\(", fuera))
+
+
+def sin_datos(codigo: str) -> str:
+    """El código sin lo que no puede hacer daño: texto que solo es dato y las pocas órdenes inofensivas de arriba. Todo lo demás pasa por las mismas reglas."""
+    if not re.search(r"\btools(?:\.\w+)?\s*=(?!=)", codigo):
+        codigo = _campos_agente(_cambiar_codigo(BUSQUEDA, r'\1"x"', codigo))
+    if DOCUMENTO.search(codigo) and solo_lo_seguro(_cambiar_codigo(DOCUMENTO, lambda m: m.group(1) + ', "x"', codigo)):
+        codigo = _cambiar_codigo(DOCUMENTO, lambda m: m.group(1) + ', "x"', codigo)
+    return _plantillas(_registros_sin_uso(codigo))
 
 
 def pegados(codigo: str) -> bool:
@@ -66,7 +219,7 @@ def decodificado(codigo: str) -> str:
     """El código con \\xNN, \\uNNNN, octal, chr(N) y String.fromCharCode(N, ...) ya resueltos."""
     t = re.sub(r"(?i)(?:string\.fromcharcode|\bchr)\(\s*((?:0x[0-9a-f]+|\d+)(?:\s*,\s*(?:0x[0-9a-f]+|\d+))*)\s*\)",
                lambda m: '"' + "".join(_letra(x.strip(), 16 if x.strip().lower().startswith("0x") else 10) for x in m.group(1).split(",")) + '"', codigo)
-    return re.sub(r"\\+(?:x([0-9a-fA-F]{2})|u([0-9a-fA-F]{4})|u\{([0-9a-fA-F]{1,6})\}|([0-7]{3}))", lambda m: _letra(m.group(4), 8) if m.group(4) else _letra(m.group(1) or m.group(2) or m.group(3), 16), t)
+    return re.sub(r"(?<!\\)\\+(?:x([0-9a-fA-F]{2})|u([0-9a-fA-F]{4})|u\{([0-9a-fA-F]{1,6})\}|([0-7]{3}))", lambda m: _letra(m.group(4), 8) if m.group(4) else _letra(m.group(1) or m.group(2) or m.group(3), 16), t)
 
 
 def vistas(codigo: str) -> list[str]:
@@ -144,20 +297,25 @@ def lista_rm_dinamica(vs: list[str]) -> bool:
     return False
 
 
+PEGADO = re.compile(r"(?:(?<![a-z0-9])|(?<=\\[ntr]))r[^a-z0-9]*m[^a-z0-9]*(?:r[^a-z0-9]*f|f[^a-z0-9]*r)(?![a-z])")      # «rm-rf/x» desde inicio de palabra: «platform from» no lo es
+
+
 def rm_fuera_del_repo(codigo: str) -> bool:
     visto = False
+    validos = set()      # (vista, posición) de cada rm recursivo ya revisado: no apaga la revisión de los demás
     vs = vistas(codigo)
     fuera = sale_del_repo(vs)
     concatena = CONCATENA.search(codigo) is not None
     if lista_rm_dinamica(vs):
         return True
-    for txt in vs:      # incluye los literales pegados (armado con variables)
+    for k, txt in enumerate(vs):      # incluye los literales pegados (armado con variables)
         for m in RM_ARGS.finditer(txt):      # también la forma de lista: ["rm", "-rf", "/x"]
             tokens = [t for t in re.split(r"[\s,\[\]{}()]+", m.group(1)) if t]
             flags = [t for t in tokens if t.startswith("-")]
             if not any((f.startswith("--") and len(f) > 2 and "--recursive".startswith(f)) or (not f.startswith("--") and "r" in f) for f in flags):
                 continue
             visto = True
+            validos.add((k, m.start()))
             destinos = [t for t in tokens if not t.startswith("-")]
             if not destinos or fuera or any(_destino_fuera(d) for d in destinos) or re.search(r"\{[^}\s]*,", m.group(1)):
                 return True
@@ -165,12 +323,12 @@ def rm_fuera_del_repo(codigo: str) -> bool:
                 return True
     # rm -rf armado de modo que ningún rm completo se ve (rm-rf/x pegado): se bloquea salvo que ya se haya visto un rm recursivo bien formado
     # 22-nov: «rm -f archivo» bien formado no es «rm -rf pegado», PERO solo si el código no arma texto (+, chr, fromCharCode, join, plantillas, format): ahí cualquier resto de «rm -f» puede ser una opción -r escondida y se bloquea de más (revisión Opus, 3 rondas); 22-nov noche: también \\x2d, \\u002d, octal, $(...), printf, base64 y decodificadores
-    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\{|`|\$\(|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|\\[0-7]{2,3}|printf|base64|atob|b64|unhexlify|fromhex|decode|bytes\(|\w\s*=\s*[\x27\x22]?-[a-z]*r|[\x27\x22]rm[\x27\x22]\s*,\s*\[?\s*[a-z_$]\w*\s*[,\]]|%[-#0 +\d.(]*[a-z]|\.format|\bf[\"']", codigo, re.I))
+    armado = bool(re.search(r"\+|chr\(|fromcharcode|join|\{|`|\$\(|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|\\[0-7]{2,3}|printf|base64|atob|b64|unhexlify|fromhex|decode|bytes\(|\w\s*=\s*[\x27\x22]?-[a-z]*r|[\x27\x22]rm[\x27\x22]\s*,\s*\[?\s*[a-z_$]\w*\s*[,\]]|%[-#0 +\d.(]*[a-z]|\.format|(?<![\w-])f[\"']", codigo, re.I))
     resto = re.search(r"-rm\b", codigo)      # un «--rm» que no se eximió y trae después una opción con r: recortado queda «rm -rf»
     armado = armado or (resto is not None and re.compile(r"(?<![\w-])-(?:[a-z]*r|-recur)").search(codigo, resto.end()) is not None)
-    if armado and not visto and any(not DESCARTADO.search(v[max(0, m.start() - 80):m.start()]) for v in vs for m in RM_SUELTO.finditer(v)):
+    if armado and any((k, m.start()) not in validos and not DESCARTADO.search(v[max(0, m.start() - 80):m.start()]) for k, v in enumerate(vs) for m in RM_SUELTO.finditer(v)):
         return True      # código que arma texto y menciona un rm sin recursión visible: puede esconder la opción -r (concatenación, chr, variables); se bloquea de más
-    return not visto and any(re.search(r"rm(rf|fr)", reducido(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=(?!rf?(?:[\s\\\x27\x22]|$))[^-\s\\]|\\+[\x27\x22])", " ", v))) for v in vs)
+    return not visto and any(PEGADO.search(v if armado else re.sub(r"\brm[ \t]+-[a-qs-z]+[ \t]+(?=(?!rf?(?:[\s\\\x27\x22]|$))[^-\s\\]|\\+[\x27\x22])", " ", v)) for v in vs)
 
 
 # 25-nov-2026: «--rm» como opción de docker run / container run / compose run no borra archivos. Nada se decide por posición ni por recorte: se exime solo si TODO el código son llamadas que corren un literal entero
@@ -237,7 +395,7 @@ def montaje_peligroso(codigo: str, vs: list[str]) -> bool:
     if not any("docker" in reducido(v) or "podman" in reducido(v) or "nerdctl" in reducido(v) for v in vs):
         return False
     bandera = r"(?<![\w-])(?:-[a-z]*v|--volume|--mount)"
-    if CONCATENA.search(PWD.sub(".", codigo)) and any(re.search(bandera, v) for v in vs):
+    if CONCATENA.search(PWD.sub(".", codigo)) and any(re.search(bandera, re.sub(r"\b(?:[ef]?grep|pgrep|rg)(?:[ \t]+-[a-uw-z]+)*[ \t]+-[a-z]*v", "grep", v)) for v in vs):
         return True
     if any(re.search(r"""["'`](?:-v|--volume|--mount)["'`]\s*,\s*[a-z_$*.]""", v) for v in vs):      # ["-v", variable]
         return True
@@ -248,7 +406,7 @@ def montaje_peligroso(codigo: str, vs: list[str]) -> bool:
             if not o or "$" in o or "`" in o:
                 return True
             n = os.path.normpath(os.path.expanduser(o)).lower()
-            if (n.startswith("/") and (HOME + "/").startswith(n.rstrip("/") + "/")) or n == ".." or n.startswith("../") or (salio and not n.startswith("/")):
+            if (n.startswith("/") and not (n + "/").startswith(REPO)) or n == ".." or n.startswith("../") or (salio and not n.startswith("/")):
                 return True
     return False
 
@@ -272,6 +430,8 @@ def borrado_por_otra_via(vs: list[str]) -> bool:
         for antes, sigue in juntos(v, r"\bgit\b", r"\bclean\b"):
             if re.search(r"(?<![\w-])-[a-z]*x", sigue) or (re.search(r"(?<![\w-])(?:-[a-z]*f|--force)", sigue) and (re.search(r"(?<!\w)-c\b|--work-tree|--git-dir", antes) or sale_del_repo(vs))):
                 return True
+        if any(juntos(v, r"(?<![\w.-])zip\b", r"(?<![\w-])(?:-[a-z]*m(?![\w-])|--move)")):      # zip -m borra los originales
+            return True
         if any(juntos(v, r"\brsync\b", r"--(?:del|remove-source)")):
             return True
     return False
@@ -282,11 +442,11 @@ def razones(codigo: str) -> list[str]:
         return ["más texto del que se puede analizar"]
     if CADENA_LARGA.search(codigo) or (re.search(r"\b(?:ssh|scp|sftp|rm)\b", codigo) and CADENA_CON_ARGUMENTOS.search(codigo)) or re.search(r"\w=\S{1001}", codigo) or any(len(re.findall(r"\w=", t)) > 12 for t in codigo.split()):
         return ["una cadena de envolturas o un valor demasiado largo"]
-    codigo = sin_opcion_docker(codigo)
+    codigo = sin_opcion_docker(sin_datos(codigo))
     out: list[str] = []
     vs = vistas(codigo)
     letras = [reducido(v) for v in vs]
-    if any(COMANDO.search(v) or FORMA.search(v) or IP_USUARIO.search(v) for v in vs) or pegados(codigo) or pegados(decodificado(codigo)) or any(DROPLET in r for r in letras):
+    if any(COMANDO.search(v) or FORMA.search(v) or IP_USUARIO.search(v) or REPO_REMOTO.search(v) or any(juntos(v, *HOST_CON_OPCION)) for v in vs) or pegados(codigo) or pegados(decodificado(codigo)) or any(DROPLET in r for r in letras):
         out.append("ssh, scp o sftp")
     for clave, etiqueta in PRIMERO.items():
         if any(clave in r for r in letras):
