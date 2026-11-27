@@ -76,7 +76,9 @@ INOFENSIVAS = [(re.compile("(?:" + POSICION + a + ")" + CITADO), b) for a, b in 
     (LECTURAS + FIN_ORDEN, r"\1true"),
 )]
 HOOKS_SH = (re.compile("(?:" + POSICION + r"git config (?:--get )?core\.hooksPath(?=[ \t]*(?:;|&&|\|\|)[ \t]*[a-z]))" + CITADO), r"\1true")
-BUSCA = (re.compile("(?:" + POSICION + r"""((?:git[ \t]+)?[ef]?grep(?:[ \t]+-[nrEiclwhvPFq]+)*[ \t]+)(?:"[^"\\$`\n]*"|'[^'\n]*'))""" + CITADO), r'\1\2"x"')      # el patrón de una búsqueda; sin -o ni rg, que devuelven el texto pedido
+BUSCA = (re.compile("(?:" + POSICION + r"""((?:git[ \t]+)?[ef]?grep(?:[ \t]+-[nrEiclwhvPFq]+)*[ \t]+)(?:"(?!-)[^"\\$`\n]*"|'(?!-)[^'\n]*'))""" + CITADO), r'\1\2"x"')      # el patrón de una búsqueda; sin -o ni rg, que devuelven el texto pedido. El citado nunca empieza con «-»: la shell le quita las comillas y sería una opción
+# 27-nov-2026: la búsqueda del patrón con rg sobre archivos escritos enteros; sin «-o», «-r», «--pre», «-f» ni comodines en las rutas
+BUSCA_RG = (re.compile("(?:" + POSICION + r"""(rg(?:[ \t]+-[niwFcl]+)*[ \t]+)(?:"(?!-)[^"\\$`\n]*"|'(?!-)[^'\n]*')(?=(?:[ \t]+""" + RUTA + r")+" + FIN_ORDEN + "))" + CITADO), r'\1\2"x"')
 # Texto que solo es dato: el patrón de tools.Grep, el encargo de tools.Agent, lo que busca .includes() y lo que se escribe en un .md o .txt.
 DATO = r"""(?:"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\$]|\\.|\$(?!\{))*`)"""
 BUSQUEDA = re.compile(r"(\btools\.Grep\(\{\s{0,20}pattern\s{0,20}:\s{0,20}|\.includes\(\s{0,20})" + DATO + r"(?=\s*[,})])")
@@ -180,6 +182,94 @@ def _pesos_propio(codigo: str, spans: list) -> bool:
     return bool("\\u" in fuera or PESOS_PROPIO.search(fuera) or re.search(r"""(["'`])\$\1""", codigo))
 
 
+# 27-nov-2026, bloqueo estructural (se acabó perseguir variantes de «$»): se mira el código tal como lo lee JavaScript, interpolaciones de las plantillas incluidas, y todo lo que puede redefinir o sombrear «$» se rechaza.
+FICHA = re.compile(r"""(?P<hueco>[\s\ufeff]+|//[^\n\r\u2028\u2029]*|/\*(?s:.*?)\*/)|(?P<texto>"(?:[^"\\\n\r]|\\(?s:.))*"|'(?:[^'\\\n\r]|\\(?s:.))*')|(?P<num>\.?\d(?:[\w.]|(?<=[eE])[+-])*)|(?P<id>(?:[^\W\d]|\$)(?:\w|\$)*)|(?P<op>\+\+|--|<!--|/\*|["']|(?s:.))""")
+REGEX_JS = re.compile(r"/(?![/*])(?:[^/\\\n\r\[]|\\.|\[(?:[^\]\\\n\r]|\\.)*\])+/")
+PLANTILLA_JS = re.compile(r"(?:[^`\\$]|\\(?s:.)|\$(?!\{))*(`|\$\{)")
+ANTES_DE_REGEX = {"return", "typeof", "instanceof", "in", "new", "delete", "void", "throw", "case", "do", "else"}
+GLOBALES = {"globalThis", "global", "self", "window", "this"}
+PROHIBIDOS = {"Reflect", "eval", "Function"}
+
+
+def fichas(codigo: str) -> list[str] | None:
+    """Las piezas de código (textos y expresiones regulares quedan como «"»); None si no se puede leer con seguridad."""
+    out: list[str] = []
+    llaves: list[int] = []      # una cuenta por cada «${» abierto
+    i, plantilla = 0, False
+    while i < len(codigo):
+        if plantilla:
+            m = PLANTILLA_JS.match(codigo, i)
+            if not m:
+                return None
+            i, plantilla = m.end(), False
+            if m.group(1) == "${":
+                llaves.append(0)
+                out.append("(")
+            else:
+                out.append('"')
+            continue
+        c = codigo[i]
+        if c == "`":
+            out.append("`")
+            i, plantilla = i + 1, True
+            continue
+        previa = out[-1] if out else ""
+        if c == "/" and codigo[i + 1:i + 2] not in ("/", "*"):
+            propiedad = len(out) > 1 and out[-2] == "."
+            # tras «)», «}», «of», «yield» o «await» no se sabe si divide o abre una expresión: si como expresión escondería comillas o comentarios, no se lee
+            dudoso = previa in (")", "}") or (previa in ("of", "yield", "await") and not propiedad)
+            divide = previa in ('"', "]", "++", "--") or (previa[:1].isalnum() or previa[:1] in "_$") and (propiedad or previa not in ANTES_DE_REGEX)
+            m = REGEX_JS.match(codigo, i)
+            if dudoso:
+                if m and re.search(r"""["'`]|//|/\*""", m.group(0)[1:-1]):
+                    return None
+            elif not divide:
+                if not m:
+                    return None
+                out.append('"')
+                i = m.end()
+                continue
+        m = FICHA.match(codigo, i)
+        i = m.end()
+        if m.lastgroup == "hueco":
+            continue
+        t = m.group(0)
+        if t in ('"', "'", "/*", "<!--"):
+            return None
+        if llaves and t == "{":
+            llaves[-1] += 1
+        elif llaves and t == "}":
+            if not llaves[-1]:
+                llaves.pop()
+                plantilla = True
+                out.append(")")
+                continue
+            llaves[-1] -= 1
+        out.append('"' if m.lastgroup in ("texto", "num") else t)
+    return None if plantilla or llaves else out
+
+
+def redefine_pesos(codigo: str) -> bool:
+    """«$» solo vale como etiqueta ($`...`), como «await $(c)» o como método de otro objeto (page.$(x)); los objetos globales y «this», solo con «.nombre» fijo; «with», «eval», «Function», «Reflect» y los nombres con escape, nunca."""
+    f = fichas(codigo)
+    if f is None or any(a == "\\" and b[:1] == "u" for a, b in zip(f, f[1:])):      # un nombre escrito con escape; cualquier otra barra suelta no es JavaScript válido
+        return True
+    f = ["", ""] + f + ["", "", ""]
+    for i in range(2, len(f) - 3):
+        t, antes, sigue = f[i], f[i - 1], f[i + 1]
+        if t == "$":
+            if not (sigue == "`" or (sigue == "(" and (antes == "." or (antes == "await" and f[i + 2].isidentifier() and f[i + 3] == ")")))):
+                return True
+            continue
+        if antes == "." or (sigue == ":" and antes in ("{", ",")):
+            continue
+        if (t == "with" and sigue == "(") or t in PROHIBIDOS:
+            return True
+        if t in GLOBALES and not (sigue == "." and f[i + 2].isidentifier() and f[i + 2] not in GLOBALES | PROHIBIDOS):
+            return True
+    return False
+
+
 def _plantillas(codigo: str) -> str:
     spans = textos(codigo) or []
     if _pesos_propio(codigo, spans):
@@ -193,7 +283,7 @@ def _plantillas(codigo: str) -> str:
             continue
         cuerpo = codigo[a + 1:b - 1]
         if codigo[a - 1:a] == "$" and not re.match(r"[\w$]", codigo[a - 2:a - 1]):
-            nuevo = _plantilla(cuerpo, INOFENSIVAS + ([BUSCA] if busca else []), ejemplo)
+            nuevo = _plantilla(cuerpo, INOFENSIVAS + ([BUSCA, BUSCA_RG] if busca else []), ejemplo)
         elif sh and "$" not in cuerpo and re.search(r"(?<![\w$.])sh\Z", codigo[max(0, a - 3):a]):
             nuevo = _plantilla(cuerpo, [HOOKS_SH], False)
         else:
@@ -290,6 +380,7 @@ def pegados(codigo: str) -> bool:
     return any((i := bisect_right(orden, m.start())) < len(orden) and orden[i] < m.end() for m in NOMBRES.finditer("".join(trozos)))
 
 
+REDEFINE = "una forma de redefinir «$» (with, globalThis, self, window, this, Reflect, eval, asignar o declarar «$», o código que no se puede leer)"
 PRIMERO = {"noverify": "--no-verify", "ghprreview": "gh pr review", "ghprmerge": "gh pr merge", "ghauth": "gh auth"}
 
 
@@ -545,8 +636,8 @@ def razones(codigo: str) -> list[str]:
         return ["más texto del que se puede analizar"]
     if CADENA_LARGA.search(codigo) or (re.search(r"\b(?:ssh|scp|sftp|rm)\b", codigo) and CADENA_CON_ARGUMENTOS.search(codigo)) or re.search(r"\w=\S{1001}", codigo) or any(len(re.findall(r"\w=", t)) > 12 for t in codigo.split()):
         return ["una cadena de envolturas o un valor demasiado largo"]
+    out: list[str] = [REDEFINE] if redefine_pesos(codigo) else []      # sobre el código original, antes de cualquier exención
     codigo = sin_opcion_docker(sin_datos(codigo))
-    out: list[str] = []
     vs = vistas(codigo)
     letras = [reducido(v) for v in vs]
     if any(COMANDO.search(v) or FORMA.search(v) or IP_USUARIO.search(v) or REPO_REMOTO.search(v) or any(juntos(v, *HOST_CON_OPCION)) for v in vs) or pegados(codigo) or pegados(decodificado(codigo)) or any(DROPLET in r for r in letras):
