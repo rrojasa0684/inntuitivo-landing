@@ -826,3 +826,90 @@ def test_26nov_entradas_que_colgaban_las_reglas_nuevas(codigo):
     t = time.time()
     _correr(codigo)
     assert time.time() - t < 5
+
+
+# 27-nov-2026: las cuatro filas del lote del 26-nov, con su entrada exacta.
+_SH = "const sh=async c=>(await $(c).nothrow()).output;\n"
+_LECTURA = "git status --short && git config core.hooksPath && git log --oneline -3"
+LOTE_27NOV_PASA = [
+    "({status: await sh`" + _LECTURA + "`})",
+    _SH + "({date: await sh`date`,\nstatus: await sh`cd /x && " + _LECTURA + "`,\nssh: await sh`ssh-add -l`,\n})",      # la sentencia real, con su ayudante
+    "const a = x.slice(1); await $`git grep -n firecrawl -- .env.example platform.env.example`",
+    "await edit(f, 'docker compose run --rm app-ejemplo python -m app.cli x', 'y'); await $`git diff --stat`",
+    "await $`cat docs/*.md; ls *.py app/*.{py,sh} | head`",
+    "const r = /[^/]*$/.exec(p); await $`find . -name \"*.sh\" | head`",
+    "const P = '/x'; await $`cd ${P} && git grep -n firecrawl -- platform.env.example | head`",
+]
+_RM, _ENV, _NV = "rm -rf fuera del repo", "platform.env", "--no-verify"
+LOTE_27NOV_BLOQUEA = [(f"await $`{o}`", _ENV) for o in (
+    "cat platform.en?", "cat platform.e*", "cat platform.[e]nv", "cat ?latform.env", "cat platform.{e,x}nv", "cat platform.{d..f}nv", "cat [p][l][a][t][f][o][r][m].env", "cat pl*", "cat p*", "cat *v",
+    "cat /srv/outreach-engine/plat*", "cat platform.$EXT", "cat platform.(e|x)nv", "p=platform; cat $p.env", "cat ${x}form.env", "find . -name 'plat*env' | xargs cat", "cat $(ls pla*)",
+    "cat $(ls platform.env.example | head -c 12)", "echo cat platform.env.example | head -c 16 | sh", "ls platform.env.example > f; cat < f", "ls platform.env.example | head -c 12 | while read f; do cat $f; done",
+)] + [
+    ("const t = await $`ls platform.env.example`.text(); await $`cat ${t.slice (0, 12)}`", _ENV),
+    ('const t = await $`ls platform.env.example`.text(); await $`cat ${t["slice"](0, 12)}`', _ENV),
+    ("const [t] = [(await $`ls platform.env.example`.text()).slice (0, 12)]; await $`cat ${t}`", _ENV),
+    ("let t = 'a'; [t] = [(await $`ls platform.env.example`.text()).slice (0, 12)]; await $`cat ${t}`", _ENV),
+    ("const t = await $`ls platform.env.example`.text(); await bash(t.slice (0, 12))", _ENV),
+    (_SH + "await sh`git config core.hooksPath /dev/null`", _NV),
+    ("await sh`git config core.hooksPath /dev/null && git log`", _NV),
+    ("await sh`git config core.hooksPath`", _NV),      # nada detrás: un ayudante ajeno podría agregarle un valor
+    ("const sh = c => $`${c[0]} /dev/null`; await sh`git config core.hooksPath && git log`", _NV),
+    ("const sh=async c=>(await $(c).nothrow()).output; sh = otro; await sh`git config core.hooksPath && git log`", _NV),
+    ("function sh(c) { return $(c) } await sh`git config core.hooksPath && git log`", _NV),
+    ("const t = await $`ls platform.env.example`.text(); await write('a', t.slice (0, 12)); await $`xargs cat < a`", _ENV),
+    ("const t = await $`ls platform.env.example`.text(); await t.slice (0, 12).split(' ').map(bash)", _ENV),
+    ("const t = await $`ls platform.env.example`.text(); await bash\n(t.slice (0, 12))", _ENV),
+    ("const t = await $`ls platform.env.example`.text(); await bash/**/(t.slice (0, 12))", _ENV),
+    ("write('a.md', 'rm -rf ~/x'); await bash\n('cp a.md ops/x.sh')", _RM),
+    # revisión de Opus, ronda 1 (27-nov)
+    ('{ const $ = c => bash(c[0] + " /dev/null"); await $`git config core.hooksPath` }', _NV),
+    ('{ const $ = c => bash(c[0].replace("-f x", "-rf ~")); await $`rm -f x` }', _RM),
+    ('(($) => $`rm -f x`)(c => bash(c[0].replace("-f x", "-rf ~")))', _RM),
+    ('function $(c) { return bash(c[0] + " /dev/null") } await $`git config core.hooksPath`', _NV),
+    ('globalThis["$"] = otro; await $`git config core.hooksPath`', _NV),
+    ('$.prefix = otro; await $`rm -f x`', _RM),
+    # revisión de Opus, ronda 2 (27-nov): «$» redefinido como método, getter o dentro de with
+    ('Object.assign(globalThis, { $(c) { return bash(c[0] + " /dev/null") } }); await $`git config core.hooksPath`', _NV),
+    ('Object.assign(globalThis, { $ (c, d = f()) { return bash(c[0].replace("-f x", "-rf ~")) } }); await $`rm -f x`', _RM),
+    ('Object.defineProperties(globalThis, Object.getOwnPropertyDescriptors({ get $() { return otro } })); await $`rm -f x`', _RM),
+    ('with ({ $(c) { return bash(c[0] + " /dev/null") } }) { await $`git config core.hooksPath` }', _NV),
+    ('globalThis.sh = c => bash(c[0].split(" &&")[0] + " /dev/null"); await sh`git config core.hooksPath && git log`', _NV),
+    ('globalThis["sh"] = otro; await sh`git config core.hooksPath && git log`', _NV),
+    ('await write("a.md", "rm -rf ~"); await $ `bash a.md`', _RM),
+    ('await write("a.md", "rm -rf ~"); await $\n`bash a.md`', _RM),
+    ('await write("a.md", "rm -rf ~"); await $/**/`bash a.md`', _RM),
+    ('await write("a.md", "rm -rf ~"); await bash\n`bash a.md`', _RM),
+    ("await $`ls platform.env.example | head -c 12 | tar -cf - -T -`", _ENV),
+    ("await $`ls platform.env.example | head -n 1 | cpio -o`", _ENV),
+    ("await sh`rm -f a; rm -rf ~/x; git config core.hooksPath && ls`", _RM),
+    ("await edit(f, 'docker run --rm -f -r /', 'y'); await $`git diff --stat`", _RM),
+    ("await edit(f, 'docker run --rm img -rf /h', 'y'); await $`bash ${f}`", _RM),
+    ("await edit(f, 'docker run --rm -f -r /', 'y'); const s = await read(f); await $`${s.slice (13)}`", _RM),
+    ("const s = 'docker run --rm -f -r /'; await edit(f, s, 'y'); await bash(s.slice (13))", _RM),
+    ("await edit(f, 'docker run --rm img', 'y'); await $`cut -c14- f | sh`", _RM),
+    ("await $`rm -f ${variable}/archivo`", _RM),
+]
+
+
+@pytest.mark.parametrize("codigo", LOTE_27NOV_PASA)
+def test_27nov_lo_legitimo_del_lote_pasa(codigo):
+    r = _correr(codigo)
+    assert r.returncode == 0, (codigo, r.stderr)
+
+
+@pytest.mark.parametrize("codigo,razon", LOTE_27NOV_BLOQUEA)
+def test_27nov_el_lote_no_abre_nada(codigo, razon):
+    r = _correr(codigo)
+    assert r.returncode == 2 and razon in r.stderr, (codigo, r.returncode, r.stderr)
+
+
+@pytest.mark.parametrize("codigo", ["cat " + "[" * 39000, "cat " + "{" * 39000, "cat " + "{a," * 13000, "cat platform.e" + "*?" * 15000, "cat " + "p* " * 13000, "$`ls platform.env.example`;" + "a(" * 15000,
+                                    "$`ls platform.env.example ${a}`;" + "a='" * 12000, "const sh=async c=>(await $(c)" * 1300, "await edit(f," * 3000, "$`x`;" + "edit(f,'a'," * 3500, "cat $" + "a" * 39000, "cat " + "$a" * 19000, "cat ${a}" + "\"" * 39000,
+                                    "'\"\"' " * 8000 + "".join(f"const q{chr(97 + i)} = [{{" for i in range(20)) + "'}]' " * 1500, "''" * 9000 + "tools.Agent({" * 1600,
+                                    '""' * 10000 + "".join(f"const q{chr(97 + i)} = [{{" for i in range(20)) + '"}]"' * 3800 + '; await bash("rm -rf ~")', "$`x`" + " " * 20000 + "`x`" * 6000])
+def test_27nov_las_reglas_nuevas_no_agotan_el_tiempo(codigo):
+    import time
+    t = time.time()
+    _correr(codigo)
+    assert time.time() - t < 5
