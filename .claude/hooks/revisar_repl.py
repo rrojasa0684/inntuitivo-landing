@@ -42,7 +42,7 @@ CADENA_CON_ARGUMENTOS = re.compile(r"(?:(?<![^ \t])(?:" + ENVOLTURAS + r"|\d+(?:
 NOMBRES = re.compile(r"\.ssh|ssh|scp|sftp")
 FORMA = re.compile(r"ssh://|ssh\s+(?:-[a-z]|[\w.-]+@|\d+\.\d+\.)")      # ssh con opción, usuario@host, IP o URL: en cualquier posición (caffeinate ssh h, git push ssh://...)
 HOST_CON_OPCION = (r"\bssh[ \t]+[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}(?![\w.-])", r"(?<![\w-])-[lo](?![a-z-])")      # «ssh host.dominio ... -l u», tras cualquier envoltorio
-REPO_REMOTO = re.compile(r"\bgit(?:[ \t]+-c[ \t]+\S+)?[ \t,]+(?:(?:clone|push|pull|fetch|ls-remote)(?:[ \t,]+-\S+)*|remote[ \t,]+(?:add|set-url)(?:[ \t,]+-\S+)*[ \t,]+[\w.-]+)[ \t,]+[\w.-]{2,}:(?!//)")      # host:ruta sin usuario; un refspec (HEAD:main) va después del remoto
+REPO_REMOTO = re.compile(r"\bgit(?:[ \t]+-c[ \t]+\S+)?[ \t,]+(?:(?:clone|push|pull|fetch|ls-remote)(?:[ \t,]+-[^\s,]+)*|remote[ \t,]+(?:add|set-url)(?:[ \t,]+-[^\s,]+)*[ \t,]+[\w.-]+)[ \t,]+[\w.-]{2,}:(?!//)")      # host:ruta sin usuario; un refspec (HEAD:main) va después del remoto
 
 # 26-nov-2026, bloqueos indebidos. Dos órdenes de lectura exactas (las pide CLAUDE.md), solo dentro de $`...` (o en un registro que nadie usa).
 LECTURAS = r"(?:ssh-add -l|ssh-add --apple-use-keychain -q ~/\.ssh/id_ed25519|git config (?:--get )?core\.hooksPath)"
@@ -53,7 +53,7 @@ AVISOS = re.compile(r"""(["'])""" + _AVISO + r"(?:, " + _AVISO + r""")+\1""")   
 REGISTRO = re.compile(r"\bconst[ \t]+(\w+)[ \t]*=[ \t]*\[\s{0,20}\{")
 RECORTE = re.compile(r"\.(?:slice|substr\w*|substring|split|replace\w*|match\w*|exec|at|charAt)\(|\[\s*-?\d*\s*:")
 # la salida de una búsqueda que puede acabar ejecutándose
-SALIDA_EJECUTADA = re.compile(r"\|[ \t]*(?:\S*/)?(?:(?:ba|z|da|k)?sh|xargs|eval|source|python3?|node|perl|ruby)\b|\$`\s*\$\{|\beval\b|\$\(")
+SALIDA_EJECUTADA = re.compile(r"\|[ \t]*(?:[^\s|]{0,200}/)?(?:(?:ba|z|da|k)?sh|xargs|eval|source|python3?|node|perl|ruby)\b|\$`\s*\$\{|\beval\b|\$\(")
 # Órdenes que solo valen dentro de una plantilla $`...` (se ejecuta en el acto: ninguna variable la guarda para recortarla), en posición de comando y fuera de comillas y comentarios.
 POSICION = r"(?:\A|(?<=[;&|\n])(?<!\\[;&|\n]))([ \t]*)"
 FIN_ORDEN = r"(?=(?:[ \t]+[12]?>(?:&[12]|/dev/null))*[ \t]*(?:[;&|\n]|\Z))"
@@ -163,7 +163,7 @@ def solo_lo_seguro(codigo: str) -> bool:
     spans = textos(codigo)
     if spans is None or re.search(r"\b(?:write|edit|tools|Promise|console)\b[ \t]*=", codigo):
         return False
-    resto, previo = [], 0
+    resto, previo, nombres = [], 0, set()
     for a, b in spans:
         resto.append(codigo[previo:a] + "S")
         previo = b
@@ -174,17 +174,17 @@ def solo_lo_seguro(codigo: str) -> bool:
                 return False
             continue
         cuerpo = codigo[a + 1:b - 1]
-        for nombre in re.findall(r"\$\{(\w+)\}", cuerpo):      # una variable armada aquí solo puede ser una ruta escrita entera
-            if any(not re.match(r"""(["'`])[\w./ ~-]*\1""", v) for v in re.findall(r"\b" + nombre + r"[ \t]*=[ \t]*([^;\n]+)", codigo)):
-                return False
+        nombres.update(re.findall(r"\$\{(\w+)\}", cuerpo))
         cuerpo = re.sub(r"\$\{\w+\}", "V", cuerpo)
         if re.search(r"\\|\$|`|--output", cuerpo):
             return False
         cuerpo = re.sub(r"2>(?:&1|/dev/null)", "", re.sub(r"'[^']*'|\"[^\"]*\"", "q", cuerpo))
         if "<" in cuerpo or ">" in cuerpo or any(t.strip() and not ORDEN_SEGURA.match(t.strip()) for t in re.split(r"[;&|\n]", cuerpo)):
             return False
+    if len(nombres) > 10 or any(not re.match(r"""(["'`])[\w./ ~-]*\1""", v) for n in nombres for v in re.findall(r"\b" + n + r"[ \t]*=[ \t]*([^;\n]+)", codigo)):
+        return False      # una variable armada aquí solo puede ser una ruta escrita entera
     fuera = "".join(resto) + codigo[previo:]
-    return all(n in LLAMADAS or ("." in n and n.rsplit(".", 1)[1] in METODOS) for n in re.findall(r"([\w$.\])]+)[ \t]*\(", fuera))
+    return all(n in LLAMADAS or ("." in n and n.rsplit(".", 1)[1] in METODOS) for n in re.findall(r"(?<![\w$.\])])([\w$.\])]+)[ \t]*\(", fuera))
 
 
 def sin_datos(codigo: str) -> str:
