@@ -927,3 +927,60 @@ def test_27nov_function_seguido_de_muchos_espacios_no_agota_el_tiempo():
     t = time.time()
     _correr("function" + " " * 39900 + 'x; write("a.md","x")')
     assert time.time() - t < 5
+
+
+# 27-nov-2026, bloqueo estructural: redefinir o sombrear «$» (o llegar al objeto global con una clave calculada) se rechaza entero, sin perseguir variantes.
+PESOS_27NOV_BLOQUEA = [
+    'with ({"\\x24": f}) { await $`rm -f Users`; }',
+    'globalThis["\\x24"] = f; await $`rm -f Users` ',
+    'globalThis["$$".slice(1)] = f; await $`rm -f Users` ',
+    '`${$ = f}`; await $`rm -f Users` ',
+    "$.x += v", "$.a.b = v", "[$.prefix] = [v]",
+    "$ = f", "$ ??= f", "[$] = [f]", "({a: $} = o)", "for ($ of x) {}", "const $ = f", "let a = 1, $ = f", "function $(c) {}", "($) => 1", "async $ => 1", "catch ($) {}", "const g = $; g.x = 1",
+    "with (o) { await $`ls` }", "self[k] = f", "window?.[k]", "const g = globalThis; g[k] = f", "Object.assign(globalThis, o)", "globalThis.globalThis[k] = f", "globalThis.$ = f",
+    "global[k] = f", "this[k] = f", "Object.assign(this, o)", "Reflect.set(o, k, f)", "eval(c)", "new Function(c)()", "glob\\u0061lThis[k] = f", "\\u0024 = f",
+    "if (a) /'/.test(b); with (o) {} //'", "x = a.of /1; with(o){} /1", "<!--'\nwith (o) {}\n//'", "x = `a${ `b${ with(o){} }` }`", "x = 1.\nwith (o) {}", "// x with (o) {}",
+]
+PESOS_27NOV_PASA = [
+    "await $`ls`", "const r = await $`git status --short`.nothrow().text()", "await $ `ls`", 'const sh=async c=>(await $(c).nothrow()).output;\nawait sh`date`', "await page.$('a')",
+    'await $`grep -n "with|self|window|globalThis|this|eval" app/cli.py`', 'print("with self window globalThis this Reflect eval $ = 1")', "// with self $ = 1\nawait $`ls`", "/* with (o) $ = 1 */ await $`ls`",
+    "const b = a.with(0, 1); const c = x.self; const d = {window: 3, self: 2}", "await page.evaluate(() => window.innerWidth)", "const t = (a - b) / 1000 + 's'", "const r = /[^/]*$/.exec(p)",
+    "x = `total ${n} de ${ {a: 1}.a }`",
+    'const cmp = await $`rg -n "BOUNCER|env_file|platform.env" docker-compose.yml | head; rg -n "PYTEST_OBJETIVO" ops/test-linux.sh | head -3; docker ps --format \'{{.Names}}\' | head; uptime`.nothrow().text();\ncmp',
+]
+_BUSCA_RG = 'await $`%s`'
+RG_27NOV_BLOQUEA = [_BUSCA_RG % o for o in (
+    'rg --pre sh "platform.env" docker-compose.yml', 'rg -o "platform.env" docker-compose.yml', 'rg -r x "platform.env" docker-compose.yml', 'rg -n "x" platform.env', 'rg -n "platform.env" platform.env',
+    'rg -n "platform.env" plat*', 'rg -n "platform.env" ../otro', 'rg -n "platform.env"', 'rg -n "platform.env" docker-compose.yml | xargs cat', 'rg -n "platform.env" docker-compose.yml | sh',
+    'rg -f "platform.env" docker-compose.yml', 'cat "platform.env"',
+)]
+
+
+@pytest.mark.parametrize("codigo", PESOS_27NOV_BLOQUEA)
+def test_27nov_redefinir_pesos_se_bloquea(codigo):
+    r = _correr(codigo)
+    assert r.returncode == 2 and "redefinir" in r.stderr, (codigo, r.returncode, r.stderr)
+
+
+@pytest.mark.parametrize("codigo", PESOS_27NOV_PASA)
+def test_27nov_el_uso_normal_pasa(codigo):
+    r = _correr(codigo)
+    assert r.returncode == 0, (codigo, r.stderr)
+
+
+@pytest.mark.parametrize("codigo", RG_27NOV_BLOQUEA)
+def test_27nov_la_busqueda_con_rg_no_abre_nada(codigo):
+    r = _correr(codigo)
+    assert r.returncode == 2 and "platform.env" in r.stderr, (codigo, r.returncode, r.stderr)
+
+
+@pytest.mark.parametrize("codigo", ["$" * 39000, "`${" * 13000, "(/" * 19000, "/*" * 19000, "'" + "\\\\" * 19000, "with " * 7800, ") /x" * 9700])
+def test_27nov_el_lector_no_agota_el_tiempo(codigo):
+    assert _correr(codigo).returncode in (0, 2)
+
+
+# 27-nov, revisión de Opus (alta): un texto citado que empieza con «-» es una opción, no un patrón
+@pytest.mark.parametrize("orden", ['rg "--pre=ssh" x droplet', 'rg \'-uugplatform.env\' . .', 'git grep "--open-files-in-pager=ssh" x'])
+def test_27nov_una_opcion_citada_no_se_toma_como_patron(orden):
+    r = _correr("await $`" + orden + "`")
+    assert r.returncode == 2, (orden, r.stderr)
