@@ -57,7 +57,7 @@ CADENAS = {"slice", "substr", "substring", "split", "join", "trim"}      # ningu
 SALE = re.compile(r"\$|`|<|>|--output|(?<![\w-])-(?:O|exec|ok)|(?<![\w.-])(?:(?:ba|z|da|k)?sh|xargs|eval|source|exec|python3?|node|perl|ruby|parallel|awk|read)(?![\w.-])|(?:\A|[;&|\n])[ \t]*\.[ \t]")
 SIGUE_TUBO = re.compile(r"""[ \t]*(?:head(?:[ \t]+-n?[ \t]*\d+)?|wc(?:[ \t]+-[lwc])?|grep(?:[ \t]+-[nivEcwF]+)*[ \t]+(?:'[^']*'|"[^"]*"|[\w.]+))[ \t]*""")
 # «sh» como ayudante propio que solo envuelve a $: únicamente la lectura de los hooks, y con otra orden detrás (nada agregado al final la vuelve un cambio)
-PASO_SH = re.compile(r"(?<![\w$.])(?:const|let|var)[ \t]+sh[ \t]*=[ \t]*async[ \t]+(\w+)[ \t]*=>[ \t]*\(await[ \t]+\$\(\1\)(?:\.(?:nothrow|quiet)\(\))*\)(?:\.(?:output|stdout))?[ \t]*(?=[;\n]|\Z)")
+PASO_SH = re.compile(r"(?<![\w$.])(?:const|let|var)[ \t]+sh[ \t]*=[ \t]*async[ \t]+(\w+)[ \t]*=>[ \t]*\(await[ \t]+\$\(\1\)(?:\.(?:nothrow|quiet)\(\))*\)(?:\.(?:output|stdout))?(?=\s*(?:;|\Z))")      # termina en «;»: en la línea siguiente puede seguir la misma expresión
 # 27-nov-2026: comodines y expansiones que pueden resolver al archivo de entorno
 ENTORNO_ARMADO = re.compile(r"""platform\.[?*\[{($@+!]|\$(?:\{\w+\}["']{0,2}[a-z]*|\w+(?:["']{1,2}[a-z]*)?)\.env(?![\w.])""")
 LEE = re.compile(r"\b(?:cat|tac|head|tail|less|more|nl|od|xxd|base64|strings|sed|awk|cut|sort|cp|mv|dd|diff|source|grep|rg)\b")
@@ -133,11 +133,12 @@ def _plantilla(cuerpo: str, patrones: list, ejemplo: bool) -> str:
                    for t in re.split(r"((?<!>)&|[;\n])", cuerpo))
 
 
-def _fuera_de_textos(codigo: str, spans: list) -> str:
-    """El código con cada texto, plantilla o expresión reducido a su primer carácter, y cada comentario a «S» (así «bash/**/(x)» sigue siendo una llamada desconocida)."""
+def _fuera_de_textos(codigo: str, spans: list, comentario: str = "S") -> str:
+    """El código con cada texto, plantilla o expresión reducido a su primer carácter, y cada comentario a «S» (así «bash/**/(x)» sigue siendo una llamada desconocida)
+    o a lo que se pida: para buscar «$» y «sh» redefinidos va un espacio, porque la «S» pegada formaba otro nombre."""
     partes, previo = [], 0
     for a, b in spans:
-        partes.append(codigo[previo:a] + ("S" if codigo[a:a + 2] in ("//", "/*") else codigo[a]))
+        partes.append(codigo[previo:a] + (comentario if codigo[a:a + 2] in ("//", "/*") else codigo[a]))
         previo = b
     return "".join(partes) + codigo[previo:]
 
@@ -166,11 +167,17 @@ def _ejemplo_sin_salida(codigo: str) -> bool:
 
 # 27-nov (Opus): las exenciones dan por hecho que «$» es la shell. Fuera de los textos solo vale como etiqueta o seguido de «.»: cualquier otro «$» (asignación, parámetro, método, getter o llamada,
 # salvo el «$(c)» del ayudante sh) o un «$.x =» puede redefinirlo, y entonces no hay ninguna exención
-PESOS_PROPIO = re.compile(r"(?<![\w$])\$(?![\w$`.])|\bfunction\b\s*\*?\s*\$|(?<![\w$])\$\.[\w$]+\s*=(?!=)")
+PESOS_PROPIO = re.compile(r"(?<![\w$])\$(?![\w$`.])|\bfunction\b[\s*]*\$|(?<![\w$])\$\.[\w$]+\s*=(?!=)")
+
+
+def _sin_ayudante(codigo: str, spans: list) -> str:
+    return PASO_SH.sub("", _fuera_de_textos(codigo, spans, " "))
 
 
 def _pesos_propio(codigo: str, spans: list) -> bool:
-    return bool(PESOS_PROPIO.search(PASO_SH.sub("", _fuera_de_textos(codigo, spans))) or re.search(r"""(["'`])\$\1""", codigo))
+    # un nombre escrito con escape («\u0024», «s\u0068») fuera de los textos es el mismo nombre para JavaScript
+    fuera = _sin_ayudante(codigo, spans)
+    return bool("\\u" in fuera or PESOS_PROPIO.search(fuera) or re.search(r"""(["'`])\$\1""", codigo))
 
 
 def _plantillas(codigo: str) -> str:
@@ -179,7 +186,7 @@ def _plantillas(codigo: str) -> str:
         return codigo
     busca = not SALIDA_EJECUTADA.search(codigo)
     ejemplo = "platform.env.example" in codigo and _ejemplo_sin_salida(codigo)
-    sh = not (re.search(r"(?<![\w$])sh(?![\w$`])", PASO_SH.sub("", _fuera_de_textos(codigo, spans))) or re.search(r"""(["'`])sh\1""", codigo))      # tampoco «globalThis.sh» ni «["sh"]»
+    sh = not (re.search(r"(?<![\w$])sh(?![\w$`])", _sin_ayudante(codigo, spans)) or re.search(r"""(["'`])sh\1""", codigo))      # tampoco «globalThis.sh» ni «["sh"]»
     partes, previo = [], 0
     for a, b in spans:
         if codigo[a] != "`":

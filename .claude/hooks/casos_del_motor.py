@@ -889,6 +889,13 @@ LOTE_27NOV_BLOQUEA = [(f"await $`{o}`", _ENV) for o in (
     ("const s = 'docker run --rm -f -r /'; await edit(f, s, 'y'); await bash(s.slice (13))", _RM),
     ("await edit(f, 'docker run --rm img', 'y'); await $`cut -c14- f | sh`", _RM),
     ("await $`rm -f ${variable}/archivo`", _RM),
+    # revisión de Opus del último arreglo (27-nov): comentario pegado a «$» o «sh», nombre con escape Unicode y ayudante que sigue en la línea siguiente
+    ('{ const $/**/= (s) => bash(s[0].replace("-f ", "-rf /"));\n    await $`rm -f Users`; }', _RM),
+    ('const sh/**/= (s) => bash(s[0].replace(";", " /dev/null;"));\nawait sh`git config core.hooksPath; echo listo`;', _NV),
+    (r'{ const \u0024 = (s) => bash(s[0].replace("-f ", "-rf /")); await $`rm -f Users`; }', _RM),
+    (r'const s\u0068 = (s) => bash(s[0].replace(";", " /dev/null;")); await sh`git config core.hooksPath; echo listo`;', _NV),
+    (r'{ const \u{24} = f; await $`rm -f Users`; }', _RM),
+    ('const sh=async c=>(await $(c).nothrow()).output\n&& bash(c[0].split(" &&")[0] + " /dev/null");\nawait sh`git config core.hooksPath && git log`;', _NV),
 ]
 
 
@@ -912,4 +919,11 @@ def test_27nov_las_reglas_nuevas_no_agotan_el_tiempo(codigo):
     import time
     t = time.time()
     _correr(codigo)
+    assert time.time() - t < 5
+
+
+def test_27nov_function_seguido_de_muchos_espacios_no_agota_el_tiempo():
+    import time
+    t = time.time()
+    _correr("function" + " " * 39900 + 'x; write("a.md","x")')
     assert time.time() - t < 5
