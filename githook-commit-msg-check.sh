@@ -27,6 +27,20 @@ rechaza "ninguna sin causa" "feat: z
 
 Verificado: ninguna"
 rechaza "asunto que empieza con Merge pero no es un merge" "Merge de cosas varias"
+NINGUNA="feat: z
+
+Verificado: ninguna — porque no se corrió nada"
+rechaza "ninguna con un archivo de código" "$NINGUNA"
+mixto() { nuevo_doc; nuevo; }; prepara=mixto
+rechaza "ninguna con documento y código juntos" "$NINGUNA"
+rechaza "Ninguna con mayúscula y código" "feat: z
+
+Verificado:  Ninguna — porque no se corrió nada"
+en_docs() { n=$((n+1)); mkdir -p "$T/docs"; echo "$n" > "$T/docs/f$n.txt"; g add "docs/f$n.txt"; }; prepara=en_docs
+pasa    "ninguna con un archivo bajo docs/" "$NINGUNA"
+movido() { nuevo; g -c core.hooksPath=/dev/null commit -q -m base; mkdir -p "$T/docs"; g mv "f$n" "docs/m$n"; }; prepara=movido
+rechaza "ninguna al mover código a docs/" "$NINGUNA"
+prepara=nuevo
 # merge: los commits de preparación van sin hooks (core.hooksPath apagado solo para ellos)
 sg() { g -c core.hooksPath=/dev/null "$@"; }
 sg checkout -q -b rama; nuevo; sg commit -q -m base; sg checkout -q main; nuevo; sg commit -q -m otro
