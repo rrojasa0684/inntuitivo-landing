@@ -7,17 +7,21 @@ T="$(mktemp -d)"; trap 'find "$T" -depth -delete' EXIT; fallos=0
 g() { git -C "$T" -c user.name=t -c user.email=t@t.test "$@"; }
 git -C "$T" init -q -b main; mkdir "$T/.githooks"; cp "$HOOK" "$T/.githooks/commit-msg"; chmod +x "$T/.githooks/commit-msg"
 n=0; nuevo() { n=$((n+1)); echo "$n" > "$T/f$n"; g add "f$n"; }
+nuevo_doc() { n=$((n+1)); echo "$n" > "$T/d$n.md"; g add "d$n.md"; }
+prepara=nuevo
 g config core.hooksPath .githooks
-pasa()    { nuevo; if g commit -q -m "$2" >/dev/null 2>"$T/e"; then echo "OK   $1"; else echo "FALLA $1: se rechazó: $(head -c 150 "$T/e")"; fallos=$((fallos+1)); fi; }
-rechaza() { nuevo; if g commit -q -m "$2" >/dev/null 2>"$T/e"; then echo "FALLA $1: pasó y debía rechazarse"; fallos=$((fallos+1)); elif grep -q "COMMIT RECHAZADO" "$T/e"; then echo "OK   $1"; else echo "FALLA $1: falló pero no por el hook"; fallos=$((fallos+1)); fi; }
+pasa()    { $prepara; if g commit -q -m "$2" >/dev/null 2>"$T/e"; then echo "OK   $1"; else echo "FALLA $1: se rechazó: $(head -c 150 "$T/e")"; fallos=$((fallos+1)); fi; }
+rechaza() { $prepara; if g commit -q -m "$2" >/dev/null 2>"$T/e"; then echo "FALLA $1: pasó y debía rechazarse"; fallos=$((fallos+1)); elif grep -q "COMMIT RECHAZADO" "$T/e"; then echo "OK   $1"; else echo "FALLA $1: falló pero no por el hook"; fallos=$((fallos+1)); fi; g reset -q 2>/dev/null; }
 pasa    "con la línea Verificado" "feat: x
 
 Verificado: verify (12 tests dirigidos ok, 48 s)
 
 Co-Authored-By: a <a@a.test>"
+prepara=nuevo_doc
 pasa    "ninguna — porque ..." "docs: y
 
 Verificado: ninguna — porque solo cambia un documento"
+prepara=nuevo
 rechaza "sin la línea" "feat: z"
 rechaza "ninguna sin causa" "feat: z
 
