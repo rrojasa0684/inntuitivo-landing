@@ -41,8 +41,18 @@ pasa    "ninguna con un archivo bajo docs/" "$NINGUNA"
 movido() { nuevo; g -c core.hooksPath=/dev/null commit -q -m base; mkdir -p "$T/docs"; g mv "f$n" "docs/m$n"; }; prepara=movido
 rechaza "ninguna al mover código a docs/" "$NINGUNA"
 prepara=nuevo
-# merge: los commits de preparación van sin hooks (core.hooksPath apagado solo para ellos)
+rechaza "«ninguno» con código" "feat: z
+
+Verificado: ninguno — porque no se corrió nada"
+rechaza "NINGUNA en mayúsculas con código" "feat: z
+
+Verificado: NINGUNA — porque no se corrió nada"
+# merge y enmiendas: los commits de preparación van sin hooks (core.hooksPath apagado solo para ellos)
 sg() { g -c core.hooksPath=/dev/null "$@"; }
+nuevo; sg commit -q -m base-codigo
+if g commit -q --amend -m "$NINGUNA" >/dev/null 2>"$T/e"; then echo "FALLA enmienda con «ninguna» sobre un commit de código: pasó"; fallos=$((fallos+1)); elif grep -q "COMMIT RECHAZADO" "$T/e"; then echo "OK   enmienda con «ninguna» sobre un commit de código"; else echo "FALLA enmienda de código: falló pero no por el hook"; fallos=$((fallos+1)); fi
+nuevo_doc; sg commit -q -m base-documento
+if g commit -q --amend -m "$NINGUNA" >/dev/null 2>"$T/e"; then echo "OK   enmienda con «ninguna» sobre un commit de documentos"; else echo "FALLA enmienda de documentos: $(head -c 150 "$T/e")"; fallos=$((fallos+1)); fi
 sg checkout -q -b rama; nuevo; sg commit -q -m base; sg checkout -q main; nuevo; sg commit -q -m otro
 if g merge -q --no-ff rama >/dev/null 2>"$T/e"; then echo "OK   merge sin la línea (exento)"; else echo "FALLA merge: $(head -c 150 "$T/e")"; fallos=$((fallos+1)); fi
 [ "$fallos" -eq 0 ] && echo "GITHOOK_COMMIT_MSG_OK" || { echo "GITHOOK_COMMIT_MSG_FALLA ($fallos)"; exit 1; }

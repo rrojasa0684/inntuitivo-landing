@@ -6,11 +6,13 @@ cuerpo=$(grep -v '^#' "$1")
 t=$(printf '%s\n' "$cuerpo" | grep -E '^Verificado: ' | tail -n 1 | sed 's/^Verificado: *//')
 if [ ${#t} -ge 5 ]; then
     case "$t" in
-        [Nn]inguna*)
-            if printf '%s\n' "$t" | grep -qE '^ninguna [—–-]+ porque .{3,}'; then
+        [Nn][Ii][Nn][Gg][Uu][Nn]*)
+            if printf '%s\n' "$t" | grep -qiE '^ningun[oa] [—–-]+ porque .{3,}'; then
                 # 27-nov-2026: «ninguna» solo si todo el commit es de documentos (docs/ o .md). --no-renames: mover código a docs/ cuenta la ruta vieja.
-                # ponytail: en un --amend solo se mira lo agregado en este paso; git no le dice al hook que es un amend.
-                codigo=$(git -c core.quotePath=false diff --cached --name-only --no-renames | grep -v -E '^docs/|\.md$' || true)
+                # En un --amend cuenta el commit entero: se compara contra el padre del que se corrige (git no avisa al hook; se lee la orden del proceso padre, /proc en Linux y ps en la Mac).
+                base=""; padre=$( { tr '\0' ' ' < "/proc/$PPID/cmdline" || ps -o args= -p "$PPID"; } 2>/dev/null )
+                case " $padre " in *" --am"*) base=$(git rev-parse -q --verify 'HEAD^' || git hash-object -t tree /dev/null) ;; esac
+                codigo=$(git -c core.quotePath=false diff --cached --name-only --no-renames $base | grep -v -E '^docs/|\.md$' || true)
                 [ -z "$codigo" ] && exit 0
                 echo "COMMIT RECHAZADO: «Verificado: ninguna» solo vale si todo el commit es de documentos (docs/ o .md). Corre la comprobación y escribe lo que viste. No son documentos:" >&2
                 echo "$codigo" | sed 's/^/  /' >&2
