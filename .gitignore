@@ -2,8 +2,6 @@
 # 13-nov-2026 (Ricardo): la configuración de permisos del proyecto se versiona, para que la negación de «gh pr review» y de «gh api» sobre revisiones viaje con el repo.
 !.claude/settings.json
 !.claude/agents/
-# 20-nov-2026: el hook de Code Mode (REPL) se versiona: la landing queda con el mismo freno que el motor en main, no solo en la Mac de quien lo copió.
-!.claude/hooks/
 
 # ops/observer-threshold-check.mjs (Playwright) -- ver package.json
 node_modules/
